@@ -1,0 +1,81 @@
+{% extends 'layout.html' %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <h2 class="login-title">🔐 Login to Your Account</h2>
+    <form method="POST" class="login-form">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+        <p class="register-link">Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
+    </form>
+</div>
+
+<style>
+    .login-container {
+        background-color: #fff;
+        padding: 40px;
+        max-width: 400px;
+        margin: 40px auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 1s ease-in-out;
+    }
+
+    .login-title {
+        text-align: center;
+        color: #6a1b9a;
+        font-size: 26px;
+        margin-bottom: 25px;
+    }
+
+    .login-form input {
+        width: 100%;
+        padding: 12px 15px;
+        margin: 10px 0;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        transition: border-color 0.3s;
+    }
+
+    .login-form input:focus {
+        border-color: #7e57c2;
+        outline: none;
+    }
+
+    .login-form button {
+        width: 100%;
+        padding: 12px;
+        background-color: #7e57c2;
+        color: white;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: background-color 0.3s;
+    }
+
+    .login-form button:hover {
+        background-color: #6a1b9a;
+    }
+
+    .register-link {
+        text-align: center;
+        font-size: 14px;
+        margin-top: 15px;
+    }
+
+    .register-link a {
+        color: #7e57c2;
+        text-decoration: none;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
