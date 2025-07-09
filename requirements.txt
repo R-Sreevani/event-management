@@ -1,4 +1,2 @@
 Flask
-SQLAlchemy
-werkzeug
 gunicorn
