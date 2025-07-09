@@ -1,0 +1,109 @@
+{% extends 'layout.html' %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>📝 Create Your Account</h2>
+    <form method="POST">
+        <label for="name">Full Name:</label>
+        <input type="text" name="name" id="name" required>
+
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" required>
+
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required>
+
+        <label for="role">Register as:</label>
+        <select name="role" id="role" required>
+            <option value="student">Student</option>
+            <option value="admin">Admin</option>
+        </select>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p class="redirect-text">
+        Already have an account?
+        <a href="{{ url_for('login') }}">Login here</a>.
+    </p>
+</div>
+
+<style>
+    .form-container {
+        max-width: 500px;
+        margin: 50px auto;
+        padding: 35px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .form-container h2 {
+        text-align: center;
+        color: #6a1b9a;
+        font-size: 28px;
+        margin-bottom: 25px;
+    }
+
+    .form-container label {
+        display: block;
+        margin-top: 12px;
+        margin-bottom: 6px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .form-container input,
+    .form-container select {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 16px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        margin-bottom: 15px;
+    }
+
+    .form-container input:focus,
+    .form-container select:focus {
+        border-color: #7e57c2;
+        outline: none;
+    }
+
+    .form-container button {
+        width: 100%;
+        padding: 12px;
+        background-color: #7e57c2;
+        color: white;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+    .form-container button:hover {
+        background-color: #6a1b9a;
+    }
+
+    .redirect-text {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .redirect-text a {
+        color: #7e57c2;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
