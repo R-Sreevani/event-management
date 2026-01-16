@@ -1,0 +1,89 @@
+<!-- templates/chatbot.html -->
+<div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+    <div id="chat-window" style="display: none; width: 300px; height: 400px; background: white; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); flex-direction: column;">
+        <div style="background: #4CAF50; color: white; padding: 10px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between;">
+            <strong>Event Assistant 🤖</strong>
+            <button onclick="toggleChat()" style="background: none; border: none; color: white; cursor: pointer;">×</button>
+        </div>
+        <div id="chat-messages" style="flex: 1; padding: 10px; overflow-y: auto; font-size: 14px;">
+            <div class="message bot">Hello! I'm your event assistant. How can I help you today? 😊</div>
+        </div>
+        <div style="padding: 10px; border-top: 1px solid #ddd;">
+            <input type="text" id="chat-input" placeholder="Type your message..." 
+                   style="width: 70%; padding: 5px; border: 1px solid #ddd; border-radius: 5px;"
+                   onkeypress="if(event.keyCode==13) sendMessage()">
+            <button onclick="sendMessage()" style="width: 25%; padding: 6px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Send</button>
+        </div>
+    </div>
+    <button onclick="toggleChat()" style="background: #4CAF50; color: white; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
+        🤖
+    </button>
+</div>
+
+<script>
+let chatOpen = false;
+
+function toggleChat() {
+    const chatWindow = document.getElementById('chat-window');
+    chatOpen = !chatOpen;
+    chatWindow.style.display = chatOpen ? 'flex' : 'none';
+}
+
+function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    // Add user message
+    addMessage(message, 'user');
+    input.value = '';
+    
+    // Send to backend
+    fetch('/chatbot', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        addMessage(data.response, 'bot');
+    })
+    .catch(error => {
+        addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+    });
+}
+
+function addMessage(text, sender) {
+    const messagesDiv = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}`;
+    messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+    messageDiv.style.margin = '5px 0';
+    messageDiv.style.padding = '8px';
+    messageDiv.style.borderRadius = '5px';
+    messageDiv.style.maxWidth = '80%';
+    messageDiv.style.wordWrap = 'break-word';
+    
+    if (sender === 'user') {
+        messageDiv.style.background = '#4CAF50';
+        messageDiv.style.color = 'white';
+        messageDiv.style.marginLeft = 'auto';
+    } else {
+        messageDiv.style.background = '#f1f1f1';
+        messageDiv.style.color = '#333';
+        messageDiv.style.marginRight = 'auto';
+    }
+    
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+// Optional: Add sample questions buttons
+function addQuickQuestion(question) {
+    document.getElementById('chat-input').value = question;
+    sendMessage();
+}
+</script>
