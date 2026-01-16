@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Central University Event Hub</title>
+    <title>Central University Event Hub - {% block title %}{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #f9f9f9;
@@ -11,97 +12,576 @@
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
+            padding-bottom: 100px; /* Space for chatbot */
         }
 
         header {
             background-color: #ffffff;
             padding: 1.5rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             text-align: center;
         }
 
         header h1 {
             margin: 0;
-            font-size: 2rem;
+            font-size: 2.2rem;
             color: #0077cc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         nav {
-            margin-top: 10px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
         }
 
         nav a {
             color: #0077cc;
             text-decoration: none;
-            margin: 0 15px;
             font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         nav a:hover {
-            color: #005999;
-            text-decoration: underline;
+            color: #ffffff;
+            background-color: #0077cc;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 119, 204, 0.2);
         }
 
         main {
             padding: 2rem;
+            min-height: calc(100vh - 200px);
         }
 
         footer {
-            background-color: #f0f0f0;
-            color: #555;
+            background: linear-gradient(135deg, #0077cc, #005fa3);
+            color: #ffffff;
             text-align: center;
-            padding: 1rem;
+            padding: 1.5rem;
             font-size: 0.9rem;
-            border-top: 1px solid #ddd;
             margin-top: 2rem;
+            border-top: 3px solid #ffc107;
+        }
+
+        footer a {
+            color: #ffc107;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
         }
 
         .btn {
-            background-color: #0077cc;
+            background: linear-gradient(135deg, #0077cc, #005fa3);
             color: #fff;
-            padding: 8px 14px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            margin: 5px 0;
-            transition: background-color 0.3s ease-in-out;
+            margin: 5px;
+            transition: all 0.3s ease-in-out;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn:hover {
-            background-color: #005fa3;
+            background: linear-gradient(135deg, #005fa3, #004d82);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 119, 204, 0.3);
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: auto;
         }
 
-        ul {
-            padding-left: 1.2rem;
+        .user-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f0f8ff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #cce7ff;
         }
 
-        li {
-            margin-bottom: 0.5rem;
+        .user-status span {
+            font-weight: bold;
+            color: #0077cc;
+        }
+
+        /* Chatbot Styles */
+        #chatbot-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        #chat-window {
+            width: 380px;
+            height: 520px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #0077cc, #005fa3);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        #chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            font-size: 14px;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.4;
+            animation: messageAppear 0.3s ease-out;
+        }
+
+        @keyframes messageAppear {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #0077cc, #005fa3);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .quick-questions {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .quick-btn {
+            background: #f0f2f5;
+            border: 1px solid #ddd;
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .quick-btn:hover {
+            background: #0077cc;
+            color: white;
+            border-color: #0077cc;
+        }
+
+        .chat-input-area {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        #chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #chat-input:focus {
+            border-color: #0077cc;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #0077cc, #005fa3);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .chat-toggle-btn {
+            background: linear-gradient(135deg, #0077cc, #005fa3);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(0, 119, 204, 0.4);
+            transition: all 0.3s;
+            margin-left: auto;
+        }
+
+        .chat-toggle-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 119, 204, 0.5);
+        }
+
+        .chat-icon {
+            font-size: 18px;
+        }
+
+        .chat-label {
+            font-size: 14px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            nav {
+                gap: 10px;
+            }
+            
+            #chat-window {
+                width: calc(100vw - 60px);
+                height: 450px;
+                right: 30px;
+            }
+            
+            .chat-toggle-btn {
+                padding: 10px 15px;
+            }
+            
+            .chat-label {
+                display: none;
+            }
+            
+            .user-status {
+                position: static;
+                justify-content: center;
+                margin-top: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Central University Event Hub</h1>
-        <nav>
-            <a href="{{ url_for('index') }}">Home</a>
+        <div class="container">
+            <h1>🎓 Central University Event Hub</h1>
+            
             {% if session.get('user_id') %}
-                <a href="{{ url_for('logout') }}">Logout</a>
+            <div class="user-status">
+                <span>👤 {{ session.get('role')|title }}</span>
+                <span>|</span>
+                <a href="{{ url_for('logout') }}" style="color: #dc3545; font-size: 12px;">Logout</a>
+            </div>
             {% endif %}
-        </nav>
+            
+            <nav>
+                <a href="{{ url_for('index') }}">🏠 Home</a>
+                
+                {% if session.get('user_id') %}
+                    {% if session.get('role') == 'admin' %}
+                        <a href="{{ url_for('admin_dashboard') }}">🛠️ Admin Dashboard</a>
+                    {% else %}
+                        <a href="{{ url_for('dashboard') }}">📊 Student Dashboard</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('register') }}">📝 Register</a>
+                    <a href="{{ url_for('login') }}">🔐 Login</a>
+                {% endif %}
+                
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('dashboard') if session.get('role') == 'student' else url_for('admin_dashboard') }}">
+                        📅 My Events
+                    </a>
+                {% endif %}
+                
+                <a href="javascript:void(0)" onclick="toggleChat()">🤖 Ask Assistant</a>
+            </nav>
+        </div>
     </header>
 
     <main class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    {% for message in messages %}
+                        {{ message }}<br>
+                    {% endfor %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endif %}
+        {% endwith %}
+        
         {% block content %}{% endblock %}
     </main>
 
     <footer>
-        &copy; {{ now.year }} Central University Hub | Developed by You
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <strong>&copy; {{ now.year }} Central University Hub</strong>
+                    <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.9;">
+                        Developed with ❤️ for better event management
+                    </p>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <a href="#" style="color: #ffc107;">Privacy Policy</a>
+                    <a href="#" style="color: #ffc107;">Terms of Service</a>
+                    <a href="#" style="color: #ffc107;">Contact Us</a>
+                </div>
+            </div>
+        </div>
     </footer>
+
+    <!-- Global Chatbot (appears on all pages) -->
+    <div id="chatbot-container">
+        <div id="chat-window" style="display: none;">
+            <div class="chat-header">
+                <strong>Event Assistant 🤖</strong>
+                <button onclick="toggleChat()" class="close-btn">×</button>
+            </div>
+            <div id="chat-messages">
+                <div class="message bot">
+                    {% if session.get('user_id') %}
+                        Hello {{ session.get('role')|title }}! 👋 I'm your event assistant.
+                    {% else %}
+                        Welcome to Central University Event Hub! 👋 I'm your event assistant.
+                    {% endif %}
+                </div>
+                <div class="message bot">I can help you with:
+                    <ul style="margin: 5px 0 5px 20px;">
+                        <li>Event information</li>
+                        <li>Registration assistance</li>
+                        <li>Dashboard navigation</li>
+                        <li>General queries</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="quick-questions">
+                {% if session.get('user_id') %}
+                    {% if session.get('role') == 'admin' %}
+                        <button onclick="askQuestion('How many events are there?')" class="quick-btn">📊 Events</button>
+                        <button onclick="askQuestion('Show recent registrations')" class="quick-btn">👥 Registrations</button>
+                        <button onclick="askQuestion('Admin commands')" class="quick-btn">🛠️ Commands</button>
+                    {% else %}
+                        <button onclick="askQuestion('What events are coming up?')" class="quick-btn">📅 Events</button>
+                        <button onclick="askQuestion('My registered events')" class="quick-btn">🎟️ My Events</button>
+                        <button onclick="askQuestion('How to register?')" class="quick-btn">❓ Help</button>
+                    {% endif %}
+                {% else %}
+                    <button onclick="askQuestion('What events are coming up?')" class="quick-btn">📅 Events</button>
+                    <button onclick="askQuestion('How do I register?')" class="quick-btn">📝 Register</button>
+                    <button onclick="askQuestion('Login help')" class="quick-btn">🔐 Login</button>
+                {% endif %}
+                <button onclick="askQuestion('Current time')" class="quick-btn">🕒 Time</button>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Ask me anything about events..." 
+                       onkeypress="if(event.keyCode==13) sendMessage()">
+                <button onclick="sendMessage()" class="send-btn">Send</button>
+            </div>
+        </div>
+        <button onclick="toggleChat()" class="chat-toggle-btn">
+            <span class="chat-icon">🤖</span>
+            <span class="chat-label">Ask Assistant</span>
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    let chatOpen = false;
+
+    function toggleChat() {
+        const chatWindow = document.getElementById('chat-window');
+        chatOpen = !chatOpen;
+        chatWindow.style.display = chatOpen ? 'flex' : 'none';
+        if (chatOpen) {
+            setTimeout(() => {
+                document.getElementById('chat-input').focus();
+            }, 100);
+        }
+    }
+
+    function askQuestion(question) {
+        document.getElementById('chat-input').value = question;
+        sendMessage();
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+        
+        if (!message) return;
+        
+        // Add user message
+        addMessage(message, 'user');
+        input.value = '';
+        
+        // Show typing indicator
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'message bot';
+        typingIndicator.id = 'typing';
+        typingIndicator.innerHTML = 'Typing...';
+        document.getElementById('chat-messages').appendChild(typingIndicator);
+        document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+        
+        // Send to backend
+        fetch('/chatbot', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Remove typing indicator
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+            
+            // Add bot response
+            addMessage(data.response, 'bot');
+        })
+        .catch(error => {
+            // Remove typing indicator
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+            
+            // Fallback response for offline or error
+            let fallbackResponse = "I'm having trouble connecting right now. ";
+            if (message.toLowerCase().includes('event')) {
+                fallbackResponse += "You can view events on the homepage or dashboard.";
+            } else if (message.toLowerCase().includes('register')) {
+                fallbackResponse += "Use the Register button in the navigation to create an account.";
+            } else if (message.toLowerCase().includes('login')) {
+                fallbackResponse += "Use the Login button to access your account.";
+            } else {
+                fallbackResponse += "Please try again or refresh the page.";
+            }
+            
+            addMessage(fallbackResponse, 'bot');
+        });
+    }
+
+    function addMessage(text, sender) {
+        const messagesDiv = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}`;
+        messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+        
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // Auto-open chatbot for first-time visitors
+    window.addEventListener('load', function() {
+        const firstVisit = localStorage.getItem('firstVisit');
+        if (!firstVisit) {
+            localStorage.setItem('firstVisit', 'true');
+            setTimeout(() => {
+                const welcomeMessage = document.createElement('div');
+                welcomeMessage.className = 'message bot';
+                welcomeMessage.innerHTML = "💡 <strong>Tip:</strong> I'm here to help! Click my button anytime or type your question.";
+                document.getElementById('chat-messages').appendChild(welcomeMessage);
+            }, 2000);
+        }
+    });
+
+    // Keyboard shortcut for chatbot (Ctrl + /)
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === '/') {
+            e.preventDefault();
+            toggleChat();
+        }
+    });
+    </script>
 </body>
 </html>
