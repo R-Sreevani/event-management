@@ -1,4 +1,36 @@
-flask
-gunicorn
-Flask-SQLAlchemy 
-Werkzeug
+# Core Flask & Web Server
+Flask==3.0.0
+gunicorn==21.2.0
+
+# Database & ORM
+Flask-SQLAlchemy==3.0.5
+SQLAlchemy==2.0.23
+
+# Security & Hashing
+Werkzeug==3.0.1
+
+# Additional useful dependencies
+python-dotenv==1.0.0
+Flask-Login==0.6.3
+Flask-WTF==1.2.1
+WTForms==3.1.1
+email-validator==2.1.0
+Flask-Migrate==4.0.5
+
+# For chatbot/NLP (optional enhancements)
+nltk==3.8.1
+transformers==4.36.2
+torch==2.1.2
+scikit-learn==1.3.2
+
+# For API development
+Flask-RESTful==0.3.10
+Flask-CORS==4.0.0
+
+# For testing
+pytest==7.4.3
+pytest-flask==1.2.0
+
+# For deployment
+psycopg2-binary==2.9.9  # For PostgreSQL
+pymysql==1.1.0  # For MySQL
