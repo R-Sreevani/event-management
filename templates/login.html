@@ -1,187 +1,323 @@
 {% extends 'layout.html' %}
 {% block title %}Login{% endblock %}
 
+{% block extra_css %}
+<style>
+    .login-container {
+        max-width: 450px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 40px;
+    }
+    
+    .university-header-login {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .logo-circle {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--cuk-blue), var(--cuk-green));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        color: white;
+        font-size: 1.8rem;
+    }
+    
+    .form-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+    }
+    
+    .form-control {
+        padding-left: 45px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s;
+        height: 45px;
+    }
+    
+    .form-control:focus {
+        border-color: var(--cuk-blue);
+        box-shadow: 0 0 0 0.25rem rgba(0, 51, 102, 0.25);
+    }
+    
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        z-index: 10;
+    }
+    
+    .demo-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+    
+    .demo-account {
+        background: white;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #dee2e6;
+    }
+    
+    .forgot-password {
+        color: var(--cuk-blue);
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    
+    .forgot-password:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="login-container">
-    <h2 class="login-title">🔐 Login to Your Account</h2>
-    
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="alert-container">
-                {% for message in messages %}
-                    <div class="alert alert-{{ 'success' if '✅' in message else 'danger' if '❌' in message else 'info' }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
+    <div class="login-card">
+        <!-- University Header -->
+        <div class="university-header-login">
+            <div class="logo-circle">
+                <i class="bi bi-building"></i>
             </div>
-        {% endif %}
-    {% endwith %}
-    
-    <form method="POST" class="login-form" id="loginForm">
-        <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" name="email" id="email" required 
-                   placeholder="Enter your email"
-                   class="form-control"
-                   value="admin@example.com">
+            <h4 class="cuk-text-primary mb-2">Central University of Karnataka</h4>
+            <p class="text-muted">Event Management System</p>
         </div>
         
-        <div class="form-group">
-            <label for="password">Password</label>
-            <div class="password-input">
-                <input type="password" name="password" id="password" required 
-                       placeholder="Enter your password"
-                       class="form-control"
-                       value="admin123">
-                <span class="toggle-password" onclick="togglePassword()">👁️</span>
-            </div>
-        </div>
+        <h5 class="text-center mb-4">Sign in to your account</h5>
         
-        <div class="remember-forgot">
-            <button type="button" class="btn btn-link" onclick="showPasswordHelp()" style="padding: 0; color: #0077cc;">
-                Forgot Password?
+        <form method="POST" id="loginForm">
+            <!-- Email -->
+            <div class="mb-3">
+                <label class="form-label">University Email</label>
+                <div class="position-relative">
+                    <i class="bi bi-envelope form-icon"></i>
+                    <input type="email" name="email" class="form-control" 
+                           placeholder="name@cuk.ac.in" required
+                           value="admin@cuk.ac.in">
+                </div>
+            </div>
+            
+            <!-- Password -->
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label">Password</label>
+                    <a href="javascript:void(0)" class="forgot-password" 
+                       onclick="showPasswordHelp()">
+                        Forgot password?
+                    </a>
+                </div>
+                <div class="position-relative">
+                    <i class="bi bi-lock form-icon"></i>
+                    <input type="password" name="password" id="password" 
+                           class="form-control" placeholder="Enter your password" required
+                           value="admin123">
+                    <button type="button" class="password-toggle" 
+                            onclick="togglePassword()">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Remember Me -->
+            <div class="mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="remember">
+                    <label class="form-check-label" for="remember">
+                        Remember me
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
             </button>
-        </div>
-        
-        <button type="submit" class="login-btn">Login</button>
-        
-        <div class="demo-info">
-            <h5>Demo Accounts:</h5>
-            <div class="demo-account">
-                <strong>Admin:</strong> admin@example.com / admin123
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillAdmin()">Fill</button>
+            
+            <div class="text-center">
+                <small class="text-muted">
+                    Don't have an account? 
+                    <a href="{{ url_for('register_user') }}" class="text-primary text-decoration-none">
+                        Register here
+                    </a>
+                </small>
             </div>
+        </form>
+        
+        <!-- Demo Accounts -->
+        <div class="demo-section">
+            <h6 class="text-center mb-3"><i class="bi bi-info-circle me-2"></i>Demo Accounts</h6>
+            
+            <!-- Admin Account -->
             <div class="demo-account">
-                <strong>Student:</strong> student@example.com / student123
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillStudent()">Fill</button>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small><strong>Admin Account</strong></small><br>
+                        <small class="text-muted">Full system access</small>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                            onclick="fillCredentials('admin')">
+                        <i class="bi bi-clipboard me-1"></i>Fill
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="bi bi-envelope me-1"></i>admin@cuk.ac.in<br>
+                        <i class="bi bi-key me-1"></i>admin123
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Student Account -->
+            <div class="demo-account">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small><strong>Student Account</strong></small><br>
+                        <small class="text-muted">Event registration access</small>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-success" 
+                            onclick="fillCredentials('student')">
+                        <i class="bi bi-clipboard me-1"></i>Fill
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="bi bi-envelope me-1"></i>student@cuk.ac.in<br>
+                        <i class="bi bi-key me-1"></i>student123
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Faculty Account (if needed) -->
+            <div class="demo-account">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small><strong>Faculty Account</strong></small><br>
+                        <small class="text-muted">Event management access</small>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-warning" 
+                            onclick="fillCredentials('faculty')">
+                        <i class="bi bi-clipboard me-1"></i>Fill
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="bi bi-envelope me-1"></i>faculty@cuk.ac.in<br>
+                        <i class="bi bi-key me-1"></i>faculty123
+                    </small>
+                </div>
             </div>
         </div>
-        
-        <p class="register-link">
-            Don't have an account? 
-            <a href="{{ url_for('register') }}" class="register-now">Register now</a>
-        </p>
-    </form>
+    </div>
 </div>
-
-<style>
-.login-container {
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 30px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.login-title {
-    text-align: center;
-    color: #6a1b9a;
-    margin-bottom: 25px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-control {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-}
-
-.password-input {
-    position: relative;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-}
-
-.remember-forgot {
-    text-align: right;
-    margin-bottom: 20px;
-}
-
-.login-btn {
-    width: 100%;
-    padding: 12px;
-    background: #0077cc;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.login-btn:hover {
-    background: #005fa3;
-}
-
-.demo-info {
-    margin-top: 25px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 6px;
-}
-
-.demo-account {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 8px 0;
-    padding: 8px;
-    background: white;
-    border-radius: 4px;
-}
-
-.register-link {
-    text-align: center;
-    margin-top: 20px;
-    color: #666;
-}
-</style>
 
 <script>
 function togglePassword() {
-    const passwordInput = document.getElementById('password');
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
+    const passwordField = document.getElementById('password');
+    const toggleButton = document.querySelector('.password-toggle i');
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        toggleButton.classList.remove('bi-eye');
+        toggleButton.classList.add('bi-eye-slash');
     } else {
-        passwordInput.type = 'password';
+        passwordField.type = 'password';
+        toggleButton.classList.remove('bi-eye-slash');
+        toggleButton.classList.add('bi-eye');
     }
 }
 
+function fillCredentials(type) {
+    const emailField = document.querySelector('input[name="email"]');
+    const passwordField = document.getElementById('password');
+    
+    if (type === 'admin') {
+        emailField.value = 'admin@cuk.ac.in';
+        passwordField.value = 'admin123';
+    } else if (type === 'student') {
+        emailField.value = 'student@cuk.ac.in';
+        passwordField.value = 'student123';
+    } else if (type === 'faculty') {
+        emailField.value = 'faculty@cuk.ac.in';
+        passwordField.value = 'faculty123';
+    }
+    
+    // Visual feedback
+    emailField.focus();
+    emailField.style.borderColor = '#28a745';
+    passwordField.style.borderColor = '#28a745';
+    
+    setTimeout(() => {
+        emailField.style.borderColor = '#dee2e6';
+        passwordField.style.borderColor = '#dee2e6';
+    }, 1000);
+}
+
 function showPasswordHelp() {
-    alert("🔐 **Password Help**\n\nFor password reset, please contact:\n📧 Email: admin@example.com\n\n🔑 **Demo Accounts:**\n• Admin: admin@example.com / admin123\n• Student: student@example.com / student123");
-}
-
-function fillAdmin() {
-    document.getElementById('email').value = 'admin@example.com';
-    document.getElementById('password').value = 'admin123';
-}
-
-function fillStudent() {
-    document.getElementById('email').value = 'student@example.com';
-    document.getElementById('password').value = 'student123';
+    const message = `
+    🔐 **Password Assistance**
+    
+    For password reset, please contact:
+    📧 Email: admin@cuk.ac.in
+    📞 Phone: 08388-251100
+    
+    **Demo Accounts Available:**
+    • Admin: admin@cuk.ac.in / admin123
+    • Student: student@cuk.ac.in / student123
+    • Faculty: faculty@cuk.ac.in / faculty123
+    
+    Please use your official university email (@cuk.ac.in) for registration.
+    `;
+    
+    alert(message);
 }
 
 // Form validation
 document.getElementById('loginForm').addEventListener('submit', function(e) {
-    const email = document.getElementById('email').value;
+    const email = document.querySelector('input[name="email"]').value;
     const password = document.getElementById('password').value;
     
     if (!email || !password) {
         e.preventDefault();
         alert('Please fill in all fields');
-        return;
+        return false;
     }
+    
+    if (!email.includes('@')) {
+        e.preventDefault();
+        alert('Please enter a valid email address');
+        return false;
+    }
+    
+    return true;
+});
+
+// Auto-focus on email field
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelector('input[name="email"]').focus();
 });
 </script>
 {% endblock %}
