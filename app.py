@@ -123,22 +123,40 @@ def index():
     events = Event.query.all()
     return render_template('index.html', events=events)
 
+# Update the chatbot route to handle unauthenticated users
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
-    if 'user_id' not in session:
-        return jsonify({'response': 'Please login to use the chatbot.'})
-    
     data = request.get_json()
     user_message = data.get('message', '')
     
+    # Create chatbot instance
     chatbot = EventChatbot(db)
-    user_role = session.get('role')
-    user_id = session.get('user_id')
+    
+    # Get user info if logged in, otherwise None
+    user_role = session.get('role') if 'user_id' in session else None
+    user_id = session.get('user_id') if 'user_id' in session else None
+    
+    # For home page, provide basic event info even without login
+    if 'user_id' not in session:
+        # Check if it's a general question about events
+        if any(word in user_message.lower() for word in ['event', 'events', 'upcoming', 'schedule']):
+            events = Event.query.all()
+            if not events:
+                response = "There are no upcoming events at the moment."
+            else:
+                response = "📅 **Upcoming Events:**\n"
+                for event in events[:5]:
+                    response += f"• {event.name} on {event.date} at {event.venue or 'TBD'}\n"
+                if len(events) > 5:
+                    response += f"... and {len(events)-5} more events."
+                response += "\n\nPlease login or register to participate!"
+            return jsonify({'response': response})
+        else:
+            return jsonify({'response': "Please login or register to access full chatbot features. For now, I can only tell you about upcoming events."})
     
     response = chatbot.get_response(user_message, user_role, user_id)
-    
     return jsonify({'response': response})
-
+    
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
