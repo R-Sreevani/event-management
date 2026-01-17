@@ -2,596 +2,134 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<!-- Header -->
-<div style="text-align: center; padding: 40px 20px;">
-    <h1 style="
-        font-size: 36px;
-        font-weight: bold;
-        color: #4a148c;
-        margin-bottom: 10px;
-    ">
-        🎪 Central University Event Hub
-    </h1>
-    <p style="font-size: 18px; color: #555; margin-bottom: 15px;">
-        Your gateway to exciting university events and activities
-    </p>
-    <div style="display: inline-flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin-top: 10px;">
-        <span style="background: #e3f2fd; padding: 5px 15px; border-radius: 20px; font-size: 14px;">🎓 Student Events</span>
-        <span style="background: #f3e5f5; padding: 5px 15px; border-radius: 20px; font-size: 14px;">🎯 Workshops</span>
-        <span style="background: #e8f5e8; padding: 5px 15px; border-radius: 20px; font-size: 14px;">🎤 Seminars</span>
-        <span style="background: #fff3e0; padding: 5px 15px; border-radius: 20px; font-size: 14px;">🎭 Cultural</span>
+<!-- Hero Section -->
+<div class="university-header rounded-3 mb-5">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-3">Central University of Karnataka</h1>
+        <p class="lead mb-4">Event Management System</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('events') }}" class="btn btn-light btn-lg">
+                <i class="bi bi-calendar3 me-2"></i>Browse Events
+            </a>
+            {% if not session.get('user_id') %}
+                <a href="{{ url_for('register_user') }}" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-person-plus me-2"></i>Register Now
+                </a>
+            {% endif %}
+        </div>
     </div>
 </div>
 
-<!-- Main Action Cards -->
-<div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin: 30px 20px;">
-    <div style="
-        background: linear-gradient(135deg, #1976d2, #0d5cb6);
-        color: white;
-        padding: 30px;
-        border-radius: 15px;
-        width: 250px;
-        text-align: center;
-        box-shadow: 0 8px 20px rgba(25, 118, 210, 0.2);
-        transition: transform 0.3s;
-    " onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-        <div style="font-size: 40px; margin-bottom: 15px;">📝</div>
-        <h3 style="margin-bottom: 10px;">Register</h3>
-        <p style="font-size: 14px; opacity: 0.9; margin-bottom: 20px;">Create your account to join events</p>
-        <a href="{{ url_for('register') }}">
-            <button style="
-                background: white;
-                color: #1976d2;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 25px;
-                font-weight: bold;
-                cursor: pointer;
-                width: 100%;
-            ">Get Started</button>
-        </a>
-    </div>
-
-    <div style="
-        background: linear-gradient(135deg, #7b1fa2, #6a1b9a);
-        color: white;
-        padding: 30px;
-        border-radius: 15px;
-        width: 250px;
-        text-align: center;
-        box-shadow: 0 8px 20px rgba(123, 31, 162, 0.2);
-        transition: transform 0.3s;
-    " onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-        <div style="font-size: 40px; margin-bottom: 15px;">🔐</div>
-        <h3 style="margin-bottom: 10px;">Login</h3>
-        <p style="font-size: 14px; opacity: 0.9; margin-bottom: 20px;">Access your dashboard and events</p>
-        <a href="{{ url_for('login') }}">
-            <button style="
-                background: white;
-                color: #7b1fa2;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 25px;
-                font-weight: bold;
-                cursor: pointer;
-                width: 100%;
-            ">Sign In</button>
-        </a>
-    </div>
-
-    <div style="
-        background: linear-gradient(135deg, #2E7D32, #1B5E20);
-        color: white;
-        padding: 30px;
-        border-radius: 15px;
-        width: 250px;
-        text-align: center;
-        box-shadow: 0 8px 20px rgba(46, 125, 50, 0.2);
-        transition: transform 0.3s;
-    " onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-        <div style="font-size: 40px; margin-bottom: 15px;">🤖</div>
-        <h3 style="margin-bottom: 10px;">AI Assistant</h3>
-        <p style="font-size: 14px; opacity: 0.9; margin-bottom: 20px;">Get instant help about events</p>
-        <button onclick="toggleChat()" style="
-            background: white;
-            color: #2E7D32;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-        ">Ask Assistant</button>
-    </div>
-</div>
-
-<!-- Event List -->
-<div style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
-        <h2 style="color: #6a1b9a; font-size: 26px; margin: 0;">
-            🎉 Upcoming Events
-        </h2>
-        <div style="font-size: 14px; color: #666; background: #f0f4ff; padding: 8px 15px; border-radius: 20px;">
-            📅 {{ now.strftime('%B %d, %Y') }} &nbsp; | &nbsp; 🕒 {{ now.strftime('%I:%M %p') }}
-        </div>
-    </div>
-
-    {% if events %}
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
-        {% for event in events %}
-        <div style="
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            border-top: 4px solid #7e57c2;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        " onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'" 
-           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'">
-            <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                <div style="
-                    background: #ede7f6;
-                    width: 50px;
-                    height: 50px;
-                    border-radius: 10px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-right: 15px;
-                    font-size: 24px;
-                ">
-                    🎯
-                </div>
-                <div>
-                    <h3 style="font-size: 20px; color: #333; margin: 0 0 5px 0;">{{ event.name }}</h3>
-                    <div style="font-size: 14px; color: #666; display: flex; align-items: center; gap: 10px;">
-                        <span>🎓 University Event</span>
-                    </div>
-                </div>
+<!-- Announcements Section -->
+{% if announcements %}
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4 cuk-text-primary"><i class="bi bi-megaphone me-2"></i>Latest Announcements</h2>
+        {% for announcement in announcements %}
+            <div class="announcement-card {{ 'announcement-high' if announcement.priority == 'High' else 'announcement-medium' if announcement.priority == 'Medium' else '' }}">
+                <h5>{{ announcement.title }}</h5>
+                <p class="text-muted">{{ announcement.content }}</p>
+                <small class="text-muted">
+                    <i class="bi bi-tag me-1"></i>{{ announcement.category }} • 
+                    <i class="bi bi-calendar me-1"></i>{{ announcement.published_date.strftime('%d %b %Y') }}
+                </small>
             </div>
-            
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-                <div style="display: flex; align-items: center; gap: 8px; color: #555;">
-                    <span style="font-size: 20px;">📅</span>
-                    <span>{{ event.date }}</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px; color: #555;">
-                    <span style="font-size: 20px;">📍</span>
-                    <span>{{ event.venue }}</span>
-                </div>
-            </div>
-            
-            <button onclick="askAboutEvent('{{ event.name }}')" style="
-                background: #f5f5f5;
-                color: #7e57c2;
-                border: 1px solid #ddd;
-                padding: 10px 15px;
-                border-radius: 8px;
-                font-weight: bold;
-                cursor: pointer;
-                width: 100%;
-                transition: all 0.2s;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-            " onmouseover="this.style.background='#7e57c2'; this.style.color='white'" 
-               onmouseout="this.style.background='#f5f5f5'; this.style.color='#7e57c2'">
-                🤖 Ask About This Event
-            </button>
-        </div>
         {% endfor %}
     </div>
-    {% else %}
-    <div style="
-        text-align: center;
-        padding: 50px 20px;
-        background: #f9f9f9;
-        border-radius: 12px;
-        margin: 30px 0;
-    ">
-        <div style="font-size: 60px; margin-bottom: 20px;">📅</div>
-        <h3 style="color: #666; margin-bottom: 10px;">No events scheduled yet</h3>
-        <p style="color: #888; max-width: 500px; margin: 0 auto;">
-            Check back soon for upcoming events or ask our assistant about event schedules.
-        </p>
-    </div>
-    {% endif %}
 </div>
+{% endif %}
 
-<!-- Chatbot integrated into the page -->
-<div id="chatbot-container">
-    <div id="chat-window" style="display: none;">
-        <div class="chat-header">
-            <strong>Event Assistant 🤖</strong>
-            <button onclick="toggleChat()" class="close-btn">×</button>
-        </div>
-        <div id="chat-messages">
-            <div class="message bot">Welcome to Central University Event Hub! 👋</div>
-            <div class="message bot">I'm your virtual assistant. I can help you with:
-                <ul style="margin: 5px 0 5px 20px;">
-                    <li>Event information</li>
-                    <li>Registration process</li>
-                    <li>Login assistance</li>
-                    <li>Upcoming schedules</li>
-                </ul>
+<!-- Upcoming Events -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4 cuk-text-primary"><i class="bi bi-calendar-event me-2"></i>Upcoming Events</h2>
+        {% if events %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for event in events %}
+                    <div class="col">
+                        <div class="card event-card h-100">
+                            <div class="position-relative">
+                                {% if event.category == 'academic' %}
+                                    <span class="category-badge academic-badge">🎓 Academic</span>
+                                {% elif event.category == 'cultural' %}
+                                    <span class="category-badge cultural-badge">🎭 Cultural</span>
+                                {% elif event.category == 'sports' %}
+                                    <span class="category-badge sports-badge">⚽ Sports</span>
+                                {% elif event.category == 'workshop' %}
+                                    <span class="category-badge workshop-badge">🔧 Workshop</span>
+                                {% endif %}
+                                <div style="height: 150px; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-calendar-event fs-1 text-muted"></i>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ event.name }}</h5>
+                                <p class="card-text text-muted">
+                                    <i class="bi bi-calendar me-1"></i>{{ event.date.strftime('%d %b %Y') }}
+                                    {% if event.start_time %}
+                                        <br><i class="bi bi-clock me-1"></i>{{ event.start_time }}
+                                    {% endif %}
+                                    <br><i class="bi bi-geo-alt me-1"></i>{{ event.venue }}
+                                </p>
+                                {% if event.department %}
+                                    <div class="mb-2">
+                                        <span class="department-tag">{{ event.department.code }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer bg-white border-0">
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary w-100">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-            <div class="message bot">Try asking: "What events are coming up?" or "How do I register?"</div>
-        </div>
-        <div class="quick-questions">
-            <button onclick="askQuestion('What events are coming up?')" class="quick-btn">📅 Events</button>
-            <button onclick="askQuestion('How do I register?')" class="quick-btn">📝 Register</button>
-            <button onclick="askQuestion('Login help')" class="quick-btn">🔐 Login</button>
-            <button onclick="askQuestion('Contact admin')" class="quick-btn">👨‍💼 Admin</button>
-        </div>
-        <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Ask me about university events..." 
-                   onkeypress="if(event.keyCode==13) sendMessage()">
-            <button onclick="sendMessage()" class="send-btn">Send</button>
-        </div>
+            <div class="text-center mt-4">
+                <a href="{{ url_for('events') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-right me-2"></i>View All Events
+                </a>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
+                <h4 class="text-muted">No upcoming events</h4>
+                <p>Check back later for new events!</p>
+            </div>
+        {% endif %}
     </div>
-    <button onclick="toggleChat()" class="chat-toggle-btn">
-        <span class="chat-icon">🤖</span>
-        <span class="chat-label">Ask Assistant</span>
-    </button>
 </div>
 
-<style>
-/* Chatbot Styles */
-#chatbot-container {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 1000;
-}
-
-#chat-window {
-    width: 380px;
-    height: 520px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-.chat-header {
-    background: linear-gradient(135deg, #4a148c, #7b1fa2);
-    color: white;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.close-btn {
-    background: rgba(255,255,255,0.2);
-    border: none;
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.close-btn:hover {
-    background: rgba(255,255,255,0.3);
-}
-
-#chat-messages {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    background: #f8f9fa;
-    font-size: 14px;
-}
-
-.message {
-    margin: 10px 0;
-    padding: 12px 16px;
-    border-radius: 18px;
-    max-width: 85%;
-    word-wrap: break-word;
-    line-height: 1.4;
-    animation: messageAppear 0.3s ease-out;
-}
-
-@keyframes messageAppear {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.message.bot {
-    background: white;
-    color: #333;
-    border: 1px solid #e0e0e0;
-    margin-right: auto;
-    border-bottom-left-radius: 5px;
-}
-
-.message.user {
-    background: linear-gradient(135deg, #4a148c, #7b1fa2);
-    color: white;
-    margin-left: auto;
-    border-bottom-right-radius: 5px;
-}
-
-.quick-questions {
-    padding: 15px 20px;
-    background: white;
-    border-top: 1px solid #eee;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.quick-btn {
-    background: #f0f2f5;
-    border: 1px solid #ddd;
-    padding: 6px 10px;
-    border-radius: 15px;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-}
-
-.quick-btn:hover {
-    background: #4a148c;
-    color: white;
-    border-color: #4a148c;
-}
-
-.chat-input-area {
-    padding: 15px 20px;
-    background: white;
-    border-top: 1px solid #eee;
-    display: flex;
-    gap: 10px;
-}
-
-#chat-input {
-    flex: 1;
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-    border-radius: 25px;
-    outline: none;
-    transition: border-color 0.3s;
-}
-
-#chat-input:focus {
-    border-color: #4a148c;
-}
-
-.send-btn {
-    background: linear-gradient(135deg, #4a148c, #7b1fa2);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: transform 0.2s;
-}
-
-.send-btn:hover {
-    transform: scale(1.05);
-}
-
-.chat-toggle-btn {
-    background: linear-gradient(135deg, #4a148c, #7b1fa2);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 50px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: bold;
-    box-shadow: 0 6px 20px rgba(74, 20, 140, 0.4);
-    transition: all 0.3s;
-    margin-left: auto;
-}
-
-.chat-toggle-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(74, 20, 140, 0.5);
-}
-
-.chat-icon {
-    font-size: 18px;
-}
-
-.chat-label {
-    font-size: 14px;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-    #chat-window {
-        width: calc(100vw - 60px);
-        height: 450px;
-        right: 30px;
-    }
-    
-    .chat-toggle-btn {
-        padding: 10px 15px;
-    }
-    
-    .chat-label {
-        display: none;
-    }
-}
-
-/* Stats Counter Animation */
-@keyframes countUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-</style>
-
-<script>
-let chatOpen = false;
-let eventData = {{ events|tojson|safe }};
-
-function toggleChat() {
-    const chatWindow = document.getElementById('chat-window');
-    chatOpen = !chatOpen;
-    chatWindow.style.display = chatOpen ? 'flex' : 'none';
-    if (chatOpen) {
-        // Auto-focus input when chat opens
-        setTimeout(() => {
-            document.getElementById('chat-input').focus();
-        }, 100);
-    }
-}
-
-function askQuestion(question) {
-    document.getElementById('chat-input').value = question;
-    sendMessage();
-}
-
-function askAboutEvent(eventName) {
-    // Open chat if not open
-    if (!chatOpen) {
-        toggleChat();
-        setTimeout(() => {
-            document.getElementById('chat-input').value = `Tell me about ${eventName}`;
-            sendMessage();
-        }, 300);
-    } else {
-        document.getElementById('chat-input').value = `Tell me about ${eventName}`;
-        sendMessage();
-    }
-}
-
-function sendMessage() {
-    const input = document.getElementById('chat-input');
-    const message = input.value.trim();
-    
-    if (!message) return;
-    
-    // Add user message
-    addMessage(message, 'user');
-    input.value = '';
-    
-    // Show typing indicator
-    const typingIndicator = document.createElement('div');
-    typingIndicator.className = 'message bot';
-    typingIndicator.id = 'typing';
-    typingIndicator.innerHTML = 'Typing...';
-    document.getElementById('chat-messages').appendChild(typingIndicator);
-    document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-    
-    // Check if user is logged in for backend call
-    // For home page, we'll use a simpler response system
-    if (message.toLowerCase().includes('event')) {
-        setTimeout(() => {
-            // Remove typing indicator
-            const typing = document.getElementById('typing');
-            if (typing) typing.remove();
-            
-            // Generate response based on events
-            let response = '';
-            if (eventData.length === 0) {
-                response = "There are currently no upcoming events. Please check back later!";
-            } else if (message.toLowerCase().includes('upcoming') || message.toLowerCase().includes('coming up')) {
-                response = `📅 There are ${eventData.length} upcoming events:\n`;
-                eventData.forEach(event => {
-                    response += `• ${event.name} on ${event.date} at ${event.venue}\n`;
-                });
-                response += "\nClick on any event card to learn more!";
-            } else if (message.toLowerCase().includes('register')) {
-                response = "To register for events:\n1. Click the 'Get Started' button\n2. Create your account\n3. Login to access events\n4. Register for any upcoming event!";
-            } else if (message.toLowerCase().includes('login')) {
-                response = "To login:\n1. Click the 'Sign In' button\n2. Enter your email and password\n3. If you're an admin, use admin@example.com / admin123\n4. Access your dashboard!";
-            } else {
-                // Try to find specific event
-                const matchedEvents = eventData.filter(event => 
-                    event.name.toLowerCase().includes(message.toLowerCase()) || 
-                    message.toLowerCase().includes(event.name.toLowerCase())
-                );
-                
-                if (matchedEvents.length > 0) {
-                    response = `🎯 **${matchedEvents[0].name}**\n`;
-                    response += `📅 Date: ${matchedEvents[0].date}\n`;
-                    response += `📍 Venue: ${matchedEvents[0].venue}\n`;
-                    response += `\nRegister to participate in this exciting event!`;
-                } else {
-                    response = "I found these events:\n";
-                    eventData.slice(0, 3).forEach(event => {
-                        response += `• ${event.name} (${event.date})\n`;
-                    });
-                    if (eventData.length > 3) {
-                        response += `... and ${eventData.length - 3} more events`;
-                    }
-                }
-            }
-            
-            addMessage(response, 'bot');
-        }, 800);
-    } else {
-        // For non-event queries, use backend
-        fetch('/chatbot', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ message: message })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Remove typing indicator
-            const typing = document.getElementById('typing');
-            if (typing) typing.remove();
-            
-            // Add bot response
-            addMessage(data.response, 'bot');
-        })
-        .catch(error => {
-            // Remove typing indicator
-            const typing = document.getElementById('typing');
-            if (typing) typing.remove();
-            
-            addMessage('Sorry, I encountered an error. Please try again.', 'bot');
-        });
-    }
-}
-
-function addMessage(text, sender) {
-    const messagesDiv = document.getElementById('chat-messages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${sender}`;
-    messageDiv.innerHTML = text.replace(/\n/g, '<br>');
-    
-    messagesDiv.appendChild(messageDiv);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-// Auto-open chatbot after 5 seconds with welcome
-setTimeout(() => {
-    if (!chatOpen && eventData.length > 0) {
-        const welcomeMessage = document.createElement('div');
-        welcomeMessage.className = 'message bot';
-        welcomeMessage.innerHTML = `👋 Welcome! We have ${eventData.length} upcoming events. Ask me anything!`;
-        document.getElementById('chat-messages').appendChild(welcomeMessage);
-    }
-}, 5000);
-</script>
+<!-- Quick Stats -->
+<div class="row mb-5">
+    <div class="col-md-3 col-sm-6">
+        <div class="stats-card blue">
+            <i class="bi bi-calendar-event fs-1 mb-2"></i>
+            <h3>{{ stats.total_events if stats else '0' }}</h3>
+            <p>Total Events</p>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stats-card green">
+            <i class="bi bi-people fs-1 mb-2"></i>
+            <h3>{{ stats.total_registrations if stats else '0' }}</h3>
+            <p>Registrations</p>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stats-card orange">
+            <i class="bi bi-person fs-1 mb-2"></i>
+            <h3>{{ stats.total_users if stats else '0' }}</h3>
+            <p>Registered Users</p>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stats-card purple">
+            <i class="bi bi-building fs-1 mb-2"></i>
+            <h3>{{ stats.total_departments if stats else '0' }}</h3>
+            <p>Departments</p>
+        </div>
+    </div>
+</div>
 {% endblock %}
