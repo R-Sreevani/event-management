@@ -20,6 +20,7 @@
             padding: 1.5rem 2rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             text-align: center;
+            position: relative;
         }
 
         header h1 {
@@ -128,6 +129,42 @@
         .user-status span {
             font-weight: bold;
             color: #0077cc;
+        }
+
+        .user-status .user-name {
+            color: #6a1b9a;
+        }
+
+        /* Alert Container Styling */
+        .alert-container {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+            border-left: 4px solid #17a2b8;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-left: 4px solid #ffc107;
         }
 
         /* Chatbot Styles */
@@ -313,6 +350,17 @@
             font-size: 14px;
         }
 
+        /* Forgot Password specific chatbot styling */
+        .forgot-password-msg {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
         /* Responsive design */
         @media (max-width: 768px) {
             header h1 {
@@ -321,6 +369,13 @@
             
             nav {
                 gap: 10px;
+            }
+            
+            .user-status {
+                position: static;
+                justify-content: center;
+                margin: 10px auto;
+                width: fit-content;
             }
             
             #chat-window {
@@ -336,11 +391,21 @@
             .chat-label {
                 display: none;
             }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 1rem;
+            }
             
-            .user-status {
-                position: static;
+            nav {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            nav a {
+                width: 100%;
                 justify-content: center;
-                margin-top: 10px;
             }
         }
     </style>
@@ -352,7 +417,11 @@
             
             {% if session.get('user_id') %}
             <div class="user-status">
-                <span>👤 {{ session.get('role')|title }}</span>
+                {% if session.get('user_name') %}
+                    <span class="user-name">👤 {{ session.get('user_name') }}</span>
+                    <span>|</span>
+                {% endif %}
+                <span>{{ session.get('role')|title }}</span>
                 <span>|</span>
                 <a href="{{ url_for('logout') }}" style="color: #dc3545; font-size: 12px;">Logout</a>
             </div>
@@ -384,13 +453,33 @@
     </header>
 
     <main class="container">
+        <!-- Flash Messages Display -->
         {% with messages = get_flashed_messages() %}
             {% if messages %}
-                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <div class="alert-container">
                     {% for message in messages %}
-                        {{ message }}<br>
+                        {% if '✅' in message or 'success' in message|lower %}
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% elif '❌' in message or 'error' in message|lower or 'invalid' in message|lower %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% elif '⚠️' in message or 'warning' in message|lower %}
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endif %}
                     {% endfor %}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endif %}
         {% endwith %}
@@ -408,9 +497,9 @@
                     </p>
                 </div>
                 <div style="display: flex; gap: 15px;">
-                    <a href="#" style="color: #ffc107;">Privacy Policy</a>
-                    <a href="#" style="color: #ffc107;">Terms of Service</a>
-                    <a href="#" style="color: #ffc107;">Contact Us</a>
+                    <a href="javascript:void(0)" onclick="showPrivacyPolicy()" style="color: #ffc107;">Privacy Policy</a>
+                    <a href="javascript:void(0)" onclick="showTerms()" style="color: #ffc107;">Terms of Service</a>
+                    <a href="javascript:void(0)" onclick="contactAdmin()" style="color: #ffc107;">Contact Us</a>
                 </div>
             </div>
         </div>
@@ -426,7 +515,11 @@
             <div id="chat-messages">
                 <div class="message bot">
                     {% if session.get('user_id') %}
-                        Hello {{ session.get('role')|title }}! 👋 I'm your event assistant.
+                        {% if session.get('user_name') %}
+                            Hello {{ session.get('user_name') }}! 👋 I'm your event assistant.
+                        {% else %}
+                            Hello {{ session.get('role')|title }}! 👋 I'm your event assistant.
+                        {% endif %}
                     {% else %}
                         Welcome to Central University Event Hub! 👋 I'm your event assistant.
                     {% endif %}
@@ -435,28 +528,35 @@
                     <ul style="margin: 5px 0 5px 20px;">
                         <li>Event information</li>
                         <li>Registration assistance</li>
+                        <li>Password/Login help</li>
                         <li>Dashboard navigation</li>
-                        <li>General queries</li>
                     </ul>
                 </div>
+                {% if not session.get('user_id') %}
+                <div class="forgot-password-msg">
+                    <strong>Forgot Password?</strong><br>
+                    Email: admin@example.com<br>
+                    Demo: admin@example.com / admin123
+                </div>
+                {% endif %}
             </div>
             <div class="quick-questions">
                 {% if session.get('user_id') %}
                     {% if session.get('role') == 'admin' %}
                         <button onclick="askQuestion('How many events are there?')" class="quick-btn">📊 Events</button>
                         <button onclick="askQuestion('Show recent registrations')" class="quick-btn">👥 Registrations</button>
-                        <button onclick="askQuestion('Admin commands')" class="quick-btn">🛠️ Commands</button>
+                        <button onclick="askQuestion('How to create event?')" class="quick-btn">🛠️ Help</button>
                     {% else %}
                         <button onclick="askQuestion('What events are coming up?')" class="quick-btn">📅 Events</button>
                         <button onclick="askQuestion('My registered events')" class="quick-btn">🎟️ My Events</button>
-                        <button onclick="askQuestion('How to register?')" class="quick-btn">❓ Help</button>
+                        <button onclick="askQuestion('How to register for events?')" class="quick-btn">❓ Help</button>
                     {% endif %}
                 {% else %}
                     <button onclick="askQuestion('What events are coming up?')" class="quick-btn">📅 Events</button>
                     <button onclick="askQuestion('How do I register?')" class="quick-btn">📝 Register</button>
-                    <button onclick="askQuestion('Login help')" class="quick-btn">🔐 Login</button>
+                    <button onclick="askQuestion('Forgot password help')" class="quick-btn">🔐 Password</button>
                 {% endif %}
-                <button onclick="askQuestion('Current time')" class="quick-btn">🕒 Time</button>
+                <button onclick="askQuestion('Current time and date')" class="quick-btn">🕒 Time</button>
             </div>
             <div class="chat-input-area">
                 <input type="text" id="chat-input" placeholder="Ask me anything about events..." 
@@ -537,10 +637,12 @@
             
             // Fallback response for offline or error
             let fallbackResponse = "I'm having trouble connecting right now. ";
-            if (message.toLowerCase().includes('event')) {
-                fallbackResponse += "You can view events on the homepage or dashboard.";
+            if (message.toLowerCase().includes('forgot') || message.toLowerCase().includes('password')) {
+                fallbackResponse = "For password reset, please email: admin@example.com";
+            } else if (message.toLowerCase().includes('event')) {
+                fallbackResponse += "You can view events on the homepage.";
             } else if (message.toLowerCase().includes('register')) {
-                fallbackResponse += "Use the Register button in the navigation to create an account.";
+                fallbackResponse += "Use the Register button in navigation.";
             } else if (message.toLowerCase().includes('login')) {
                 fallbackResponse += "Use the Login button to access your account.";
             } else {
@@ -561,18 +663,62 @@
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
-    // Auto-open chatbot for first-time visitors
+    // Helper functions for footer links
+    function showPrivacyPolicy() {
+        if (typeof askQuestion === 'function') {
+            toggleChat();
+            setTimeout(() => {
+                askQuestion('What is your privacy policy?');
+            }, 300);
+        } else {
+            alert('Privacy Policy: We protect your data and never share it with third parties.');
+        }
+    }
+
+    function showTerms() {
+        if (typeof askQuestion === 'function') {
+            toggleChat();
+            setTimeout(() => {
+                askQuestion('What are the terms of service?');
+            }, 300);
+        } else {
+            alert('Terms of Service: By using this platform, you agree to follow university policies.');
+        }
+    }
+
+    function contactAdmin() {
+        if (typeof askQuestion === 'function') {
+            toggleChat();
+            setTimeout(() => {
+                askQuestion('How to contact admin?');
+            }, 300);
+        } else {
+            alert('Contact Admin: Email admin@example.com for assistance.');
+        }
+    }
+
+    // Auto-open chatbot for first-time visitors (delayed)
     window.addEventListener('load', function() {
         const firstVisit = localStorage.getItem('firstVisit');
         if (!firstVisit) {
             localStorage.setItem('firstVisit', 'true');
             setTimeout(() => {
-                const welcomeMessage = document.createElement('div');
-                welcomeMessage.className = 'message bot';
-                welcomeMessage.innerHTML = "💡 <strong>Tip:</strong> I'm here to help! Click my button anytime or type your question.";
-                document.getElementById('chat-messages').appendChild(welcomeMessage);
-            }, 2000);
+                if (!chatOpen) {
+                    const welcomeMessage = document.createElement('div');
+                    welcomeMessage.className = 'message bot';
+                    welcomeMessage.innerHTML = "💡 <strong>Tip:</strong> I can help with events, registration, and password issues!";
+                    document.getElementById('chat-messages').appendChild(welcomeMessage);
+                }
+            }, 3000);
         }
+        
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
     });
 
     // Keyboard shortcut for chatbot (Ctrl + /)
@@ -582,6 +728,18 @@
             toggleChat();
         }
     });
+    
+    // Handle forgot password from login page
+    window.forgotPasswordHelp = function() {
+        if (typeof toggleChat === 'function') {
+            toggleChat();
+            setTimeout(() => {
+                askQuestion('I forgot my password. What should I do?');
+            }, 300);
+        } else {
+            alert('For password reset, please email: admin@example.com');
+        }
+    };
     </script>
 </body>
 </html>
