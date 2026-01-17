@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import json
+import uuid
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
@@ -48,7 +49,9 @@ class EventChatbot:
             'admin': ['admin', 'contact admin', 'help', 'support'],
             'time': ['time', 'current time', 'what time', 'clock'],
             'date': ['date', 'today', 'what day', 'calendar'],
-            'logout': ['logout', 'sign out', 'exit', 'quit']
+            'logout': ['logout', 'sign out', 'exit', 'quit'],
+            'login': ['login', 'sign in', 'log in'],
+            'forgot_password': ['forgot password', 'reset password', 'password reset', 'lost password']
         }
     
     def get_response(self, user_input, user_role=None, user_id=None):
@@ -56,7 +59,10 @@ class EventChatbot:
         
         # Check for greeting
         if any(word in user_input for word in self.responses['greeting']):
-            return "Hello! 👋 I'm your event assistant. How can I help you today?"
+            if user_role:
+                return f"Hello {user_role.capitalize()}! 👋 How can I help you today?"
+            else:
+                return "Hello! 👋 I'm your event assistant. How can I help you today?"
         
         # Check for events query
         elif any(word in user_input for word in self.responses['events']):
@@ -70,6 +76,14 @@ class EventChatbot:
             if len(events) > 5:
                 response += f"... and {len(events)-5} more events."
             return response
+        
+        # Check for forgot password
+        elif any(word in user_input for word in self.responses['forgot_password']):
+            return "For password reset:\n📧 Email: admin@example.com\n🔧 Contact the admin with your registered email address for password assistance."
+        
+        # Check for login help
+        elif any(word in user_input for word in self.responses['login']):
+            return "To login:\n1. Go to the login page\n2. Enter your email and password\n3. Click Login\n\nDemo accounts:\n• Admin: admin@example.com / admin123\n• Student: student@example.com / student123"
         
         # Check for registration info
         elif any(word in user_input for word in self.responses['registration']):
@@ -120,43 +134,53 @@ class EventChatbot:
 # ----------------- Routes -----------------
 @app.route('/')
 def index():
-    events = Event.query.all()
-    return render_template('index.html', events=events)
+    try:
+        events = Event.query.all()
+        return render_template('index.html', events=events)
+    except Exception as e:
+        # Log error and return empty events list
+        print(f"Error loading events: {str(e)}")
+        return render_template('index.html', events=[])
 
-# Update the chatbot route to handle unauthenticated users
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
-    data = request.get_json()
-    user_message = data.get('message', '')
-    
-    # Create chatbot instance
-    chatbot = EventChatbot(db)
-    
-    # Get user info if logged in, otherwise None
-    user_role = session.get('role') if 'user_id' in session else None
-    user_id = session.get('user_id') if 'user_id' in session else None
-    
-    # For home page, provide basic event info even without login
-    if 'user_id' not in session:
-        # Check if it's a general question about events
-        if any(word in user_message.lower() for word in ['event', 'events', 'upcoming', 'schedule']):
-            events = Event.query.all()
-            if not events:
-                response = "There are no upcoming events at the moment."
+    try:
+        data = request.get_json()
+        user_message = data.get('message', '')
+        
+        chatbot = EventChatbot(db)
+        
+        # Get user info if logged in
+        user_role = session.get('role') if 'user_id' in session else None
+        user_id = session.get('user_id') if 'user_id' in session else None
+        
+        # Handle unauthenticated users
+        if 'user_id' not in session:
+            # Allow basic event queries
+            if any(word in user_message.lower() for word in ['event', 'events', 'upcoming', 'schedule', 'what events']):
+                events = Event.query.all()
+                if not events:
+                    response = "There are no upcoming events at the moment."
+                else:
+                    response = "📅 **Upcoming Events:**\n"
+                    for event in events[:5]:
+                        response += f"• {event.name} on {event.date} at {event.venue or 'TBD'}\n"
+                    if len(events) > 5:
+                        response += f"... and {len(events)-5} more events."
+                    response += "\n\nPlease login or register to participate!"
+                return jsonify({'response': response})
+            elif any(word in user_message.lower() for word in ['forgot password', 'reset password', 'password reset']):
+                return jsonify({'response': "For password reset:\n📧 Email: admin@example.com\n🔧 Contact the admin with your registered email address."})
             else:
-                response = "📅 **Upcoming Events:**\n"
-                for event in events[:5]:
-                    response += f"• {event.name} on {event.date} at {event.venue or 'TBD'}\n"
-                if len(events) > 5:
-                    response += f"... and {len(events)-5} more events."
-                response += "\n\nPlease login or register to participate!"
-            return jsonify({'response': response})
-        else:
-            return jsonify({'response': "Please login or register to access full chatbot features. For now, I can only tell you about upcoming events."})
-    
-    response = chatbot.get_response(user_message, user_role, user_id)
-    return jsonify({'response': response})
-    
+                return jsonify({'response': "Please login or register to access full chatbot features. I can tell you about upcoming events if you ask!"})
+        
+        response = chatbot.get_response(user_message, user_role, user_id)
+        return jsonify({'response': response})
+        
+    except Exception as e:
+        print(f"Chatbot error: {str(e)}")
+        return jsonify({'response': 'Sorry, I encountered an error. Please try again.'})
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -166,14 +190,18 @@ def register():
         role = request.form['role']
 
         if role == 'admin' and User.query.filter_by(role='admin').first():
-            return "⚠️ Admin already exists. You can only register as a student."
+            flash("⚠️ Admin already exists. You can only register as a student.")
+            return render_template('register.html')
 
         if User.query.filter_by(email=email).first():
-            return "⚠️ User already exists with this email."
+            flash("⚠️ User already exists with this email.")
+            return render_template('register.html')
 
         user = User(name=name, email=email, password=password, role=role)
         db.session.add(user)
         db.session.commit()
+        
+        flash("✅ Registration successful! Please login.")
         return redirect(url_for('login'))
 
     return render_template('register.html')
@@ -188,27 +216,37 @@ def login():
         if user and check_password_hash(user.password, password):
             session['user_id'] = user.id
             session['role'] = user.role
+            session['user_name'] = user.name
+            flash(f"✅ Welcome back, {user.name}!")
             return redirect(url_for('dashboard'))
 
-        return "❌ Invalid email or password"
+        flash("❌ Invalid email or password")
+        return render_template('login.html')
+    
     return render_template('login.html')
 
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
+        flash("Please login to access dashboard")
         return redirect(url_for('login'))
 
     if session['role'] == 'admin':
         return redirect(url_for('admin_dashboard'))
 
-    user_id = session['user_id']
-    events = Event.query.all()
-    registered_event_ids = [reg.event_id for reg in Registration.query.filter_by(user_id=user_id).all()]
-    return render_template('student_dashboard.html', events=events, registered_event_ids=registered_event_ids)
+    try:
+        user_id = session['user_id']
+        events = Event.query.all()
+        registered_event_ids = [reg.event_id for reg in Registration.query.filter_by(user_id=user_id).all()]
+        return render_template('student_dashboard.html', events=events, registered_event_ids=registered_event_ids)
+    except Exception as e:
+        flash(f"Error loading dashboard: {str(e)}")
+        return redirect(url_for('index'))
 
 @app.route('/register_event/<int:event_id>')
 def register_event(event_id):
     if 'user_id' not in session or session['role'] != 'student':
+        flash("Please login as student to register for events")
         return redirect(url_for('login'))
 
     user_id = session['user_id']
@@ -218,12 +256,14 @@ def register_event(event_id):
         registration = Registration(user_id=user_id, event_id=event_id)
         db.session.add(registration)
         db.session.commit()
+        flash("✅ Successfully registered for the event!")
 
     return redirect(url_for('dashboard'))
 
 @app.route('/admin_dashboard', methods=['GET', 'POST'])
 def admin_dashboard():
     if 'user_id' not in session or session['role'] != 'admin':
+        flash("Admin access required")
         return redirect(url_for('login'))
 
     if request.method == 'POST':
@@ -235,6 +275,7 @@ def admin_dashboard():
         new_event = Event(name=name, date=date, venue=venue, description=description)
         db.session.add(new_event)
         db.session.commit()
+        flash("✅ Event created successfully!")
         return redirect(url_for('admin_dashboard'))
 
     events = Event.query.all()
@@ -243,6 +284,10 @@ def admin_dashboard():
 @app.route('/admin_event/<int:event_id>')
 @app.route('/admin/event/<int:event_id>')
 def admin_event(event_id):
+    if 'user_id' not in session or session['role'] != 'admin':
+        flash("Admin access required")
+        return redirect(url_for('login'))
+        
     event = Event.query.get_or_404(event_id)
     registrations = Registration.query.filter_by(event_id=event_id).all()
     return render_template('admin_event.html', event=event, registrations=registrations)
@@ -250,7 +295,17 @@ def admin_event(event_id):
 @app.route('/logout')
 def logout():
     session.clear()
+    flash("✅ Successfully logged out!")
     return redirect(url_for('login'))
+
+# Error handlers
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
 
 # ----------------- Main -----------------
 if __name__ == '__main__':
@@ -266,4 +321,15 @@ if __name__ == '__main__':
             db.session.add(admin_user)
             db.session.commit()
             print("✅ Admin account created!")
+        # Create a demo student account if not exists
+        if not User.query.filter_by(email='student@example.com').first():
+            student_user = User(
+                name='Demo Student',
+                email='student@example.com',
+                password=generate_password_hash('student123'),
+                role='student'
+            )
+            db.session.add(student_user)
+            db.session.commit()
+            print("✅ Demo student account created!")
     app.run(host='0.0.0.0', port=5000, debug=True)
