@@ -7,11 +7,13 @@
     
     {% with messages = get_flashed_messages() %}
         {% if messages %}
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="alert-container">
                 {% for message in messages %}
-                    {{ message }}
+                    <div class="alert alert-{{ 'success' if '✅' in message else 'danger' if '❌' in message else 'info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
                 {% endfor %}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endif %}
     {% endwith %}
@@ -19,59 +21,41 @@
     <form method="POST" class="login-form" id="loginForm">
         <div class="form-group">
             <label for="email">Email Address</label>
-            <input type="email" name="email" id="email" placeholder="Enter your email" required 
-                   class="form-control">
+            <input type="email" name="email" id="email" required 
+                   placeholder="Enter your email"
+                   class="form-control"
+                   value="admin@example.com">
         </div>
         
         <div class="form-group">
             <label for="password">Password</label>
             <div class="password-input">
-                <input type="password" name="password" id="password" placeholder="Enter your password" required 
-                       class="form-control">
+                <input type="password" name="password" id="password" required 
+                       placeholder="Enter your password"
+                       class="form-control"
+                       value="admin123">
                 <span class="toggle-password" onclick="togglePassword()">👁️</span>
             </div>
         </div>
         
         <div class="remember-forgot">
-            <label class="remember-me">
-                <input type="checkbox" name="remember"> Remember me
-            </label>
-            <a href="#" class="forgot-password" onclick="forgotPasswordHelp()">Forgot password?</a>
+            <button type="button" class="btn btn-link" onclick="showPasswordHelp()" style="padding: 0; color: #0077cc;">
+                Forgot Password?
+            </button>
         </div>
         
         <button type="submit" class="login-btn">Login</button>
         
-        <div class="demo-credentials">
-            <h4>Demo Credentials:</h4>
-            <div class="credentials">
-                <div class="credential-item">
-                    <strong>Admin:</strong> admin@example.com / admin123
-                </div>
-                <div class="credential-item">
-                    <strong>Student:</strong> student@example.com / student123
-                </div>
-                <button type="button" class="btn btn-outline-primary btn-sm" onclick="fillDemo('admin')">
-                    Fill Admin
-                </button>
-                <button type="button" class="btn btn-outline-primary btn-sm" onclick="fillDemo('student')">
-                    Fill Student
-                </button>
+        <div class="demo-info">
+            <h5>Demo Accounts:</h5>
+            <div class="demo-account">
+                <strong>Admin:</strong> admin@example.com / admin123
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillAdmin()">Fill</button>
             </div>
-        </div>
-        
-        <div class="login-divider">
-            <span>or</span>
-        </div>
-        
-        <div class="social-login">
-            <button type="button" class="social-btn google-btn">
-                <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google">
-                Continue with Google
-            </button>
-            <button type="button" class="social-btn github-btn">
-                <img src="https://img.icons8.com/ios-filled/16/ffffff/github.png" alt="GitHub">
-                Continue with GitHub
-            </button>
+            <div class="demo-account">
+                <strong>Student:</strong> student@example.com / student123
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillStudent()">Fill</button>
+            </div>
         </div>
         
         <p class="register-link">
@@ -82,394 +66,122 @@
 </div>
 
 <style>
-    .login-container {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        padding: 50px;
-        max-width: 500px;
-        margin: 40px auto;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        animation: fadeIn 0.8s ease-in-out;
-        border: 1px solid #e0e0e0;
-    }
+.login-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
 
-    .login-title {
-        text-align: center;
-        color: #6a1b9a;
-        font-size: 28px;
-        margin-bottom: 30px;
-        font-weight: bold;
-        background: linear-gradient(135deg, #6a1b9a, #9c4dcc);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
+.login-title {
+    text-align: center;
+    color: #6a1b9a;
+    margin-bottom: 25px;
+}
 
-    .form-group {
-        margin-bottom: 25px;
-    }
+.form-group {
+    margin-bottom: 20px;
+}
 
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: #444;
-        font-size: 15px;
-    }
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
 
-    .form-control {
-        width: 100%;
-        padding: 15px 20px;
-        font-size: 16px;
-        border-radius: 12px;
-        border: 2px solid #e0e0e0;
-        transition: all 0.3s;
-        background: #fff;
-    }
+.password-input {
+    position: relative;
+}
 
-    .form-control:focus {
-        border-color: #7e57c2;
-        box-shadow: 0 0 0 3px rgba(126, 87, 194, 0.1);
-        outline: none;
-    }
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
 
-    .password-input {
-        position: relative;
-    }
+.remember-forgot {
+    text-align: right;
+    margin-bottom: 20px;
+}
 
-    .toggle-password {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-        font-size: 18px;
-        color: #666;
-        user-select: none;
-    }
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background: #0077cc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
 
-    .toggle-password:hover {
-        color: #7e57c2;
-    }
+.login-btn:hover {
+    background: #005fa3;
+}
 
-    .remember-forgot {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-        font-size: 14px;
-    }
+.demo-info {
+    margin-top: 25px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
 
-    .remember-me {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #555;
-    }
+.demo-account {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 8px 0;
+    padding: 8px;
+    background: white;
+    border-radius: 4px;
+}
 
-    .remember-me input {
-        width: 16px;
-        height: 16px;
-    }
-
-    .forgot-password {
-        color: #7e57c2;
-        text-decoration: none;
-        font-weight: 500;
-        transition: color 0.3s;
-    }
-
-    .forgot-password:hover {
-        color: #5e35b1;
-        text-decoration: underline;
-    }
-
-    .login-btn {
-        width: 100%;
-        padding: 16px;
-        background: linear-gradient(135deg, #7e57c2, #5e35b1);
-        color: white;
-        font-size: 18px;
-        font-weight: bold;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.3s;
-        margin-bottom: 20px;
-    }
-
-    .login-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(126, 87, 194, 0.3);
-        background: linear-gradient(135deg, #6a1b9a, #4a148c);
-    }
-
-    .demo-credentials {
-        background: #f0f4ff;
-        padding: 20px;
-        border-radius: 12px;
-        margin-bottom: 25px;
-        border: 1px solid #cce7ff;
-    }
-
-    .demo-credentials h4 {
-        margin: 0 0 15px 0;
-        color: #1976d2;
-        font-size: 16px;
-    }
-
-    .credentials {
-        display: grid;
-        grid-template-columns: 1fr auto auto;
-        gap: 10px;
-        align-items: center;
-    }
-
-    .credential-item {
-        grid-column: 1 / -1;
-        background: white;
-        padding: 10px 15px;
-        border-radius: 8px;
-        border: 1px solid #e0e0e0;
-        font-size: 14px;
-        color: #555;
-    }
-
-    .credential-item strong {
-        color: #333;
-    }
-
-    .login-divider {
-        display: flex;
-        align-items: center;
-        margin: 25px 0;
-        color: #888;
-    }
-
-    .login-divider::before,
-    .login-divider::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: #e0e0e0;
-    }
-
-    .login-divider span {
-        padding: 0 15px;
-        font-size: 14px;
-    }
-
-    .social-login {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-bottom: 25px;
-    }
-
-    .social-btn {
-        width: 100%;
-        padding: 14px;
-        border: 2px solid #e0e0e0;
-        border-radius: 12px;
-        background: white;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-
-    .social-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .google-btn:hover {
-        border-color: #db4437;
-        background: #fff5f5;
-    }
-
-    .github-btn {
-        background: #333;
-        color: white;
-        border-color: #333;
-    }
-
-    .github-btn:hover {
-        background: #24292e;
-        border-color: #24292e;
-    }
-
-    .register-link {
-        text-align: center;
-        font-size: 15px;
-        color: #666;
-        margin-top: 20px;
-    }
-
-    .register-now {
-        color: #7e57c2;
-        text-decoration: none;
-        font-weight: bold;
-        margin-left: 5px;
-        transition: color 0.3s;
-    }
-
-    .register-now:hover {
-        color: #5e35b1;
-        text-decoration: underline;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-10px); }
-        75% { transform: translateX(10px); }
-    }
-
-    .shake {
-        animation: shake 0.5s ease-in-out;
-    }
-
-    @media (max-width: 576px) {
-        .login-container {
-            padding: 30px 20px;
-            margin: 20px;
-        }
-        
-        .credentials {
-            grid-template-columns: 1fr;
-        }
-    }
+.register-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+}
 </style>
 
 <script>
-    function togglePassword() {
-        const passwordInput = document.getElementById('password');
-        const toggleButton = document.querySelector('.toggle-password');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            toggleButton.textContent = '👁️‍🗨️';
-        } else {
-            passwordInput.type = 'password';
-            toggleButton.textContent = '👁️';
-        }
-    }
-
-    function fillDemo(role) {
-        const form = document.getElementById('loginForm');
-        if (role === 'admin') {
-            document.getElementById('email').value = 'admin@example.com';
-            document.getElementById('password').value = 'admin123';
-        } else if (role === 'student') {
-            document.getElementById('email').value = 'student@example.com';
-            document.getElementById('password').value = 'student123';
-        }
-        
-        // Show success message
-        const message = document.createElement('div');
-        message.className = 'alert alert-success alert-dismissible fade show mt-3';
-        message.innerHTML = `
-            ✅ Demo ${role} credentials filled! Click "Login" to continue.
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        form.insertBefore(message, form.querySelector('.demo-credentials'));
-        
-        // Auto-remove after 5 seconds
-        setTimeout(() => {
-            if (message.parentNode) {
-                message.remove();
-            }
-        }, 5000);
-    }
-
- // In login.html, update the forgotPasswordHelp function:
-function forgotPasswordHelp() {
-    // Direct response without opening chatbot
-    const response = "For password reset:\n\n📧 Email: admin@example.com\n\n🔑 Demo Accounts:\n• Admin: admin@example.com / admin123\n• Student: student@example.com / student123";
-    
-    // Show as alert
-    alert(response);
-    
-    // Also add to chatbot if available
-    if (typeof addMessage === 'function') {
-        addMessage(response, 'bot');
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+    } else {
+        passwordInput.type = 'password';
     }
 }
 
-    // Form validation
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        
-        if (!email || !password) {
-            e.preventDefault();
-            showError('Please fill in all fields');
-            return;
-        }
-        
-        if (!validateEmail(email)) {
-            e.preventDefault();
-            showError('Please enter a valid email address');
-            return;
-        }
-    });
+function showPasswordHelp() {
+    alert("🔐 **Password Help**\n\nFor password reset, please contact:\n📧 Email: admin@example.com\n\n🔑 **Demo Accounts:**\n• Admin: admin@example.com / admin123\n• Student: student@example.com / student123");
+}
 
-    function validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
+function fillAdmin() {
+    document.getElementById('email').value = 'admin@example.com';
+    document.getElementById('password').value = 'admin123';
+}
+
+function fillStudent() {
+    document.getElementById('email').value = 'student@example.com';
+    document.getElementById('password').value = 'student123';
+}
+
+// Form validation
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    if (!email || !password) {
+        e.preventDefault();
+        alert('Please fill in all fields');
+        return;
     }
-
-    function showError(message) {
-        // Remove any existing error alerts
-        const existingAlerts = document.querySelectorAll('.alert-danger');
-        existingAlerts.forEach(alert => alert.remove());
-        
-        // Create new error alert
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
-        alertDiv.innerHTML = `
-            ❌ ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        const form = document.getElementById('loginForm');
-        form.insertBefore(alertDiv, form.firstChild);
-        
-        // Shake animation
-        form.classList.add('shake');
-        setTimeout(() => {
-            form.classList.remove('shake');
-        }, 500);
-        
-        // Auto-remove after 5 seconds
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.remove();
-            }
-        }, 5000);
-    }
-
-    // Auto-focus on email field
-    document.addEventListener('DOMContentLoaded', function() {
-        const emailInput = document.getElementById('email');
-        if (emailInput) {
-            emailInput.focus();
-        }
-        
-        // Add chatbot hint for login page
-        setTimeout(() => {
-            if (typeof addMessage === 'function') {
-                addMessage("💡 <strong>Login Tip:</strong> You can use demo credentials or ask me for help!", 'bot');
-            }
-        }, 2000);
-    });
+});
 </script>
 {% endblock %}
