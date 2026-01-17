@@ -390,17 +390,17 @@
         }, 5000);
     }
 
-   function forgotPasswordHelp() {
-    // Check if user is already logged in
+ // In login.html, update the forgotPasswordHelp function:
+function forgotPasswordHelp() {
+    // Direct response without opening chatbot
+    const response = "For password reset:\n\n📧 Email: admin@example.com\n\n🔑 Demo Accounts:\n• Admin: admin@example.com / admin123\n• Student: student@example.com / student123";
+    
+    // Show as alert
+    alert(response);
+    
+    // Also add to chatbot if available
     if (typeof addMessage === 'function') {
-        // If chatbot is available, add message directly
-        const response = "For password reset:\n📧 Email: admin@example.com\n🔧 Contact the admin with your registered email address for password assistance.";
         addMessage(response, 'bot');
-        
-        // Also show an alert for visibility
-        alert("For password reset, please email: admin@example.com\n\nPlease include your registered email address.");
-    } else {
-        alert('Please contact admin@example.com for password reset assistance.');
     }
 }
 
