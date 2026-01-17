@@ -741,5 +741,105 @@
         }
     };
     </script>
+    <script>
+// Check if current page is login or register
+const currentPath = window.location.pathname;
+const isLoginPage = currentPath.includes('/login');
+const isRegisterPage = currentPath.includes('/register');
+
+// Hide chatbot on login/register pages
+if (isLoginPage || isRegisterPage) {
+    document.getElementById('chatbot-container').style.display = 'none';
+}
+
+// Override the toggleChat function for login/register pages
+if (isLoginPage || isRegisterPage) {
+    window.toggleChat = function() {
+        alert("Chatbot is not available on this page. For password help:\n\n📧 Email: admin@example.com\n🔑 Demo: admin@example.com / admin123");
+        return false;
+    };
+}
+
+// Forgot password function for login page
+window.forgotPasswordHelp = function() {
+    alert("🔐 **Password Help**\n\nFor password reset, please contact:\n📧 Email: admin@example.com\n\n🔑 **Demo Accounts:**\n• Admin: admin@example.com / admin123\n• Student: student@example.com / student123");
+    return false;
+};
+
+// Chatbot functions only for non-login/register pages
+if (!isLoginPage && !isRegisterPage) {
+    let chatOpen = false;
+
+    window.toggleChat = function() {
+        const chatWindow = document.getElementById('chat-window');
+        chatOpen = !chatOpen;
+        chatWindow.style.display = chatOpen ? 'flex' : 'none';
+        if (chatOpen) {
+            setTimeout(() => {
+                document.getElementById('chat-input').focus();
+            }, 100);
+        }
+    };
+
+    window.askQuestion = function(question) {
+        document.getElementById('chat-input').value = question;
+        sendMessage();
+    };
+
+    window.sendMessage = function() {
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+        
+        if (!message) return;
+        
+        // Add user message
+        addMessage(message, 'user');
+        input.value = '';
+        
+        // Show typing indicator
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'message bot';
+        typingIndicator.id = 'typing';
+        typingIndicator.innerHTML = 'Typing...';
+        document.getElementById('chat-messages').appendChild(typingIndicator);
+        document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+        
+        // Send to backend
+        fetch('/chatbot', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Remove typing indicator
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+            
+            // Add bot response
+            addMessage(data.response, 'bot');
+        })
+        .catch(error => {
+            // Remove typing indicator
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+            
+            addMessage("Sorry, connection error. For help: admin@example.com", 'bot');
+        });
+    };
+
+    function addMessage(text, sender) {
+        const messagesDiv = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}`;
+        messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+        
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+}
+</script>
 </body>
 </html>
