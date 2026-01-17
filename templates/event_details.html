@@ -1,0 +1,371 @@
+{% extends 'layout.html' %}
+{% block title %}{{ event.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .event-header {
+        background: linear-gradient(135deg, rgba(0, 51, 102, 0.9), rgba(0, 64, 128, 0.9)),
+                    url('https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 30px;
+        border-radius: 15px;
+    }
+    
+    .event-meta {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .meta-icon {
+        width: 40px;
+        height: 40px;
+        background: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        color: var(--cuk-blue);
+    }
+    
+    .register-btn-container {
+        position: sticky;
+        top: 20px;
+    }
+    
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.2rem;
+    }
+    
+    .feedback-card {
+        border-left: 4px solid var(--cuk-blue);
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Event Header -->
+<div class="event-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="badge bg-light text-dark me-3">
+                        {{ event.category|title }}
+                    </span>
+                    {% if event.department %}
+                        <span class="badge bg-info">{{ event.department.code }}</span>
+                    {% endif %}
+                </div>
+                <h1 class="display-5 fw-bold mb-3">{{ event.name }}</h1>
+                <div class="d-flex flex-wrap gap-4">
+                    <div>
+                        <i class="bi bi-calendar me-2"></i>
+                        {{ event.date.strftime('%A, %d %B %Y') }}
+                    </div>
+                    {% if event.start_time %}
+                        <div>
+                            <i class="bi bi-clock me-2"></i>
+                            {{ event.start_time }} {% if event.end_time %}- {{ event.end_time }}{% endif %}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <i class="bi bi-geo-alt me-2"></i>
+                        {{ event.venue }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="rating-stars mb-2">
+                    {% for i in range(5) %}
+                        <i class="bi bi-star{% if i < avg_rating %}fill{% endif %}"></i>
+                    {% endfor %}
+                    <span class="ms-2">{{ avg_rating }}/5 ({{ feedbacks|length }} reviews)</span>
+                </div>
+                <div class="badge bg-light text-dark fs-6">
+                    {{ event.registrations|length }}/{{ event.capacity }} Registered
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Event Details -->
+        <div class="col-lg-8">
+            <!-- Description -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="cuk-text-primary mb-3">About this Event</h4>
+                    <p class="card-text">{{ event.description|safe }}</p>
+                </div>
+            </div>
+            
+            <!-- Event Meta -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="event-meta">
+                        <h5 class="cuk-text-primary mb-4"><i class="bi bi-info-circle me-2"></i>Event Details</h5>
+                        
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="bi bi-calendar"></i>
+                            </div>
+                            <div>
+                                <strong>Date</strong><br>
+                                {{ event.date.strftime('%d %B %Y') }}
+                            </div>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div>
+                                <strong>Time</strong><br>
+                                {{ event.start_time or 'TBD' }} {% if event.end_time %}- {{ event.end_time }}{% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="bi bi-geo-alt"></i>
+                            </div>
+                            <div>
+                                <strong>Venue</strong><br>
+                                {{ event.venue }}
+                            </div>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <div>
+                                <strong>Capacity</strong><br>
+                                {{ event.capacity }} seats
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="event-meta">
+                        <h5 class="cuk-text-primary mb-4"><i class="bi bi-person-badge me-2"></i>Coordinators</h5>
+                        
+                        {% if event.faculty_coordinator %}
+                            <div class="meta-item">
+                                <div class="meta-icon">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <div>
+                                    <strong>Faculty Coordinator</strong><br>
+                                    {{ event.faculty_coordinator.name }}<br>
+                                    <small class="text-muted">{{ event.faculty_coordinator.designation }}</small>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if event.department %}
+                            <div class="meta-item">
+                                <div class="meta-icon">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                                <div>
+                                    <strong>Department</strong><br>
+                                    {{ event.department.name }} ({{ event.department.code }})<br>
+                                    <small class="text-muted">{{ event.department.description }}</small>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feedback Section -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="cuk-text-primary mb-4">Feedback & Reviews</h4>
+                    
+                    {% if feedbacks %}
+                        {% for feedback in feedbacks %}
+                            <div class="feedback-card">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div>
+                                        <strong>{{ feedback.user.name }}</strong>
+                                        <small class="text-muted ms-2">
+                                            {{ feedback.submitted_date.strftime('%d %b %Y') }}
+                                        </small>
+                                    </div>
+                                    <div class="rating-stars">
+                                        {% for i in range(5) %}
+                                            <i class="bi bi-star{% if i < feedback.rating %}fill{% endif %}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <p class="mb-0">{{ feedback.comment }}</p>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-chat-left-text fs-1 text-muted mb-3"></i>
+                            <p class="text-muted">No feedback yet. Be the first to review!</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Submit Feedback Form (for registered users who attended) -->
+                    {% if is_registered and not user_feedback %}
+                        <div class="mt-4">
+                            <h5 class="cuk-text-primary mb-3">Submit Your Feedback</h5>
+                            <form method="POST" action="{{ url_for('submit_feedback', event_id=event.id) }}">
+                                <div class="mb-3">
+                                    <label class="form-label">Rating</label>
+                                    <div class="rating-stars" id="ratingStars">
+                                        {% for i in range(1, 6) %}
+                                            <i class="bi bi-star" 
+                                               onclick="setRating({{ i }})" 
+                                               style="cursor: pointer; font-size: 1.5rem;"></i>
+                                        {% endfor %}
+                                    </div>
+                                    <input type="hidden" name="rating" id="ratingValue" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Comments</label>
+                                    <textarea name="comment" class="form-control" rows="3" 
+                                              placeholder="Share your experience..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Registration Sidebar -->
+        <div class="col-lg-4">
+            <div class="register-btn-container">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="cuk-text-primary mb-3">Registration</h5>
+                        
+                        {% if not session.get('user_id') %}
+                            <div class="alert alert-warning">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Please login to register for this event.
+                            </div>
+                            <a href="{{ url_for('login') }}" class="btn btn-primary w-100 mb-2">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login to Register
+                            </a>
+                        {% elif session.role != 'student' %}
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Only students can register for events.
+                            </div>
+                        {% elif is_registered %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle me-2"></i>
+                                You are registered for this event!
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="#" class="btn btn-outline-primary">
+                                    <i class="bi bi-calendar-plus me-2"></i>Add to Calendar
+                                </a>
+                                <a href="{{ url_for('unregister_event', event_id=event.id) }}" 
+                                   class="btn btn-outline-danger"
+                                   onclick="return confirm('Are you sure you want to unregister?')">
+                                    <i class="bi bi-x-circle me-2"></i>Unregister
+                                </a>
+                            </div>
+                        {% else %}
+                            {% if event.registrations|length >= event.capacity %}
+                                <div class="alert alert-danger">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Event is full!
+                                </div>
+                            {% elif event.date < now.date() %}
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-clock-history me-2"></i>
+                                    Event has passed
+                                </div>
+                            {% else %}
+                                <a href="{{ url_for('register_event', event_id=event.id) }}" 
+                                   class="btn btn-primary w-100 py-3 fs-5">
+                                    <i class="bi bi-calendar-plus me-2"></i>Register Now
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <hr class="my-4">
+                        
+                        <div class="text-center">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                {{ event.registrations|length }} out of {{ event.capacity }} seats filled
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Share Event -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="cuk-text-primary mb-3">Share this Event</h5>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="#" class="btn btn-outline-primary">
+                                <i class="bi bi-facebook"></i>
+                            </a>
+                            <a href="#" class="btn btn-outline-info">
+                                <i class="bi bi-twitter"></i>
+                            </a>
+                            <a href="#" class="btn btn-outline-success">
+                                <i class="bi bi-whatsapp"></i>
+                            </a>
+                            <a href="#" class="btn btn-outline-secondary">
+                                <i class="bi bi-link"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function setRating(rating) {
+    const stars = document.querySelectorAll('#ratingStars i');
+    const ratingInput = document.getElementById('ratingValue');
+    
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.classList.remove('bi-star');
+            star.classList.add('bi-star-fill');
+        } else {
+            star.classList.remove('bi-star-fill');
+            star.classList.add('bi-star');
+        }
+    });
+    
+    ratingInput.value = rating;
+}
+</script>
+{% endblock %}
