@@ -1,61 +1,387 @@
 {% extends 'layout.html' %}
-{% block title %}{{ event.name }}{% endblock %}
+{% block title %}{{ event.name }} | Campus Events{% endblock %}
 
 {% block extra_css %}
 <style>
-    .event-header {
-        background: linear-gradient(135deg, rgba(0, 51, 102, 0.9), rgba(0, 64, 128, 0.9)),
-                    url('https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3');
-        background-size: cover;
-        background-position: center;
-        color: white;
-        padding: 60px 0;
-        margin-bottom: 30px;
-        border-radius: 15px;
+    :root {
+        --event-gradient: linear-gradient(135deg, rgba(0, 51, 102, 0.9), rgba(0, 64, 128, 0.9));
+        --shadow: 0 8px 30px rgba(0,0,0,0.12);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    .event-meta {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    .event-header {
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        margin-bottom: 40px;
+        box-shadow: var(--shadow);
+    }
+    
+    .event-header-content {
+        position: relative;
+        z-index: 2;
+        padding: 60px 0;
+        background: var(--event-gradient);
+    }
+    
+    .event-bg-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('{{ event.image_url or "https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3" }}') center/cover no-repeat;
+        opacity: 0.3;
+        filter: brightness(0.8);
+    }
+    
+    .event-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(0,51,102,0.9) 0%, rgba(0,64,128,0.9) 100%);
+        z-index: 1;
+    }
+    
+    .event-badge-container {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
         margin-bottom: 20px;
+    }
+    
+    .event-badge {
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .category-badge {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .status-badge {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+    
+    .capacity-badge {
+        background: rgba(0, 123, 255, 0.2);
+        color: #007bff;
+        border: 1px solid rgba(0, 123, 255, 0.3);
+    }
+    
+    .meta-card {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: var(--shadow);
+        border: none;
+        transition: var(--transition);
+        height: 100%;
+    }
+    
+    .meta-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .meta-card h5 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .meta-icon-circle {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--cuk-blue), #0056b3);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        flex-shrink: 0;
     }
     
     .meta-item {
         display: flex;
-        align-items: center;
-        margin-bottom: 15px;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 12px;
+        transition: var(--transition);
     }
     
-    .meta-icon {
+    .meta-item:hover {
+        background: #f1f5f9;
+        transform: translateX(5px);
+    }
+    
+    .meta-item-icon {
         width: 40px;
         height: 40px;
-        background: #f8f9fa;
+        background: white;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--cuk-blue);
+        font-size: 18px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    
+    .coordinator-avatar {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--cuk-blue), #0056b3);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 15px;
-        color: var(--cuk-blue);
+        color: white;
+        font-weight: 600;
+        font-size: 18px;
     }
     
-    .register-btn-container {
-        position: sticky;
-        top: 20px;
+    .rating-container {
+        background: white;
+        padding: 25px;
+        border-radius: 16px;
+        margin-bottom: 25px;
+        box-shadow: var(--shadow);
     }
     
     .rating-stars {
         color: #ffc107;
-        font-size: 1.2rem;
+        font-size: 1.5rem;
+        letter-spacing: 2px;
+    }
+    
+    .rating-stars .bi-star-fill {
+        animation: starPulse 2s infinite;
+    }
+    
+    @keyframes starPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
     }
     
     .feedback-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
         border-left: 4px solid var(--cuk-blue);
-        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: var(--transition);
+    }
+    
+    .feedback-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .feedback-user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
         margin-bottom: 15px;
-        background: #f8f9fa;
+    }
+    
+    .feedback-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .register-container {
+        position: sticky;
+        top: 20px;
+    }
+    
+    .register-card {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        border: none;
+    }
+    
+    .register-card-header {
+        background: linear-gradient(135deg, var(--cuk-blue), #0056b3);
+        color: white;
+        padding: 25px;
+        text-align: center;
+    }
+    
+    .countdown-timer {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 15px;
+        border-radius: 12px;
+        margin: 20px 0;
+    }
+    
+    .timer-unit {
+        text-align: center;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.2);
         border-radius: 8px;
+        min-width: 60px;
+    }
+    
+    .timer-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .timer-label {
+        font-size: 0.75rem;
+        opacity: 0.9;
+        margin-top: 5px;
+    }
+    
+    .share-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .share-btn {
+        flex: 1;
+        min-width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+    
+    .share-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .share-btn.facebook { background: #1877f2; }
+    .share-btn.twitter { background: #1da1f2; }
+    .share-btn.whatsapp { background: #25d366; }
+    .share-btn.linkedin { background: #0077b5; }
+    .share-btn.copy { background: #6c757d; }
+    
+    .event-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .gallery-item {
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .gallery-item:hover {
+        transform: scale(1.05);
+    }
+    
+    .gallery-item img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+    }
+    
+    .speaker-card {
+        text-align: center;
+        padding: 20px;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: var(--transition);
+    }
+    
+    .speaker-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .speaker-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin: 0 auto 15px;
+        overflow: hidden;
+        border: 4px solid var(--cuk-blue-light);
+    }
+    
+    .speaker-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    @media (max-width: 768px) {
+        .event-header-content {
+            padding: 40px 0;
+        }
+        
+        .meta-card {
+            padding: 20px;
+        }
+        
+        .countdown-timer {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .timer-unit {
+            flex: 1;
+        }
+    }
+    
+    /* Animation for page elements */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animated-card {
+        animation: fadeInUp 0.6s ease forwards;
     }
 </style>
 {% endblock %}
@@ -63,56 +389,108 @@
 {% block content %}
 <!-- Event Header -->
 <div class="event-header">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <div class="d-flex align-items-center mb-3">
-                    <span class="badge bg-light text-dark me-3">
-                        {{ event.category|title if event.category else 'General' }}
-                    </span>
-                    {% if event.department %}
-                        <span class="badge bg-info">{{ event.department.code if event.department.code else event.department }}</span>
-                    {% endif %}
-                </div>
-                <h1 class="display-5 fw-bold mb-3">{{ event.name }}</h1>
-                <div class="d-flex flex-wrap gap-4">
-                    <div>
-                        <i class="bi bi-calendar me-2"></i>
-                        {% if event.date %}
-                            {{ event.date.strftime('%A, %d %B %Y') }}
-                        {% else %}
-                            Date TBD
+    <div class="event-bg-image"></div>
+    <div class="event-header-content">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="event-badge-container">
+                        <span class="event-badge category-badge">
+                            <i class="bi bi-tag"></i>
+                            {{ event.category|title if event.category else 'General' }}
+                        </span>
+                        
+                        {% if is_registered %}
+                            <span class="event-badge status-badge">
+                                <i class="bi bi-check-circle"></i>
+                                Registered
+                            </span>
+                        {% endif %}
+                        
+                        <span class="event-badge capacity-badge">
+                            <i class="bi bi-people"></i>
+                            {{ event.registrations|length if event.registrations else 0 }}/{{ event.capacity or '∞' }}
+                        </span>
+                        
+                        {% if event_date and current_date and event_date < current_date %}
+                            <span class="event-badge" style="background: rgba(220, 53, 69, 0.2); color: #dc3545;">
+                                <i class="bi bi-clock-history"></i>
+                                Event Ended
+                            </span>
+                        {% elif event_date and current_date and event_date == current_date %}
+                            <span class="event-badge" style="background: rgba(255, 193, 7, 0.2); color: #ffc107;">
+                                <i class="bi bi-lightning"></i>
+                                Happening Today
+                            </span>
                         {% endif %}
                     </div>
-                    {% if event.start_time %}
-                        <div>
-                            <i class="bi bi-clock me-2"></i>
-                            {{ event.start_time }} {% if event.end_time %}- {{ event.end_time }}{% endif %}
+                    
+                    <h1 class="display-4 fw-bold text-white mb-4">{{ event.name }}</h1>
+                    
+                    <div class="d-flex flex-wrap gap-4 mb-4">
+                        <div class="d-flex align-items-center text-white">
+                            <i class="bi bi-calendar-event fs-5 me-3"></i>
+                            <div>
+                                <div class="fw-semibold">
+                                    {% if event.date %}
+                                        {{ event.date.strftime('%A, %d %B %Y') }}
+                                    {% else %}
+                                        Date TBD
+                                    {% endif %}
+                                </div>
+                                <small>
+                                    {% if event.start_time %}
+                                        {{ event.start_time }} 
+                                        {% if event.end_time %}- {{ event.end_time }}{% endif %}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center text-white">
+                            <i class="bi bi-geo-alt fs-5 me-3"></i>
+                            <div>
+                                <div class="fw-semibold">{{ event.venue or 'Venue TBD' }}</div>
+                                {% if event.location_link %}
+                                    <small>
+                                        <a href="{{ event.location_link }}" class="text-white" target="_blank">
+                                            <i class="bi bi-map me-1"></i>View on Map
+                                        </a>
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if event.department %}
+                        <div class="text-white">
+                            <i class="bi bi-building me-2"></i>
+                            Organized by {{ event.department.name }}
+                            {% if event.department.code %}
+                                ({{ event.department.code }})
+                            {% endif %}
                         </div>
                     {% endif %}
-                    <div>
-                        <i class="bi bi-geo-alt me-2"></i>
-                        {{ event.venue or 'Venue TBD' }}
+                </div>
+                
+                <div class="col-lg-4 text-lg-end">
+                    <div class="rating-container bg-white d-inline-block rounded-3 p-4">
+                        <div class="rating-stars mb-2">
+                            {% set avg_rating_value = avg_rating or 0 %}
+                            {% for i in range(5) %}
+                                {% if i < avg_rating_value|round %}
+                                    <i class="bi bi-star-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="text-center">
+                            <div class="display-6 fw-bold text-dark">{{ "%.1f"|format(avg_rating_value) if avg_rating_value else "0.0" }}</div>
+                            <div class="text-muted">out of 5</div>
+                            <small class="text-muted">{{ feedbacks|length if feedbacks else 0 }} reviews</small>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-4 text-end">
-                <div class="rating-stars mb-2">
-                    {% set avg_rating_value = avg_rating or 0 %}
-                    {% for i in range(5) %}
-                        {% if i < avg_rating_value %}
-                            <i class="bi bi-star-fill"></i>
-                        {% else %}
-                            <i class="bi bi-star"></i>
-                        {% endif %}
-                    {% endfor %}
-                    <span class="ms-2">
-                        {{ "%.1f"|format(avg_rating_value) if avg_rating_value else "0.0" }}/5 
-                        ({{ feedbacks|length if feedbacks else 0 }} reviews)
-                    </span>
-                </div>
-                <div class="badge bg-light text-dark fs-6">
-                    {{ event.registrations|length if event.registrations else 0 }}/{{ event.capacity or 0 }} Registered
                 </div>
             </div>
         </div>
@@ -121,82 +499,147 @@
 
 <div class="container">
     <div class="row">
-        <!-- Event Details -->
+        <!-- Main Content -->
         <div class="col-lg-8">
-            <!-- Description -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h4 class="cuk-text-primary mb-3">About this Event</h4>
-                    <p class="card-text">{{ event.description|safe if event.description else 'No description available.' }}</p>
+            <!-- Event Description -->
+            <div class="meta-card animated-card" style="animation-delay: 0.1s;">
+                <h5 class="cuk-text-primary">
+                    <div class="meta-icon-circle">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                    About this Event
+                </h5>
+                <div class="event-description">
+                    {% if event.description %}
+                        {{ event.description|safe }}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-info-circle fs-1 text-muted mb-3"></i>
+                            <p class="text-muted">No description available for this event.</p>
+                        </div>
+                    {% endif %}
                 </div>
+                
+                {% if event.gallery_images %}
+                    <div class="event-gallery mt-4">
+                        {% for image in event.gallery_images[:4] %}
+                            <div class="gallery-item" onclick="openGallery({{ loop.index0 }})">
+                                <img src="{{ image.url }}" alt="Event Image {{ loop.index }}" class="rounded">
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
             
-            <!-- Event Meta -->
+            <!-- Event Details Grid -->
             <div class="row">
                 <div class="col-md-6">
-                    <div class="event-meta">
-                        <h5 class="cuk-text-primary mb-4"><i class="bi bi-info-circle me-2"></i>Event Details</h5>
+                    <div class="meta-card animated-card" style="animation-delay: 0.2s;">
+                        <h5 class="cuk-text-primary">
+                            <div class="meta-icon-circle">
+                                <i class="bi bi-calendar-week"></i>
+                            </div>
+                            Schedule & Venue
+                        </h5>
                         
                         <div class="meta-item">
-                            <div class="meta-icon">
+                            <div class="meta-item-icon">
                                 <i class="bi bi-calendar"></i>
                             </div>
                             <div>
-                                <strong>Date</strong><br>
-                                {% if event.date %}
-                                    {{ event.date.strftime('%d %B %Y') }}
-                                {% else %}
-                                    To be announced
+                                <strong>Date</strong>
+                                <div class="text-muted">
+                                    {% if event.date %}
+                                        {{ event.date.strftime('%A, %d %B %Y') }}
+                                    {% else %}
+                                        To be announced
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <div class="meta-item-icon">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div>
+                                <strong>Timing</strong>
+                                <div class="text-muted">
+                                    {{ event.start_time or 'TBD' }}
+                                    {% if event.end_time %} - {{ event.end_time }}{% endif %}
+                                </div>
+                                {% if event.duration %}
+                                    <small class="text-muted">Duration: {{ event.duration }}</small>
                                 {% endif %}
                             </div>
                         </div>
                         
                         <div class="meta-item">
-                            <div class="meta-icon">
-                                <i class="bi bi-clock"></i>
-                            </div>
-                            <div>
-                                <strong>Time</strong><br>
-                                {{ event.start_time or 'TBD' }} {% if event.end_time %}- {{ event.end_time }}{% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="meta-item">
-                            <div class="meta-icon">
+                            <div class="meta-item-icon">
                                 <i class="bi bi-geo-alt"></i>
                             </div>
                             <div>
-                                <strong>Venue</strong><br>
-                                {{ event.venue or 'To be announced' }}
+                                <strong>Venue</strong>
+                                <div class="text-muted">{{ event.venue or 'To be announced' }}</div>
+                                {% if event.location_link %}
+                                    <a href="{{ event.location_link }}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
+                                        <i class="bi bi-map me-1"></i>View on Map
+                                    </a>
+                                {% endif %}
                             </div>
                         </div>
                         
-                        <div class="meta-item">
-                            <div class="meta-icon">
-                                <i class="bi bi-people"></i>
+                        {% if event.prerequisites %}
+                            <div class="meta-item">
+                                <div class="meta-item-icon">
+                                    <i class="bi bi-list-check"></i>
+                                </div>
+                                <div>
+                                    <strong>Prerequisites</strong>
+                                    <div class="text-muted">{{ event.prerequisites }}</div>
+                                </div>
                             </div>
-                            <div>
-                                <strong>Capacity</strong><br>
-                                {{ event.capacity or 'Unlimited' }} seats
-                            </div>
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 
                 <div class="col-md-6">
-                    <div class="event-meta">
-                        <h5 class="cuk-text-primary mb-4"><i class="bi bi-person-badge me-2"></i>Coordinators</h5>
+                    <div class="meta-card animated-card" style="animation-delay: 0.3s;">
+                        <h5 class="cuk-text-primary">
+                            <div class="meta-icon-circle">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            Organizers
+                        </h5>
                         
                         {% if event.faculty_coordinator %}
                             <div class="meta-item">
-                                <div class="meta-icon">
-                                    <i class="bi bi-person"></i>
+                                <div class="coordinator-avatar">
+                                    {{ event.faculty_coordinator.name[:2]|upper }}
                                 </div>
                                 <div>
-                                    <strong>Faculty Coordinator</strong><br>
-                                    {{ event.faculty_coordinator.name if event.faculty_coordinator.name else event.faculty_coordinator }}<br>
-                                    {% if event.faculty_coordinator.designation %}
-                                        <small class="text-muted">{{ event.faculty_coordinator.designation }}</small>
+                                    <strong>Faculty Coordinator</strong>
+                                    <div class="text-muted">{{ event.faculty_coordinator.name }}</div>
+                                    {% if event.faculty_coordinator.email %}
+                                        <small class="text-muted">{{ event.faculty_coordinator.email }}</small><br>
+                                    {% endif %}
+                                    {% if event.faculty_coordinator.phone %}
+                                        <small class="text-muted">{{ event.faculty_coordinator.phone }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if event.student_coordinator %}
+                            <div class="meta-item">
+                                <div class="coordinator-avatar bg-success">
+                                    {{ event.student_coordinator.name[:2]|upper }}
+                                </div>
+                                <div>
+                                    <strong>Student Coordinator</strong>
+                                    <div class="text-muted">{{ event.student_coordinator.name }}</div>
+                                    {% if event.student_coordinator.email %}
+                                        <small class="text-muted">{{ event.student_coordinator.email }}</small>
                                     {% endif %}
                                 </div>
                             </div>
@@ -204,18 +647,14 @@
                         
                         {% if event.department %}
                             <div class="meta-item">
-                                <div class="meta-icon">
+                                <div class="meta-item-icon">
                                     <i class="bi bi-building"></i>
                                 </div>
                                 <div>
-                                    <strong>Department</strong><br>
-                                    {{ event.department.name if event.department.name else event.department }} 
+                                    <strong>Department</strong>
+                                    <div class="text-muted">{{ event.department.name }}</div>
                                     {% if event.department.code %}
-                                        ({{ event.department.code }})
-                                    {% endif %}
-                                    <br>
-                                    {% if event.department.description %}
-                                        <small class="text-muted">{{ event.department.description }}</small>
+                                        <small class="text-muted">Code: {{ event.department.code }}</small>
                                     {% endif %}
                                 </div>
                             </div>
@@ -224,85 +663,187 @@
                 </div>
             </div>
             
-            <!-- Feedback Section -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h4 class="cuk-text-primary mb-4">Feedback & Reviews</h4>
-                    
-                    {% if feedbacks and feedbacks|length > 0 %}
-                        {% for feedback in feedbacks %}
-                            <div class="feedback-card">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <div>
-                                        <strong>{{ feedback.user.name if feedback.user.name else 'Anonymous' }}</strong>
-                                        <small class="text-muted ms-2">
-                                            {% if feedback.submitted_date %}
-                                                {{ feedback.submitted_date.strftime('%d %b %Y') }}
-                                            {% endif %}
-                                        </small>
+            <!-- Event Speakers -->
+            {% if event.speakers %}
+                <div class="meta-card animated-card" style="animation-delay: 0.4s;">
+                    <h5 class="cuk-text-primary">
+                        <div class="meta-icon-circle">
+                            <i class="bi bi-mic"></i>
+                        </div>
+                        Featured Speakers
+                    </h5>
+                    <div class="row">
+                        {% for speaker in event.speakers %}
+                            <div class="col-md-4 mb-3">
+                                <div class="speaker-card">
+                                    <div class="speaker-avatar">
+                                        {% if speaker.image_url %}
+                                            <img src="{{ speaker.image_url }}" alt="{{ speaker.name }}">
+                                        {% else %}
+                                            <div class="bg-primary text-white d-flex align-items-center justify-content-center h-100">
+                                                {{ speaker.name[:2]|upper }}
+                                            </div>
+                                        {% endif %}
                                     </div>
-                                    <div class="rating-stars">
-                                        {% for i in range(5) %}
-                                            {% if i < feedback.rating %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% else %}
-                                                <i class="bi bi-star"></i>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </div>
+                                    <h6 class="mb-1">{{ speaker.name }}</h6>
+                                    <p class="text-muted small mb-2">{{ speaker.designation }}</p>
+                                    {% if speaker.company %}
+                                        <p class="text-muted small mb-0">{{ speaker.company }}</p>
+                                    {% endif %}
                                 </div>
-                                <p class="mb-0">{{ feedback.comment or 'No comment' }}</p>
                             </div>
                         {% endfor %}
-                    {% else %}
-                        <div class="text-center py-4">
-                            <i class="bi bi-chat-left-text fs-1 text-muted mb-3"></i>
-                            <p class="text-muted">No feedback yet. Be the first to review!</p>
-                        </div>
-                    {% endif %}
-                    
-                    <!-- Submit Feedback Form (for registered users who attended) -->
-                    {% if is_registered and not user_feedback %}
-                        <div class="mt-4">
-                            <h5 class="cuk-text-primary mb-3">Submit Your Feedback</h5>
-                            <form method="POST" action="{{ url_for('submit_feedback', event_id=event.id) }}">
-                                <div class="mb-3">
-                                    <label class="form-label">Rating</label>
-                                    <div class="rating-stars" id="ratingStars">
-                                        {% for i in range(1, 6) %}
-                                            <i class="bi bi-star" 
-                                               onclick="setRating({{ i }})" 
-                                               style="cursor: pointer; font-size: 1.5rem;"></i>
-                                        {% endfor %}
-                                    </div>
-                                    <input type="hidden" name="rating" id="ratingValue" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Comments</label>
-                                    <textarea name="comment" class="form-control" rows="3" 
-                                              placeholder="Share your experience..."></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Submit Feedback</button>
-                            </form>
-                        </div>
-                    {% endif %}
+                    </div>
                 </div>
+            {% endif %}
+            
+            <!-- Feedback & Reviews -->
+            <div class="meta-card animated-card" style="animation-delay: 0.5s;">
+                <h5 class="cuk-text-primary">
+                    <div class="meta-icon-circle">
+                        <i class="bi bi-chat-left-text"></i>
+                    </div>
+                    Feedback & Reviews
+                    <span class="badge bg-primary ms-2">{{ feedbacks|length if feedbacks else 0 }}</span>
+                </h5>
+                
+                {% if feedbacks and feedbacks|length > 0 %}
+                    <div class="row">
+                        {% for feedback in feedbacks %}
+                            <div class="col-12 mb-3">
+                                <div class="feedback-card">
+                                    <div class="feedback-user">
+                                        <div class="feedback-avatar">
+                                            {{ feedback.user.name[:1]|upper }}
+                                        </div>
+                                        <div>
+                                            <strong>{{ feedback.user.name }}</strong>
+                                            <div class="text-muted small">
+                                                {% if feedback.submitted_date %}
+                                                    {{ feedback.submitted_date.strftime('%d %b %Y') }}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="rating-stars ms-auto">
+                                            {% for i in range(5) %}
+                                                {% if i < feedback.rating %}
+                                                    <i class="bi bi-star-fill"></i>
+                                                {% else %}
+                                                    <i class="bi bi-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <p class="mb-0">{{ feedback.comment or 'No comment provided.' }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-chat-left-text fs-1 text-muted mb-3"></i>
+                        <h5 class="text-muted">No Reviews Yet</h5>
+                        <p class="text-muted">Be the first to share your experience!</p>
+                    </div>
+                {% endif %}
+                
+                <!-- Submit Feedback Form -->
+                {% if is_registered and not user_feedback %}
+                    <div class="mt-4 pt-4 border-top">
+                        <h5 class="cuk-text-primary mb-4">Share Your Experience</h5>
+                        <form method="POST" action="{{ url_for('submit_feedback', event_id=event.id) }}" id="feedbackForm">
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold mb-3">Your Rating</label>
+                                <div class="rating-stars interactive-stars" style="font-size: 2rem;">
+                                    {% for i in range(1, 6) %}
+                                        <i class="bi bi-star" 
+                                           data-rating="{{ i }}" 
+                                           onclick="setRating(this, {{ i }})"
+                                           style="cursor: pointer; transition: transform 0.2s;"></i>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="rating" id="ratingValue" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Your Feedback</label>
+                                <textarea name="comment" class="form-control" rows="4" 
+                                          placeholder="Share your thoughts about the event..."
+                                          maxlength="500"></textarea>
+                                <div class="text-end mt-1">
+                                    <small class="text-muted" id="charCount">0/500 characters</small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-send me-2"></i>Submit Review
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetFeedbackForm()">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                {% elif is_registered and user_feedback %}
+                    <div class="alert alert-success mt-4">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        Thank you for submitting your feedback!
+                    </div>
+                {% elif not session.get('user_id') %}
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <a href="{{ url_for('login') }}" class="alert-link">Login</a> to submit feedback for this event.
+                    </div>
+                {% endif %}
             </div>
         </div>
         
         <!-- Registration Sidebar -->
         <div class="col-lg-4">
-            <div class="register-btn-container">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="cuk-text-primary mb-3">Registration</h5>
+            <div class="register-container">
+                <!-- Registration Card -->
+                <div class="register-card animated-card" style="animation-delay: 0.3s;">
+                    <div class="register-card-header">
+                        <h4 class="text-white mb-3">
+                            <i class="bi bi-calendar-plus me-2"></i>Event Registration
+                        </h4>
+                        <div class="badge bg-light text-dark fs-6 px-3 py-2 mb-3">
+                            <i class="bi bi-people me-1"></i>
+                            {{ event.registrations|length if event.registrations else 0 }}/{{ event.capacity or 'Unlimited' }} Seats
+                        </div>
                         
+                        <!-- Countdown Timer -->
+                        {% if event_date and current_date and event_date > current_date %}
+                            <div class="countdown-timer">
+                                <div class="text-center mb-2">
+                                    <small class="text-white opacity-75">Registration closes in</small>
+                                </div>
+                                <div class="d-flex justify-content-center gap-2" id="countdownTimer">
+                                    <div class="timer-unit">
+                                        <div class="timer-value" id="days">00</div>
+                                        <div class="timer-label">Days</div>
+                                    </div>
+                                    <div class="timer-unit">
+                                        <div class="timer-value" id="hours">00</div>
+                                        <div class="timer-label">Hours</div>
+                                    </div>
+                                    <div class="timer-unit">
+                                        <div class="timer-value" id="minutes">00</div>
+                                        <div class="timer-label">Minutes</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-body p-4">
                         {% if not session.get('user_id') %}
                             <div class="alert alert-warning">
                                 <i class="bi bi-info-circle me-2"></i>
                                 Please login to register for this event.
                             </div>
-                            <a href="{{ url_for('login') }}" class="btn btn-primary w-100 mb-2">
+                            <a href="{{ url_for('login') }}" class="btn btn-primary w-100 mb-2 py-3">
                                 <i class="bi bi-box-arrow-in-right me-2"></i>Login to Register
                             </a>
                         {% elif session.role != 'student' %}
@@ -315,34 +856,39 @@
                                 <i class="bi bi-check-circle me-2"></i>
                                 You are registered for this event!
                             </div>
-                            <div class="d-grid gap-2">
-                                <a href="#" class="btn btn-outline-primary">
+                            
+                            <div class="d-grid gap-3">
+                                <button class="btn btn-outline-primary" onclick="downloadTicket()">
+                                    <i class="bi bi-ticket-perforated me-2"></i>Download Ticket
+                                </button>
+                                
+                                <button class="btn btn-outline-secondary" onclick="addToCalendar()">
                                     <i class="bi bi-calendar-plus me-2"></i>Add to Calendar
-                                </a>
+                                </button>
+                                
                                 <a href="{{ url_for('unregister_event', event_id=event.id) }}" 
                                    class="btn btn-outline-danger"
-                                   onclick="return confirm('Are you sure you want to unregister?')">
+                                   onclick="return confirmUnregister()">
                                     <i class="bi bi-x-circle me-2"></i>Unregister
                                 </a>
                             </div>
                         {% else %}
-                            {# Fixed: Using current_datetime instead of now #}
-                            {% set current_date = current_datetime.date() if current_datetime else none %}
-                            {% set event_date = event.date if event.date else none %}
-                            
                             {% if event.registrations|length >= event.capacity %}
                                 <div class="alert alert-danger">
                                     <i class="bi bi-exclamation-triangle me-2"></i>
-                                    Event is full!
+                                    <strong>Event is Full!</strong>
+                                    <div class="mt-1">All seats have been taken.</div>
                                 </div>
                             {% elif event_date and current_date and event_date < current_date %}
                                 <div class="alert alert-warning">
                                     <i class="bi bi-clock-history me-2"></i>
-                                    Event has passed
+                                    <strong>Event has Ended</strong>
+                                    <div class="mt-1">Registration is no longer available.</div>
                                 </div>
                             {% else %}
                                 <a href="{{ url_for('register_event', event_id=event.id) }}" 
-                                   class="btn btn-primary w-100 py-3 fs-5">
+                                   class="btn btn-primary w-100 py-3 fs-5 fw-semibold"
+                                   onclick="return confirmRegistration()">
                                     <i class="bi bi-calendar-plus me-2"></i>Register Now
                                 </a>
                             {% endif %}
@@ -350,32 +896,51 @@
                         
                         <hr class="my-4">
                         
+                        <!-- Event Stats -->
                         <div class="text-center">
-                            <small class="text-muted">
-                                <i class="bi bi-info-circle me-1"></i>
-                                {{ event.registrations|length if event.registrations else 0 }} out of {{ event.capacity or 'Unlimited' }} seats filled
-                            </small>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="fs-4 fw-bold text-primary">{{ event.registrations|length if event.registrations else 0 }}</div>
+                                    <small class="text-muted">Registered</small>
+                                </div>
+                                <div class="col-6">
+                                    <div class="fs-4 fw-bold text-success">{{ event.capacity - event.registrations|length if event.capacity else '∞' }}</div>
+                                    <small class="text-muted">Seats Available</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Share Event -->
-                <div class="card">
+                <!-- Share Card -->
+                <div class="card border-0 shadow mt-4 animated-card" style="animation-delay: 0.4s;">
                     <div class="card-body">
-                        <h5 class="cuk-text-primary mb-3">Share this Event</h5>
-                        <div class="d-flex justify-content-center gap-3">
-                            <a href="#" class="btn btn-outline-primary">
+                        <h5 class="cuk-text-primary mb-3">
+                            <i class="bi bi-share me-2"></i>Share this Event
+                        </h5>
+                        
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn facebook" onclick="shareOnFacebook()">
                                 <i class="bi bi-facebook"></i>
                             </a>
-                            <a href="#" class="btn btn-outline-info">
+                            <a href="#" class="share-btn twitter" onclick="shareOnTwitter()">
                                 <i class="bi bi-twitter"></i>
                             </a>
-                            <a href="#" class="btn btn-outline-success">
+                            <a href="#" class="share-btn whatsapp" onclick="shareOnWhatsApp()">
                                 <i class="bi bi-whatsapp"></i>
                             </a>
-                            <a href="#" class="btn btn-outline-secondary">
-                                <i class="bi bi-link"></i>
+                            <a href="#" class="share-btn linkedin" onclick="shareOnLinkedIn()">
+                                <i class="bi bi-linkedin"></i>
                             </a>
+                            <button class="share-btn copy" onclick="copyEventLink()">
+                                <i class="bi bi-link-45deg"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-outline-primary w-100" onclick="openQRCode()">
+                                <i class="bi bi-qr-code me-2"></i>Generate QR Code
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -384,31 +949,224 @@
     </div>
 </div>
 
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-qr-code me-2"></i>Event QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrCode" class="mb-3"></div>
+                <p class="text-muted">Scan to view event details</p>
+                <button class="btn btn-outline-primary" onclick="downloadQRCode()">
+                    <i class="bi bi-download me-2"></i>Download QR Code
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
-function setRating(rating) {
-    const stars = document.querySelectorAll('#ratingStars i');
-    const ratingInput = document.getElementById('ratingValue');
+    // Set rating function
+    function setRating(starElement, rating) {
+        const stars = document.querySelectorAll('.interactive-stars .bi');
+        const ratingInput = document.getElementById('ratingValue');
+        
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.remove('bi-star');
+                star.classList.add('bi-star-fill');
+            } else {
+                star.classList.remove('bi-star-fill');
+                star.classList.add('bi-star');
+            }
+        });
+        
+        ratingInput.value = rating;
+        
+        // Add animation
+        starElement.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            starElement.style.transform = 'scale(1)';
+        }, 200);
+    }
     
-    stars.forEach((star, index) => {
-        if (index < rating) {
-            star.classList.remove('bi-star');
-            star.classList.add('bi-star-fill');
-        } else {
+    // Character counter for feedback textarea
+    document.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.querySelector('textarea[name="comment"]');
+        const charCount = document.getElementById('charCount');
+        
+        if (textarea && charCount) {
+            textarea.addEventListener('input', function() {
+                charCount.textContent = `${this.value.length}/500 characters`;
+            });
+        }
+        
+        // Initialize countdown timer
+        initCountdownTimer();
+    });
+    
+    // Countdown timer
+    function initCountdownTimer() {
+        {% if event_date and current_date and event_date > current_date %}
+            const eventDate = new Date('{{ event.date.strftime("%Y-%m-%d") }}T23:59:59');
+            
+            function updateCountdown() {
+                const now = new Date();
+                const diff = eventDate - now;
+                
+                if (diff <= 0) {
+                    document.getElementById('countdownTimer').innerHTML = 
+                        '<div class="text-center text-white">Registration Closed</div>';
+                    return;
+                }
+                
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                
+                document.getElementById('days').textContent = days.toString().padStart(2, '0');
+                document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+                document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            }
+            
+            updateCountdown();
+            setInterval(updateCountdown, 60000); // Update every minute
+        {% endif %}
+    }
+    
+    // Reset feedback form
+    function resetFeedbackForm() {
+        const stars = document.querySelectorAll('.interactive-stars .bi');
+        stars.forEach(star => {
             star.classList.remove('bi-star-fill');
             star.classList.add('bi-star');
-        }
-    });
+        });
+        
+        document.getElementById('ratingValue').value = '';
+        document.querySelector('textarea[name="comment"]').value = '';
+        document.getElementById('charCount').textContent = '0/500 characters';
+    }
     
-    ratingInput.value = rating;
-}
-
-// Initialize with no rating selected
-document.addEventListener('DOMContentLoaded', function() {
-    const stars = document.querySelectorAll('#ratingStars i');
-    stars.forEach(star => {
-        star.classList.remove('bi-star-fill');
-        star.classList.add('bi-star');
-    });
-});
+    // Confirmations
+    function confirmRegistration() {
+        return confirm('Are you sure you want to register for this event?');
+    }
+    
+    function confirmUnregister() {
+        return confirm('Are you sure you want to unregister from this event?');
+    }
+    
+    // Download ticket
+    function downloadTicket() {
+        alert('Ticket download feature coming soon!');
+    }
+    
+    // Add to calendar
+    function addToCalendar() {
+        {% if event.date and event.start_time %}
+            const eventDate = new Date('{{ event.date.strftime("%Y-%m-%d") }}T{{ event.start_time }}');
+            const endDate = new Date('{{ event.date.strftime("%Y-%m-%d") }}T{{ event.end_time or event.start_time }}');
+            
+            const calendarEvent = {
+                title: '{{ event.name }}',
+                description: '{{ event.description|striptags|truncate(100) }}',
+                location: '{{ event.venue }}',
+                startTime: eventDate.toISOString(),
+                endTime: endDate.toISOString()
+            };
+            
+            // Create .ics file
+            const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:${calendarEvent.title}
+DESCRIPTION:${calendarEvent.description}
+LOCATION:${calendarEvent.location}
+DTSTART:${eventDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTEND:${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+END:VEVENT
+END:VCALENDAR`;
+            
+            const blob = new Blob([icsContent], { type: 'text/calendar' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'event.ics';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            alert('Event added to your calendar!');
+        {% else %}
+            alert('Event date and time are required to add to calendar.');
+        {% endif %}
+    }
+    
+    // Share functions
+    function shareOnFacebook() {
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    }
+    
+    function shareOnTwitter() {
+        const text = encodeURIComponent('Check out this event: {{ event.name }}');
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+    }
+    
+    function shareOnWhatsApp() {
+        const text = encodeURIComponent('Check out this event: {{ event.name }}\n\n{{ request.url }}');
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+    
+    function shareOnLinkedIn() {
+        const url = encodeURIComponent(window.location.href);
+        const title = encodeURIComponent('{{ event.name }}');
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+    }
+    
+    function copyEventLink() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Event link copied to clipboard!');
+        });
+    }
+    
+    // QR Code functionality
+    function openQRCode() {
+        const qrCodeDiv = document.getElementById('qrCode');
+        qrCodeDiv.innerHTML = '';
+        
+        QRCode.toCanvas(qrCodeDiv, window.location.href, {
+            width: 200,
+            margin: 2,
+            color: {
+                dark: '#007bff',
+                light: '#ffffff'
+            }
+        }, function(error) {
+            if (error) console.error(error);
+        });
+        
+        new bootstrap.Modal(document.getElementById('qrModal')).show();
+    }
+    
+    function downloadQRCode() {
+        const canvas = document.querySelector('#qrCode canvas');
+        const link = document.createElement('a');
+        link.download = 'event-qr-code.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+    
+    // Image gallery
+    function openGallery(index) {
+        // Implement gallery modal
+        alert('Image gallery feature coming soon!');
+    }
 </script>
 {% endblock %}
