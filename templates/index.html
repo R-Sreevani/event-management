@@ -448,7 +448,20 @@
 
 <script>
 let chatOpen = false;
-let eventData = {{ events|tojson|safe }};
+// FIX: Create a safe event data structure for JavaScript
+let eventData = [];
+{% if events %}
+// Convert events to JavaScript array
+eventData = [
+    {% for event in events %}
+    {
+        name: "{{ event.name|safe }}",
+        date: "{{ event.date|safe }}",
+        venue: "{{ event.venue|safe }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+{% endif %}
 
 function toggleChat() {
     const chatWindow = document.getElementById('chat-window');
@@ -499,79 +512,54 @@ function sendMessage() {
     document.getElementById('chat-messages').appendChild(typingIndicator);
     document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
     
-    // Check if user is logged in for backend call
-    // For home page, we'll use a simpler response system
-    if (message.toLowerCase().includes('event')) {
-        setTimeout(() => {
-            // Remove typing indicator
-            const typing = document.getElementById('typing');
-            if (typing) typing.remove();
-            
-            // Generate response based on events
-            let response = '';
+    // For home page, use client-side responses
+    setTimeout(() => {
+        // Remove typing indicator
+        const typing = document.getElementById('typing');
+        if (typing) typing.remove();
+        
+        // Generate response based on message
+        let response = '';
+        const msg = message.toLowerCase();
+        
+        if (msg.includes('event') || msg.includes('upcoming') || msg.includes('coming up') || msg.includes('schedule')) {
             if (eventData.length === 0) {
-                response = "There are currently no upcoming events. Please check back later!";
-            } else if (message.toLowerCase().includes('upcoming') || message.toLowerCase().includes('coming up')) {
-                response = `📅 There are ${eventData.length} upcoming events:\n`;
-                eventData.forEach(event => {
-                    response += `• ${event.name} on ${event.date} at ${event.venue}\n`;
-                });
-                response += "\nClick on any event card to learn more!";
-            } else if (message.toLowerCase().includes('register')) {
-                response = "To register for events:\n1. Click the 'Get Started' button\n2. Create your account\n3. Login to access events\n4. Register for any upcoming event!";
-            } else if (message.toLowerCase().includes('login')) {
-                response = "To login:\n1. Click the 'Sign In' button\n2. Enter your email and password\n3. If you're an admin, use admin@example.com / admin123\n4. Access your dashboard!";
+                response = "There are currently no upcoming events. Please check back later or contact the event organizers!";
             } else {
-                // Try to find specific event
-                const matchedEvents = eventData.filter(event => 
-                    event.name.toLowerCase().includes(message.toLowerCase()) || 
-                    message.toLowerCase().includes(event.name.toLowerCase())
-                );
-                
-                if (matchedEvents.length > 0) {
-                    response = `🎯 **${matchedEvents[0].name}**\n`;
-                    response += `📅 Date: ${matchedEvents[0].date}\n`;
-                    response += `📍 Venue: ${matchedEvents[0].venue}\n`;
-                    response += `\nRegister to participate in this exciting event!`;
-                } else {
-                    response = "I found these events:\n";
-                    eventData.slice(0, 3).forEach(event => {
-                        response += `• ${event.name} (${event.date})\n`;
-                    });
-                    if (eventData.length > 3) {
-                        response += `... and ${eventData.length - 3} more events`;
-                    }
-                }
+                response = `📅 There are ${eventData.length} upcoming events:\n\n`;
+                eventData.forEach(event => {
+                    response += `• **${event.name}**\n  Date: ${event.date}\n  Venue: ${event.venue}\n\n`;
+                });
+                response += "Click on any event card to learn more about it!";
             }
+        } else if (msg.includes('register') || msg.includes('sign up') || msg.includes('signup')) {
+            response = "📝 **How to Register:**\n\n1. Click the 'Get Started' button on the homepage\n2. Fill in your details (name, email, password)\n3. Verify your email (if required)\n4. Login to your account\n5. Browse events and register for any you're interested in!\n\nNeed help? Contact the admin at admin@university.edu";
+        } else if (msg.includes('login') || msg.includes('sign in') || msg.includes('signin')) {
+            response = "🔐 **Login Instructions:**\n\n1. Click the 'Sign In' button\n2. Enter your registered email and password\n3. If you're an admin, use the admin credentials provided to you\n4. Forgot password? Click 'Forgot Password' link\n\nTest credentials:\n• Student: student@example.com / password123\n• Admin: admin@example.com / admin123";
+        } else if (msg.includes('admin') || msg.includes('contact') || msg.includes('help')) {
+            response = "👨‍💼 **Admin Contact:**\n\n• Email: admin@university.edu\n• Phone: +1 (555) 123-4567\n• Office: University Admin Building, Room 101\n• Hours: Mon-Fri, 9 AM - 5 PM\n\nFor urgent matters, please call or visit in person.";
+        } else if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey')) {
+            response = "👋 Hello! Welcome to Central University Event Hub. I'm your virtual assistant. How can I help you today? You can ask about events, registration, login, or contact information!";
+        } else {
+            // Check if message contains any event names
+            const matchedEvents = eventData.filter(event => 
+                msg.includes(event.name.toLowerCase()) || 
+                event.name.toLowerCase().includes(msg)
+            );
             
-            addMessage(response, 'bot');
-        }, 800);
-    } else {
-        // For non-event queries, use backend
-        fetch('/chatbot', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ message: message })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Remove typing indicator
-            const typing = document.getElementById('typing');
-            if (typing) typing.remove();
-            
-            // Add bot response
-            addMessage(data.response, 'bot');
-        })
-        .catch(error => {
-            // Remove typing indicator
-            const typing = document.getElementById('typing');
-            if (typing) typing.remove();
-            
-            addMessage('Sorry, I encountered an error. Please try again.', 'bot');
-        });
-    }
+            if (matchedEvents.length > 0) {
+                const event = matchedEvents[0];
+                response = `🎯 **${event.name}**\n\n`;
+                response += `📅 **Date:** ${event.date}\n`;
+                response += `📍 **Venue:** ${event.venue}\n\n`;
+                response += "To participate in this event:\n1. Register an account (if you haven't)\n2. Login to your account\n3. Find this event and click 'Register'\n\nFor more specific details, please contact the event organizers.";
+            } else {
+                response = "🤔 I'm not sure I understand. Here's what I can help you with:\n\n• **Events** - Ask about upcoming events\n• **Registration** - How to create an account\n• **Login** - How to access your account\n• **Contact** - Admin contact information\n\nTry asking: 'What events are coming up?' or 'How do I register?'";
+            }
+        }
+        
+        addMessage(response, 'bot');
+    }, 800);
 }
 
 function addMessage(text, sender) {
