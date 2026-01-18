@@ -1,834 +1,438 @@
-{% extends 'layout.html' %}
-{% block title %}Admin Dashboard | Campus Event System{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard | Central University Event Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f9ff;
+            font-family: 'Segoe UI', sans-serif;
+            padding-bottom: 100px; /* Added for chatbot space */
+        }
 
-{% block extra_css %}
-<style>
-    :root {
-        --stat-purple: linear-gradient(135deg, #6f42c1, #5a32a3);
-        --stat-blue: linear-gradient(135deg, #0077cc, #005fa3);
-        --stat-green: linear-gradient(135deg, #28a745, #1e7e34);
-        --stat-orange: linear-gradient(135deg, #fd7e14, #e8590c);
-        --stat-pink: linear-gradient(135deg, #e83e8c, #d63384);
-        --stat-teal: linear-gradient(135deg, #20c997, #17a589);
-        --shadow: 0 4px 20px rgba(0,0,0,0.08);
-        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .dashboard-header {
-        background: linear-gradient(135deg, var(--cuk-blue), #0056b3);
-        color: white;
-        border-radius: 15px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .dashboard-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -20%;
-        width: 200px;
-        height: 200px;
-        background: rgba(255,255,255,0.1);
-        border-radius: 50%;
-    }
-    
-    .stat-card {
-        border-radius: 15px;
-        padding: 1.5rem;
-        color: white;
-        margin-bottom: 1.5rem;
-        transition: var(--transition);
-        border: none;
-        position: relative;
-        overflow: hidden;
-        min-height: 140px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-    
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: rgba(255,255,255,0.4);
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-    }
-    
-    .stat-card .stat-trend {
-        font-size: 0.85rem;
-        opacity: 0.9;
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-    }
-    
-    .stat-card .stat-trend.up {
-        color: #c3e6cb;
-    }
-    
-    .stat-card .stat-trend.down {
-        color: #f5c6cb;
-    }
-    
-    .stat-icon {
-        font-size: 2.8rem;
-        opacity: 0.9;
-        position: absolute;
-        right: 1.5rem;
-        bottom: 1.5rem;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-    }
-    
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: 700;
-        line-height: 1;
-        margin-bottom: 0.5rem;
-    }
-    
-    .chart-container {
-        background: white;
-        border-radius: 15px;
-        padding: 1.5rem;
-        box-shadow: var(--shadow);
-        margin-bottom: 1.5rem;
-        border: 1px solid rgba(0,0,0,0.05);
-        transition: var(--transition);
-        height: 100%;
-    }
-    
-    .chart-container:hover {
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-    
-    .chart-container h5 {
-        display: flex;
-        align-items: center;
-        padding-bottom: 1rem;
-        margin-bottom: 1.5rem;
-        border-bottom: 2px solid var(--cuk-blue-light);
-    }
-    
-    .chart-container h5 i {
-        background: var(--cuk-blue-light);
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 10px;
-        margin-right: 0.75rem;
-        color: var(--cuk-blue);
-    }
-    
-    .recent-item {
-        border-left: 4px solid var(--cuk-blue);
-        padding: 1rem;
-        margin-bottom: 1rem;
-        background: white;
-        border-radius: 0 10px 10px 0;
-        transition: var(--transition);
-        border: 1px solid rgba(0,0,0,0.05);
-    }
-    
-    .recent-item:hover {
-        transform: translateX(5px);
-        border-left-color: var(--cuk-green);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    }
-    
-    .recent-item h6 {
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #333;
-    }
-    
-    .category-badge {
-        padding: 0.4rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.3px;
-    }
-    
-    .quick-action-btn {
-        display: flex;
-        align-items: center;
-        padding: 1rem;
-        background: white;
-        border: 2px dashed #dee2e6;
-        border-radius: 10px;
-        color: #495057;
-        text-decoration: none;
-        transition: var(--transition);
-        margin-bottom: 0.75rem;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .quick-action-btn:hover {
-        border-color: var(--cuk-blue);
-        background: var(--cuk-blue-light);
-        transform: translateY(-3px);
-        color: var(--cuk-blue);
-    }
-    
-    .quick-action-btn i {
-        font-size: 1.5rem;
-        margin-right: 1rem;
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0,123,255,0.1);
-        border-radius: 10px;
-    }
-    
-    .progress-ring {
-        width: 120px;
-        height: 120px;
-        margin: 0 auto 1rem;
-    }
-    
-    .progress-ring-circle {
-        transform: rotate(-90deg);
-        transform-origin: 50% 50%;
-    }
-    
-    .attendance-chart {
-        height: 300px;
-    }
-    
-    /* Activity feed */
-    .activity-feed {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    
-    .activity-item {
-        padding: 0.75rem;
-        border-left: 3px solid #dee2e6;
-        margin-bottom: 0.75rem;
-        background: #f8f9fa;
-        border-radius: 0 8px 8px 0;
-    }
-    
-    .activity-item.new {
-        border-left-color: var(--cuk-blue);
-        background: rgba(0,123,255,0.05);
-    }
-    
-    .activity-time {
-        font-size: 0.75rem;
-        color: #6c757d;
-        display: block;
-        margin-top: 0.25rem;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .stat-number {
-            font-size: 2rem;
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 24px;
         }
-        
-        .stat-icon {
-            font-size: 2rem;
-        }
-        
-        .dashboard-header {
-            padding: 1.5rem;
-        }
-    }
-    
-    @media (max-width: 576px) {
-        .stat-card {
-            padding: 1rem;
-        }
-        
-        .stat-number {
-            font-size: 1.75rem;
-        }
-    }
-    
-    /* Custom scrollbar */
-    .activity-feed::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    .activity-feed::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 3px;
-    }
-    
-    .activity-feed::-webkit-scrollbar-thumb {
-        background: var(--cuk-blue);
-        border-radius: 3px;
-    }
-    
-    /* Loading skeleton */
-    .skeleton {
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: loading 1.5s infinite;
-    }
-    
-    @keyframes loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-</style>
-{% endblock %}
 
-{% block content %}
-<!-- Dashboard Header -->
-<div class="dashboard-header">
-    <div class="row align-items-center">
-        <div class="col-md-8">
-            <h1 class="display-6 fw-bold mb-2">Admin Dashboard</h1>
-            <p class="lead mb-0">Welcome back, <strong>{{ session.user_name }}</strong>! Here's your system overview.</p>
-            <p class="mb-0 opacity-75">
-                <i class="bi bi-clock me-1"></i>Last updated: {{ current_time.strftime('%I:%M %p') }}
-            </p>
-        </div>
-        <div class="col-md-4 text-md-end">
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-light" onclick="refreshDashboard()">
-                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh
-                </button>
-                <button type="button" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#exportModal">
-                    <i class="bi bi-download me-1"></i>Export
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+        .container {
+            margin-top: 40px;
+        }
 
-<!-- Statistics Cards -->
-<div class="row g-4 mb-4">
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card" style="background: var(--stat-blue);">
-            <div>
-                <div class="stat-number">{{ stats.total_events }}</div>
-                <div class="stat-label">Total Events</div>
-                <div class="stat-trend up">
-                    <i class="bi bi-arrow-up"></i>
-                    {{ stats.upcoming_events }} upcoming this month
-                </div>
-            </div>
-            <i class="bi bi-calendar-event stat-icon"></i>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card" style="background: var(--stat-green);">
-            <div>
-                <div class="stat-number">{{ stats.total_registrations }}</div>
-                <div class="stat-label">Total Registrations</div>
-                <div class="stat-trend up">
-                    <i class="bi bi-arrow-up"></i>
-                    {{ stats.total_users }} active users
-                </div>
-            </div>
-            <i class="bi bi-people stat-icon"></i>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card" style="background: var(--stat-purple);">
-            <div>
-                <div class="stat-number">{{ stats.total_departments }}</div>
-                <div class="stat-label">Departments</div>
-                <div class="stat-trend">
-                    <i class="bi bi-people-fill me-1"></i>
-                    {{ stats.total_faculty }} faculty members
-                </div>
-            </div>
-            <i class="bi bi-building stat-icon"></i>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card" style="background: var(--stat-orange);">
-            <div>
-                <div class="stat-number">{{ stats.upcoming_events }}</div>
-                <div class="stat-label">Upcoming Events</div>
-                <div class="stat-trend">
-                    <i class="bi bi-calendar-week me-1"></i>
-                    {{ stats.next_7_days }} in next 7 days
-                </div>
-            </div>
-            <i class="bi bi-calendar-check stat-icon"></i>
-        </div>
-    </div>
-</div>
+        .card {
+            border-left: 6px solid #4000ff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
 
-<div class="row g-4">
-    <!-- Left Column: Charts and Tables -->
-    <div class="col-lg-8">
-        <!-- Recent Events Chart -->
-        <div class="chart-container">
-            <h5><i class="bi bi-calendar3"></i> Recent Events Overview</h5>
-            {% if recent_events %}
-            <div class="row">
-                {% for event in recent_events[:3] %}
-                <div class="col-md-4 mb-3">
-                    <div class="recent-item">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="category-badge" 
-                                  style="background: {% if event.category == 'academic' %}#007bff20{% elif event.category == 'cultural' %}#dc354520{% elif event.category == 'sports' %}#28a74520{% else %}#6c757d20{% endif %}; 
-                                         color: {% if event.category == 'academic' %}#007bff{% elif event.category == 'cultural' %}#dc3545{% elif event.category == 'sports' %}#28a745{% else %}#6c757d{% endif %};">
-                                {{ event.category|title }}
-                            </span>
-                            <small class="text-muted">
-                                <i class="bi bi-calendar-event me-1"></i>{{ event.date.strftime('%d %b') }}
-                            </small>
-                        </div>
-                        <h6 class="mb-2">{{ event.name }}</h6>
-                        <small class="text-muted d-block mb-2">
-                            <i class="bi bi-geo-alt me-1"></i>{{ event.venue }}
-                        </small>
-                        {% if event.department %}
-                        <small class="text-muted">
-                            <i class="bi bi-building me-1"></i>{{ event.department.name }}
-                        </small>
-                        {% endif %}
-                        <div class="mt-2">
-                            <span class="badge bg-light text-dark">
-                                <i class="bi bi-person me-1"></i>{{ event.registrations_count or 0 }} registered
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+        .header-text {
+            color: #1976d2;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #1976d2;
+            border-color: #1976d2;
+        }
+
+        .btn-primary:hover {
+            background-color: #0d5cb6;
+            border-color: #0d5cb6;
+        }
+
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        label {
+            font-weight: 500;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        /* Chatbot Styles */
+        #chatbot-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        #chat-window {
+            width: 380px;
+            height: 520px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #1976d2, #0d5cb6);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        #chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            font-size: 14px;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.4;
+            animation: messageAppear 0.3s ease-out;
+        }
+
+        @keyframes messageAppear {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #1976d2, #0d5cb6);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .quick-questions {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .quick-btn {
+            background: #f0f2f5;
+            border: 1px solid #ddd;
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .quick-btn:hover {
+            background: #1976d2;
+            color: white;
+            border-color: #1976d2;
+        }
+
+        .chat-input-area {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        #chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #chat-input:focus {
+            border-color: #1976d2;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #1976d2, #0d5cb6);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .chat-toggle-btn {
+            background: linear-gradient(135deg, #1976d2, #0d5cb6);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
+            transition: all 0.3s;
+            margin-left: auto;
+        }
+
+        .chat-toggle-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(25, 118, 210, 0.5);
+        }
+
+        .chat-icon {
+            font-size: 18px;
+        }
+
+        .chat-label {
+            font-size: 14px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            #chat-window {
+                width: calc(100vw - 60px);
+                height: 450px;
+                right: 30px;
+            }
             
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Event Name</th>
-                            <th>Date</th>
-                            <th>Department</th>
-                            <th>Registrations</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for event in recent_events[3:] %}
-                        <tr>
-                            <td>{{ event.name }}</td>
-                            <td>{{ event.date.strftime('%d %b %Y') }}</td>
-                            <td>{{ event.department.name if event.department else 'N/A' }}</td>
-                            <td>{{ event.registrations_count or 0 }}</td>
-                            <td>
-                                {% if event.date > current_time %}
-                                <span class="badge bg-warning">Upcoming</span>
-                                {% else %}
-                                <span class="badge bg-secondary">Completed</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="text-center py-5">
-                <i class="bi bi-calendar-x fs-1 text-muted mb-3 d-block"></i>
-                <p class="text-muted mb-0">No events scheduled yet</p>
-                <a href="{{ url_for('admin_events') }}" class="btn btn-primary mt-3">
-                    <i class="bi bi-plus-circle me-2"></i>Create First Event
-                </a>
-            </div>
-            {% endif %}
-            <div class="text-center mt-3">
-                <a href="{{ url_for('admin_events') }}" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-arrow-right-circle me-1"></i>View All Events
-                </a>
-            </div>
-        </div>
-        
-        <!-- Registration Analytics -->
-        <div class="chart-container">
-            <h5><i class="bi bi-graph-up"></i> Registration Analytics</h5>
-            {% if recent_registrations %}
-            <div class="attendance-chart" id="attendanceChart"></div>
-            <div class="table-responsive mt-3">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Event</th>
-                            <th>Registration Date</th>
-                            <th>Department</th>
-                            <th>Attendance</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for reg in recent_registrations[:10] %}
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center">
-                                            <i class="bi bi-person-fill text-muted"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-2">
-                                        <div class="fw-medium">{{ reg.user.name }}</div>
-                                        <small class="text-muted">{{ reg.user.email|truncate(20) }}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <a href="{{ url_for('admin_event_detail', event_id=reg.event.id) }}" class="text-decoration-none">
-                                    {{ reg.event.name|truncate(25) }}
-                                </a>
-                            </td>
-                            <td>{{ reg.registered_at.strftime('%d %b %Y') }}</td>
-                            <td>{{ reg.user.department.name if reg.user.department else 'N/A' }}</td>
-                            <td>
-                                <span class="badge {% if reg.attendance_status == 'Present' %}bg-success{% elif reg.attendance_status == 'Absent' %}bg-danger{% else %}bg-info{% endif %}">
-                                    {{ reg.attendance_status }}
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary" 
-                                        onclick="viewRegistration({{ reg.id }})">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="text-center py-5">
-                <i class="bi bi-person-x fs-1 text-muted mb-3 d-block"></i>
-                <p class="text-muted mb-0">No registrations yet</p>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-    
-    <!-- Right Column: Quick Actions and Stats -->
-    <div class="col-lg-4">
-        <!-- Quick Actions -->
-        <div class="chart-container mb-4">
-            <h5><i class="bi bi-lightning"></i> Quick Actions</h5>
-            <div class="d-grid gap-2">
-                <a href="{{ url_for('admin_events') }}" class="quick-action-btn">
-                    <i class="bi bi-plus-circle"></i>
-                    <div>
-                        <strong>Create New Event</strong>
-                        <small class="d-block text-muted">Schedule a new campus event</small>
-                    </div>
-                </a>
-                
-                <a href="{{ url_for('admin_announcements') }}" class="quick-action-btn">
-                    <i class="bi bi-megaphone"></i>
-                    <div>
-                        <strong>Post Announcement</strong>
-                        <small class="d-block text-muted">Notify all users</small>
-                    </div>
-                </a>
-                
-                <a href="{{ url_for('admin_analytics') }}" class="quick-action-btn">
-                    <i class="bi bi-graph-up"></i>
-                    <div>
-                        <strong>View Analytics</strong>
-                        <small class="d-block text-muted">Detailed reports & insights</small>
-                    </div>
-                </a>
-                
-                <a href="{{ url_for('admin_users') }}" class="quick-action-btn">
-                    <i class="bi bi-people"></i>
-                    <div>
-                        <strong>Manage Users</strong>
-                        <small class="d-block text-muted">View and edit user accounts</small>
-                    </div>
-                </a>
-                
-                <a href="{{ url_for('admin_settings') }}" class="quick-action-btn">
-                    <i class="bi bi-gear"></i>
-                    <div>
-                        <strong>System Settings</strong>
-                        <small class="d-block text-muted">Configure system parameters</small>
-                    </div>
-                </a>
-            </div>
-        </div>
-        
-        <!-- Department Statistics -->
-        <div class="chart-container mb-4">
-            <h5><i class="bi bi-pie-chart"></i> Department Overview</h5>
-            {% if stats.department_stats %}
-            <div class="mb-4">
-                <div class="progress-ring">
-                    <svg width="120" height="120" viewBox="0 0 120 120">
-                        {% set total = stats.department_stats|sum(attribute='1') %}
-                        {% set radius = 50 %}
-                        {% set circumference = 2 * 3.14159 * radius %}
-                        {% set offset = circumference %}
-                        
-                        {% for dept, count in stats.department_stats %}
-                        {% set percentage = (count / total * 100) if total > 0 else 0 %}
-                        {% set dash_offset = offset %}
-                        {% set offset = offset - (percentage / 100 * circumference) %}
-                        
-                        <circle class="progress-ring-circle"
-                                stroke="{% if loop.index == 1 %}#007bff{% elif loop.index == 2 %}#28a745{% elif loop.index == 3 %}#6f42c1{% else %}#fd7e14{% endif %}"
-                                stroke-width="10"
-                                fill="transparent"
-                                r="{{ radius }}"
-                                cx="60"
-                                cy="60"
-                                stroke-dasharray="{{ circumference }}"
-                                stroke-dashoffset="{{ dash_offset }}"
-                                style="transition: stroke-dashoffset 1s ease-in-out;">
-                        </circle>
-                        {% endfor %}
-                    </svg>
-                </div>
-            </div>
+            .chat-toggle-btn {
+                padding: 10px 15px;
+            }
             
-            <div class="list-group">
-                {% for dept, count in stats.department_stats %}
-                <div class="list-group-item border-0 d-flex justify-content-between align-items-center px-0 py-2">
-                    <div class="d-flex align-items-center">
-                        <span class="badge me-2" 
-                              style="background: {% if loop.index == 1 %}#007bff{% elif loop.index == 2 %}#28a745{% elif loop.index == 3 %}#6f42c1{% else %}#fd7e14{% endif %}; 
-                                     width: 12px; height: 12px; border-radius: 50%;"></span>
-                        {{ dept }}
-                    </div>
-                    <div>
-                        <span class="fw-bold me-2">{{ count }}</span>
-                        <small class="text-muted">events</small>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="text-center py-4">
-                <i class="bi bi-building-slash fs-1 text-muted mb-3 d-block"></i>
-                <p class="text-muted mb-0">No department data available</p>
-            </div>
-            {% endif %}
-        </div>
-        
-        <!-- Recent Activity Feed -->
-        <div class="chart-container">
-            <h5><i class="bi bi-activity"></i> Recent Activity</h5>
-            <div class="activity-feed">
-                {% for activity in recent_activity %}
-                <div class="activity-item {% if loop.first %}new{% endif %}">
-                    <div class="d-flex">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-{{ activity.icon }} text-{{ activity.color }}"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-2">
-                            <div>{{ activity.description }}</div>
-                            <span class="activity-time">
-                                <i class="bi bi-clock me-1"></i>{{ activity.timestamp }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                <div class="text-center py-4">
-                    <i class="bi bi-activity fs-1 text-muted mb-3 d-block"></i>
-                    <p class="text-muted mb-0">No recent activity</p>
-                </div>
-                {% endfor %}
-            </div>
+            .chat-label {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-warning">
+    <div class="container">
+        <a class="navbar-brand" href="#">🛠️ Admin Panel - CU Event Hub</a>
+        <div class="d-flex">
+            <a href="/" class="btn btn-light me-2">🏠 Home</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-light">🚪 Logout</a>
         </div>
     </div>
-</div>
+</nav>
 
-<!-- Export Modal -->
-<div class="modal fade" id="exportModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-download me-2"></i>Export Dashboard Data</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Page Content -->
+<div class="container">
+    <div class="form-section">
+        <h3 class="header-text mb-4">➕ Create New Event</h3>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="name">Event Name</label>
+                <input type="text" class="form-control" name="name" required placeholder="Enter event name">
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Select Data to Export:</label>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" id="exportEvents" checked>
-                        <label class="form-check-label" for="exportEvents">Events Data</label>
-                    </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" id="exportRegistrations">
-                        <label class="form-check-label" for="exportRegistrations">Registration Data</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="exportStats">
-                        <label class="form-check-label" for="exportStats">Statistics</label>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Format:</label>
-                    <select class="form-select" id="exportFormat">
-                        <option value="csv">CSV</option>
-                        <option value="excel">Excel</option>
-                        <option value="pdf">PDF</option>
-                    </select>
-                </div>
+            <div class="mb-3">
+                <label for="date">Date</label>
+                <input type="text" class="form-control" name="date" required placeholder="e.g., 2025-07-20">
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="exportData()">
-                    <i class="bi bi-download me-2"></i>Export Data
-                </button>
+            <div class="mb-3">
+                <label for="venue">Venue</label>
+                <input type="text" class="form-control" name="venue" placeholder="e.g., Auditorium Hall">
+            </div>
+            <div class="mb-3">
+                <label for="description">Event Description (Optional)</label>
+                <textarea class="form-control" name="description" rows="3" placeholder="Add event description for chatbot"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Create Event</button>
+        </form>
+    </div>
+
+    <h4 class="header-text mb-3">📋 All Events</h4>
+
+    {% if events %}
+        {% for event in events %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ event.name }}</h5>
+                <p class="card-text">
+                    📅 Date: {{ event.date }}<br>
+                    📍 Venue: {{ event.venue }}
+                    {% if event.description %}
+                    <br>📝 Description: {{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}
+                    {% endif %}
+                </p>
+                <a href="{{ url_for('admin_event', event_id=event.id) }}" class="btn btn-outline-primary">
+                    👥 View Registered Students
+                </a>
             </div>
         </div>
-    </div>
+        {% endfor %}
+    {% else %}
+        <p>No events created yet.</p>
+    {% endif %}
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chatbot integrated into the dashboard -->
+<div id="chatbot-container">
+    <div id="chat-window" style="display: none;">
+        <div class="chat-header">
+            <strong>Admin Assistant 🤖</strong>
+            <button onclick="toggleChat()" class="close-btn">×</button>
+        </div>
+        <div id="chat-messages">
+            <div class="message bot">Hello Admin! 👋 I'm your assistant. How can I help you manage events?</div>
+            <div class="message bot">I can help you with:
+                <ul style="margin: 5px 0 5px 20px;">
+                    <li>Event statistics</li>
+                    <li>Student registrations</li>
+                    <li>Managing existing events</li>
+                    <li>Quick actions</li>
+                </ul>
+            </div>
+        </div>
+        <div class="quick-questions">
+            <button onclick="askQuestion('How many events are there?')" class="quick-btn">📊 Event Count</button>
+            <button onclick="askQuestion('Show recent events')" class="quick-btn">📅 Recent Events</button>
+            <button onclick="askQuestion('How many students registered?')" class="quick-btn">👥 Registrations</button>
+            <button onclick="askQuestion('Admin commands')" class="quick-btn">🛠️ Commands</button>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Ask about events, registrations..." 
+                   onkeypress="if(event.keyCode==13) sendMessage()">
+            <button onclick="sendMessage()" class="send-btn">Send</button>
+        </div>
+    </div>
+    <button onclick="toggleChat()" class="chat-toggle-btn">
+        <span class="chat-icon">🤖</span>
+        <span class="chat-label">Admin Assistant</span>
+    </button>
+</div>
+
 <script>
-    // Initialize attendance chart
-    function initAttendanceChart() {
-        const ctx = document.getElementById('attendanceChart');
-        if (!ctx) return;
-        
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Present', 'Absent', 'Pending'],
-                datasets: [{
-                    label: 'Attendance Distribution',
-                    data: [
-                        {{ stats.attendance_present or 0 }},
-                        {{ stats.attendance_absent or 0 }},
-                        {{ stats.attendance_pending or 0 }}
-                    ],
-                    backgroundColor: [
-                        'rgba(40, 167, 69, 0.7)',
-                        'rgba(220, 53, 69, 0.7)',
-                        'rgba(108, 117, 125, 0.7)'
-                    ],
-                    borderColor: [
-                        '#28a745',
-                        '#dc3545',
-                        '#6c757d'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
-                }
-            }
-        });
-    }
+let chatOpen = false;
+
+function toggleChat() {
+    const chatWindow = document.getElementById('chat-window');
+    chatOpen = !chatOpen;
+    chatWindow.style.display = chatOpen ? 'flex' : 'none';
+}
+
+function askQuestion(question) {
+    document.getElementById('chat-input').value = question;
+    sendMessage();
+}
+
+function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
     
-    // Refresh dashboard
-    function refreshDashboard() {
-        const btn = event.target.closest('button');
-        const originalHtml = btn.innerHTML;
-        
-        btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Refreshing...';
-        btn.disabled = true;
-        
-        // Show loading state on stat cards
-        document.querySelectorAll('.stat-number').forEach(el => {
-            el.classList.add('skeleton');
-            el.style.width = '60px';
-            el.style.height = '40px';
-            el.innerHTML = '';
-        });
-        
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
-    }
+    if (!message) return;
     
-    // View registration details
-    function viewRegistration(registrationId) {
-        // In a real application, this would open a modal or navigate to details page
-        window.location.href = `/admin/registrations/${registrationId}`;
-    }
+    // Add user message
+    addMessage(message, 'user');
+    input.value = '';
     
-    // Export data functionality
-    function exportData() {
-        const format = document.getElementById('exportFormat').value;
-        const includeEvents = document.getElementById('exportEvents').checked;
-        const includeRegistrations = document.getElementById('exportRegistrations').checked;
-        const includeStats = document.getElementById('exportStats').checked;
-        
-        // Show loading state
-        const exportBtn = document.querySelector('#exportModal .btn-primary');
-        const originalText = exportBtn.innerHTML;
-        exportBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Exporting...';
-        exportBtn.disabled = true;
-        
-        // Simulate export process
-        setTimeout(() => {
-            alert(`Data exported as ${format.toUpperCase()} successfully!`);
-            bootstrap.Modal.getInstance(document.getElementById('exportModal')).hide();
-            exportBtn.innerHTML = originalText;
-            exportBtn.disabled = false;
-        }, 1500);
-    }
+    // Show typing indicator
+    const typingIndicator = document.createElement('div');
+    typingIndicator.className = 'message bot';
+    typingIndicator.id = 'typing';
+    typingIndicator.innerHTML = 'Typing...';
+    document.getElementById('chat-messages').appendChild(typingIndicator);
+    document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
     
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        initAttendanceChart();
+    // Send to backend
+    fetch('/chatbot', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Remove typing indicator
+        const typing = document.getElementById('typing');
+        if (typing) typing.remove();
         
-        // Auto-refresh dashboard every 5 minutes
-        setInterval(() => {
-            if (document.visibilityState === 'visible') {
-                console.log('Auto-refreshing dashboard...');
-                // In production, you might want to use AJAX to refresh only specific components
-            }
-        }, 300000);
+        // Add bot response
+        addMessage(data.response, 'bot');
+    })
+    .catch(error => {
+        // Remove typing indicator
+        const typing = document.getElementById('typing');
+        if (typing) typing.remove();
         
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Ctrl+R to refresh
-            if (e.ctrlKey && e.key === 'r') {
-                e.preventDefault();
-                refreshDashboard();
-            }
-            // Ctrl+E for export
-            if (e.ctrlKey && e.key === 'e') {
-                e.preventDefault();
-                new bootstrap.Modal(document.getElementById('exportModal')).show();
-            }
-        });
+        addMessage('Sorry, I encountered an error. Please try again.', 'bot');
     });
+}
+
+function addMessage(text, sender) {
+    const messagesDiv = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}`;
+    messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+    
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+// Auto-open chatbot after 3 seconds (optional)
+setTimeout(() => {
+    if (!chatOpen) {
+        const welcomeMessage = document.createElement('div');
+        welcomeMessage.className = 'message bot';
+        welcomeMessage.innerHTML = "Tip: You can ask me about event statistics and student registrations!";
+        document.getElementById('chat-messages').appendChild(welcomeMessage);
+    }
+}, 3000);
 </script>
-{% endblock %}
+
+</body>
+</html>
