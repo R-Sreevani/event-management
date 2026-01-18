@@ -1,2 +1,2 @@
 # event-management
-This is a central univesity event managemnet hub for event registrations
+This is a central univesity of Karnataka event managemnet hub for event registrations
