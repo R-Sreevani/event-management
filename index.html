@@ -1,0 +1,1004 @@
+{% extends 'layout.html' %}
+{% block title %}Home | Campus Events Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --hero-gradient: linear-gradient(135deg, #003366 0%, #004080 50%, #0055a5 100%);
+        --stats-blue: linear-gradient(135deg, #0077cc, #005fa3);
+        --stats-green: linear-gradient(135deg, #28a745, #1e7e34);
+        --stats-orange: linear-gradient(135deg, #fd7e14, #e8590c);
+        --stats-purple: linear-gradient(135deg, #6f42c1, #5a32a3);
+        --shadow: 0 8px 30px rgba(0,0,0,0.12);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Hero Section */
+    .hero-section {
+        position: relative;
+        background: var(--hero-gradient);
+        color: white;
+        padding: 100px 0;
+        margin-bottom: 60px;
+        overflow: hidden;
+        border-radius: 0 0 30px 30px;
+    }
+    
+    .hero-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.1;
+        background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3');
+        background-size: cover;
+        background-position: center;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .university-logo {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 30px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255,255,255,0.2);
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 40px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .hero-stats {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 40px;
+        flex-wrap: wrap;
+    }
+    
+    .hero-stat {
+        text-align: center;
+        padding: 15px 25px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        min-width: 150px;
+    }
+    
+    .hero-stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .hero-stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-top: 5px;
+    }
+    
+    /* Announcements */
+    .announcements-section {
+        margin-bottom: 60px;
+    }
+    
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid var(--cuk-blue-light);
+    }
+    
+    .section-header h2 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        font-size: 1.8rem;
+    }
+    
+    .announcement-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        border-left: 5px solid var(--cuk-blue);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .announcement-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, transparent, rgba(0,123,255,0.03));
+        opacity: 0;
+        transition: var(--transition);
+    }
+    
+    .announcement-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .announcement-card:hover::before {
+        opacity: 1;
+    }
+    
+    .announcement-card.high-priority {
+        border-left-color: #dc3545;
+        background: linear-gradient(135deg, #fff, #ffeaea);
+    }
+    
+    .announcement-card.medium-priority {
+        border-left-color: #ffc107;
+        background: linear-gradient(135deg, #fff, #fff8e1);
+    }
+    
+    .announcement-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+    
+    .announcement-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: var(--cuk-blue-light);
+        color: var(--cuk-blue);
+    }
+    
+    .announcement-date {
+        font-size: 0.9rem;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .announcement-content {
+        color: #495057;
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+    
+    /* Events Section */
+    .events-section {
+        margin-bottom: 60px;
+    }
+    
+    .event-card {
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        height: 100%;
+        position: relative;
+        background: white;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .event-image {
+        height: 200px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .event-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .event-card:hover .event-image img {
+        transform: scale(1.05);
+    }
+    
+    .event-category {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    .category-academic {
+        background: rgba(0, 123, 255, 0.9);
+        color: white;
+    }
+    
+    .category-cultural {
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+    }
+    
+    .category-sports {
+        background: rgba(40, 167, 69, 0.9);
+        color: white;
+    }
+    
+    .category-workshop {
+        background: rgba(255, 193, 7, 0.9);
+        color: #212529;
+    }
+    
+    .event-card-body {
+        padding: 25px;
+    }
+    
+    .event-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+    
+    .event-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .meta-item i {
+        width: 20px;
+        color: var(--cuk-blue);
+    }
+    
+    .event-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .department-badge {
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        background: var(--cuk-blue-light);
+        color: var(--cuk-blue);
+    }
+    
+    /* Stats Cards */
+    .stats-section {
+        margin-bottom: 60px;
+    }
+    
+    .stats-card {
+        border-radius: 20px;
+        padding: 30px;
+        color: white;
+        text-align: center;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: inherit;
+        z-index: 1;
+    }
+    
+    .stats-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        transition: var(--transition);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-8px) scale(1.02);
+    }
+    
+    .stats-card:hover::after {
+        transform: scale(1.5);
+    }
+    
+    .stats-card-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .stats-card i {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        opacity: 0.9;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    
+    .stats-number {
+        font-size: 3rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 5px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .stats-label {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+    
+    .stats-card.blue { background: var(--stats-blue); }
+    .stats-card.green { background: var(--stats-green); }
+    .stats-card.orange { background: var(--stats-orange); }
+    .stats-card.purple { background: var(--stats-purple); }
+    
+    /* Quick Links */
+    .quick-links {
+        background: linear-gradient(135deg, #f8fafc, #e9ecef);
+        padding: 50px 0;
+        border-radius: 30px;
+        margin-bottom: 60px;
+    }
+    
+    .quick-link-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        height: 100%;
+        border: 2px solid transparent;
+    }
+    
+    .quick-link-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--cuk-blue);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    
+    .quick-link-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--cuk-blue-light), var(--cuk-blue));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        color: white;
+        font-size: 1.8rem;
+    }
+    
+    /* CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, var(--cuk-blue), #0056b3);
+        color: white;
+        padding: 60px 0;
+        border-radius: 30px;
+        text-align: center;
+        margin-bottom: 60px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+    }
+    
+    .cta-section::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+    }
+    
+    .cta-content {
+        position: relative;
+        z-index: 2;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    /* Animation Classes */
+    .fade-in-up {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.6s ease forwards;
+    }
+    
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+        
+        .hero-stats {
+            gap: 15px;
+        }
+        
+        .hero-stat {
+            min-width: 120px;
+            padding: 12px 20px;
+        }
+        
+        .hero-stat-number {
+            font-size: 2rem;
+        }
+        
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .stats-card {
+            padding: 25px;
+            min-height: 180px;
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .hero-section {
+            padding: 60px 0;
+        }
+        
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .university-logo {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+        }
+        
+        .event-card-body {
+            padding: 20px;
+        }
+    }
+    
+    /* Scroll Animation */
+    .reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease;
+    }
+    
+    .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-bg"></div>
+    <div class="container">
+        <div class="hero-content text-center">
+            <div class="university-logo fade-in-up">
+                <i class="bi bi-mortarboard"></i>
+            </div>
+            
+            <h1 class="hero-title fade-in-up delay-1">
+                Central University of Karnataka
+            </h1>
+            
+            <p class="hero-subtitle fade-in-up delay-2">
+                Discover, Register, and Participate in Campus Events. Connect with peers, 
+                learn new skills, and make the most of your university experience.
+            </p>
+            
+            <div class="d-flex justify-content-center gap-3 mb-4 fade-in-up delay-3">
+                <a href="{{ url_for('events') }}" class="btn btn-light btn-lg px-4 py-3 fw-semibold">
+                    <i class="bi bi-calendar3 me-2"></i>Browse All Events
+                </a>
+                {% if not session.get('user_id') %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4 py-3">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Login to Dashboard
+                    </a>
+                {% endif %}
+            </div>
+            
+            <!-- Hero Stats -->
+            <div class="hero-stats fade-in-up delay-4">
+                <div class="hero-stat">
+                    <div class="hero-stat-number">{{ stats.total_events if stats else '0' }}</div>
+                    <div class="hero-stat-label">Events</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number">{{ stats.upcoming_events if stats else '0' }}</div>
+                    <div class="hero-stat-label">Upcoming</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number">{{ stats.total_users if stats else '0' }}</div>
+                    <div class="hero-stat-label">Members</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number">{{ stats.total_depments if stats else '0' }}</div>
+                    <div class="hero-stat-label">Departments</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Announcements Section -->
+<section class="announcements-section">
+    <div class="container">
+        <div class="section-header reveal">
+            <h2 class="cuk-text-primary">
+                <i class="bi bi-megaphone-fill"></i>
+                Latest Announcements
+            </h2>
+            {% if announcements %}
+                <a href="{{ url_for('announcements') }}" class="btn btn-link text-decoration-none">
+                    View All <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            {% endif %}
+        </div>
+        
+        {% if announcements %}
+            <div class="row g-4">
+                {% for announcement in announcements[:3] %}
+                    <div class="col-lg-4 reveal" style="animation-delay: {{ loop.index * 0.1 }}s">
+                        <div class="announcement-card {% if announcement.priority == 'High' %}high-priority{% elif announcement.priority == 'Medium' %}medium-priority{% endif %}">
+                            <div class="announcement-card-header">
+                                <span class="announcement-badge">{{ announcement.category }}</span>
+                                <div class="announcement-date">
+                                    <i class="bi bi-clock"></i>
+                                    {{ announcement.published_date.strftime('%d %b') }}
+                                </div>
+                            </div>
+                            <h5 class="mb-3">{{ announcement.title }}</h5>
+                            <p class="announcement-content">
+                                {{ announcement.content|truncate(120) }}
+                            </p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5 reveal">
+                <i class="bi bi-megaphone fs-1 text-muted mb-3"></i>
+                <h4 class="text-muted">No announcements yet</h4>
+                <p>Check back later for updates</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Upcoming Events -->
+<section class="events-section">
+    <div class="container">
+        <div class="section-header reveal">
+            <h2 class="cuk-text-primary">
+                <i class="bi bi-calendar2-event-fill"></i>
+                Upcoming Events
+            </h2>
+            {% if events %}
+                <a href="{{ url_for('events') }}" class="btn btn-link text-decoration-none">
+                    View All Events <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            {% endif %}
+        </div>
+        
+        {% if events %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for event in events[:6] %}
+                    <div class="col reveal" style="animation-delay: {{ loop.index * 0.1 }}s">
+                        <div class="event-card">
+                            <div class="event-image">
+                                {% if event.category == 'academic' %}
+                                    <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3" alt="Academic Event">
+                                    <span class="event-category category-academic">🎓 Academic</span>
+                                {% elif event.category == 'cultural' %}
+                                    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3" alt="Cultural Event">
+                                    <span class="event-category category-cultural">🎭 Cultural</span>
+                                {% elif event.category == 'sports' %}
+                                    <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-4.0.3" alt="Sports Event">
+                                    <span class="event-category category-sports">⚽ Sports</span>
+                                {% elif event.category == 'workshop' %}
+                                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3" alt="Workshop">
+                                    <span class="event-category category-workshop">🔧 Workshop</span>
+                                {% else %}
+                                    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3" alt="Event">
+                                    <span class="event-category category-academic">📅 Event</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="event-card-body">
+                                <h3 class="event-title">{{ event.name }}</h3>
+                                
+                                <div class="event-meta">
+                                    <div class="meta-item">
+                                        <i class="bi bi-calendar"></i>
+                                        <span>{{ event.date.strftime('%A, %d %B %Y') }}</span>
+                                    </div>
+                                    {% if event.start_time %}
+                                        <div class="meta-item">
+                                            <i class="bi bi-clock"></i>
+                                            <span>{{ event.start_time }} {% if event.end_time %}- {{ event.end_time }}{% endif %}</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="meta-item">
+                                        <i class="bi bi-geo-alt"></i>
+                                        <span>{{ event.venue|truncate(30) }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="event-footer">
+                                    {% if event.department %}
+                                        <span class="department-badge">
+                                            <i class="bi bi-building me-1"></i>
+                                            {{ event.department.code }}
+                                        </span>
+                                    {% endif %}
+                                    
+                                    <span class="badge bg-light text-dark">
+                                        <i class="bi bi-people me-1"></i>
+                                        {{ event.registrations|length if event.registrations else 0 }}/{{ event.capacity or '∞' }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer bg-white border-0 pt-0">
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" 
+                                   class="btn btn-primary w-100 py-2">
+                                    View Details & Register
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="text-center mt-5 reveal">
+                <a href="{{ url_for('events') }}" class="btn btn-outline-primary btn-lg px-5">
+                    <i class="bi bi-arrow-right me-2"></i>Explore All Events
+                </a>
+            </div>
+        {% else %}
+            <div class="text-center py-5 reveal">
+                <div class="mb-4">
+                    <i class="bi bi-calendar2-x fs-1 text-muted"></i>
+                </div>
+                <h4 class="text-muted mb-3">No Upcoming Events</h4>
+                <p class="text-muted mb-4">Stay tuned for exciting events coming soon!</p>
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                    <a href="{{ url_for('admin_events') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Create First Event
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="stats-section">
+    <div class="container">
+        <h2 class="text-center mb-5 cuk-text-primary reveal">Campus Event Statistics</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6 reveal" style="animation-delay: 0.1s">
+                <div class="stats-card blue">
+                    <div class="stats-card-content">
+                        <i class="bi bi-calendar-event"></i>
+                        <div class="stats-number">{{ stats.total_events if stats else '0' }}</div>
+                        <p class="stats-label">Total Events</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6 reveal" style="animation-delay: 0.2s">
+                <div class="stats-card green">
+                    <div class="stats-card-content">
+                        <i class="bi bi-people-fill"></i>
+                        <div class="stats-number">{{ stats.total_registrations if stats else '0' }}</div>
+                        <p class="stats-label">Registrations</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6 reveal" style="animation-delay: 0.3s">
+                <div class="stats-card orange">
+                    <div class="stats-card-content">
+                        <i class="bi bi-person-badge"></i>
+                        <div class="stats-number">{{ stats.total_users if stats else '0' }}</div>
+                        <p class="stats-label">Active Users</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6 reveal" style="animation-delay: 0.4s">
+                <div class="stats-card purple">
+                    <div class="stats-card-content">
+                        <i class="bi bi-building"></i>
+                        <div class="stats-number">{{ stats.total_departments if stats else '0' }}</div>
+                        <p class="stats-label">Departments</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Links -->
+<section class="quick-links">
+    <div class="container">
+        <h2 class="text-center mb-5 cuk-text-primary reveal">Quick Access</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-4 reveal" style="animation-delay: 0.1s">
+                <div class="quick-link-card">
+                    <div class="quick-link-icon">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                    <h4 class="mb-3">My Registrations</h4>
+                    <p class="text-muted mb-4">View and manage all your event registrations in one place</p>
+                    <a href="{{ url_for('my_registrations') if session.get('user_id') else url_for('login') }}" 
+                       class="btn btn-primary">
+                        View My Events
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-4 reveal" style="animation-delay: 0.2s">
+                <div class="quick-link-card">
+                    <div class="quick-link-icon">
+                        <i class="bi bi-trophy"></i>
+                    </div>
+                    <h4 class="mb-3">Popular Events</h4>
+                    <p class="text-muted mb-4">Discover the most popular events on campus</p>
+                    <a href="{{ url_for('events') }}?sort=popular" class="btn btn-primary">
+                        Explore Popular
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-4 reveal" style="animation-delay: 0.3s">
+                <div class="quick-link-card">
+                    <div class="quick-link-icon">
+                        <i class="bi bi-chat-left-text"></i>
+                    </div>
+                    <h4 class="mb-3">Feedback</h4>
+                    <p class="text-muted mb-4">Share your experience and help us improve</p>
+                    <a href="{{ url_for('feedback') if session.get('user_id') else url_for('login') }}" 
+                       class="btn btn-primary">
+                        Give Feedback
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content reveal">
+            <h2 class="display-5 fw-bold mb-4">Ready to Join Our Campus Community?</h2>
+            <p class="fs-5 mb-5 opacity-90">
+                Don't miss out on exciting events, workshops, and networking opportunities. 
+                Join thousands of students who are already participating.
+            </p>
+            
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                {% if not session.get('user_id') %}
+                    <a href="{{ url_for('register_user') }}" class="btn btn-light btn-lg px-5 py-3 fw-semibold">
+                        <i class="bi bi-person-plus me-2"></i>Create Account
+                    </a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-5 py-3">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg px-5 py-3 fw-semibold">
+                        <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+                    </a>
+                    <a href="{{ url_for('events') }}" class="btn btn-outline-light btn-lg px-5 py-3">
+                        <i class="bi bi-calendar3 me-2"></i>Browse Events
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Scroll reveal animation
+    function revealOnScroll() {
+        const reveals = document.querySelectorAll('.reveal');
+        
+        reveals.forEach(element => {
+            const windowHeight = window.innerHeight;
+            const elementTop = element.getBoundingClientRect().top;
+            const elementVisible = 150;
+            
+            if (elementTop < windowHeight - elementVisible) {
+                element.classList.add('active');
+            }
+        });
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initial reveal
+        revealOnScroll();
+        
+        // Reveal on scroll
+        window.addEventListener('scroll', revealOnScroll);
+        
+        // Add click animation to buttons
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                // Create ripple effect
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.cssText = `
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.7);
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    width: ${size}px;
+                    height: ${size}px;
+                    top: ${y}px;
+                    left: ${x}px;
+                    pointer-events: none;
+                `;
+                
+                this.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+        
+        // Animate stats counters
+        animateStats();
+    });
+    
+    // Animate statistics counters
+    function animateStats() {
+        const statElements = document.querySelectorAll('.stats-number');
+        const duration = 2000; // 2 seconds
+        const frameDuration = 1000 / 60; // 60fps
+        const totalFrames = Math.round(duration / frameDuration);
+        
+        statElements.forEach(statElement => {
+            const target = parseInt(statElement.textContent);
+            let current = 0;
+            const increment = target / totalFrames;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    statElement.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    statElement.textContent = Math.floor(current);
+                }
+            }, frameDuration);
+        });
+    }
+    
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}
