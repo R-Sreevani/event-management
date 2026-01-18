@@ -1,184 +1,800 @@
 {% extends 'layout.html' %}
-{% block title %}Student Dashboard{% endblock %}
+{% block title %}Dashboard | Student Portal{% endblock %}
 
 {% block extra_css %}
 <style>
-    .welcome-card {
-        background: linear-gradient(135deg, var(--cuk-blue), #004080);
+    :root {
+        --dashboard-gradient: linear-gradient(135deg, #003366 0%, #004080 100%);
+        --stat-card-gradient: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+        --shadow: 0 8px 30px rgba(0,0,0,0.12);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Welcome Header */
+    .dashboard-header {
+        background: var(--dashboard-gradient);
         color: white;
-        border-radius: 15px;
-        padding: 30px;
-        margin-bottom: 30px;
-    }
-    
-    .event-card-student {
-        border: none;
-        border-radius: 10px;
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        position: relative;
         overflow: hidden;
-        transition: all 0.3s;
-        height: 100%;
     }
     
-    .event-card-student:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
     }
     
-    .event-image-placeholder {
-        height: 120px;
-        background: linear-gradient(135deg, #6c757d, #495057);
+    .user-greeting {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    
+    .user-avatar-large {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--cuk-blue-light), var(--cuk-green));
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
+        font-size: 2rem;
+        font-weight: 600;
+        border: 4px solid rgba(255,255,255,0.3);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     }
     
-    .badge-category {
+    .greeting-text h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .department-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .department-badge {
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    /* Quick Stats */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .stat-card {
+        background: var(--stat-card-gradient);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255,255,255,0.2);
+        transition: var(--transition);
+        cursor: pointer;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255,255,255,0.15);
+        border-color: rgba(255,255,255,0.3);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    /* Event Cards */
+    .event-card-dashboard {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        height: 100%;
+        background: white;
+        position: relative;
+    }
+    
+    .event-card-dashboard:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .event-image-container {
+        height: 160px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .event-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .event-card-dashboard:hover .event-image {
+        transform: scale(1.05);
+    }
+    
+    .event-status-badge {
         position: absolute;
-        top: 10px;
-        right: 10px;
-        padding: 5px 10px;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.5rem 1rem;
         border-radius: 20px;
         font-size: 0.75rem;
-        font-weight: bold;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.3);
     }
     
-    .upcoming-badge {
-        background: #28a745;
-        color: white;
+    .status-upcoming { background: rgba(40, 167, 69, 0.9); color: white; }
+    .status-ongoing { background: rgba(255, 193, 7, 0.9); color: #212529; }
+    .status-completed { background: rgba(108, 117, 125, 0.9); color: white; }
+    
+    .event-card-content {
+        padding: 1.5rem;
     }
     
-    .ongoing-badge {
-        background: #fd7e14;
-        color: white;
+    .event-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+        color: #333;
     }
     
-    .completed-badge {
-        background: #6c757d;
-        color: white;
-    }
-    
-    .announcement-card {
-        border-left: 4px solid var(--cuk-blue);
-        padding: 15px;
-        margin-bottom: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-    
-    .announcement-high {
-        border-left-color: #dc3545;
-        background: #fff5f5;
-    }
-    
-    .quick-stats {
+    .event-meta {
         display: flex;
-        gap: 15px;
-        margin-top: 20px;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
     }
     
-    .stat-item {
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .meta-item i {
+        width: 20px;
+        color: var(--cuk-blue);
+    }
+    
+    .event-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    /* Department Events */
+    .department-event-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+        transition: var(--transition);
+        border-left: 4px solid var(--cuk-blue);
+    }
+    
+    .department-event-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .event-date-badge {
+        min-width: 60px;
         text-align: center;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 0.5rem;
+        background: var(--cuk-blue-light);
         border-radius: 10px;
+        color: white;
+    }
+    
+    .event-date-day {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .event-date-month {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        margin-top: 0.25rem;
+    }
+    
+    .event-info {
         flex: 1;
     }
     
-    .empty-state {
-        text-align: center;
-        padding: 40px 20px;
+    .event-title-small {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #333;
+    }
+    
+    /* Announcements */
+    .announcement-card-dashboard {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border-left: 4px solid var(--cuk-blue);
+        transition: var(--transition);
+    }
+    
+    .announcement-card-dashboard:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .announcement-card-dashboard.priority-high {
+        border-left-color: #dc3545;
+        background: linear-gradient(135deg, #fff, #ffeaea);
+    }
+    
+    .announcement-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+    
+    .announcement-category {
+        padding: 0.25rem 0.75rem;
+        background: var(--cuk-blue-light);
+        color: white;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .announcement-date {
+        font-size: 0.8rem;
         color: #6c757d;
     }
+    
+    /* Quick Actions */
+    .quick-action-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .quick-action-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+    
+    .quick-action-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--cuk-blue);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .action-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--cuk-blue-light), var(--cuk-blue));
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .action-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    
+    .action-description {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+    
+    /* Calendar Widget */
+    .calendar-widget {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+    }
+    
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .calendar-day {
+        text-align: center;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+    
+    .calendar-date {
+        text-align: center;
+        padding: 0.75rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .calendar-date:hover {
+        background: var(--cuk-blue-light);
+        color: white;
+    }
+    
+    .calendar-date.today {
+        background: var(--cuk-blue);
+        color: white;
+        font-weight: 600;
+    }
+    
+    .calendar-date.has-event {
+        position: relative;
+    }
+    
+    .calendar-date.has-event::after {
+        content: '';
+        position: absolute;
+        bottom: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 4px;
+        background: var(--cuk-green);
+        border-radius: 50%;
+    }
+    
+    /* Empty States */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+    }
+    
+    .empty-state-icon {
+        font-size: 3rem;
+        color: #dee2e6;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 1.5rem;
+        }
+        
+        .user-greeting {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+        
+        .greeting-text h1 {
+            font-size: 2rem;
+        }
+        
+        .department-info {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .quick-action-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .calendar-grid {
+            gap: 0.25rem;
+        }
+        
+        .calendar-date {
+            padding: 0.5rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .event-card-content {
+            padding: 1rem;
+        }
+        
+        .event-footer {
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: stretch;
+        }
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-card {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+    
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Welcome Section -->
-<div class="welcome-card">
-    <div class="row align-items-center">
-        <div class="col-md-8">
-            <h2 class="mb-3">Welcome back, {{ session.user_name }}! 👋</h2>
-            <p class="mb-0">
-                {% if session.department_id %}
-                    Department of 
-                    {% if session.department_id == 1 %}Computer Science
-                    {% elif session.department_id == 2 %}Mathematics
-                    {% elif session.department_id == 3 %}Physics
-                    {% else %}your department
-                    {% endif %}
-                {% else %}
-                    Central University of Karnataka
-                {% endif %}
-            </p>
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="user-greeting">
+        <div class="user-avatar-large">
+            {{ session.user_name[:2]|upper }}
         </div>
-        <div class="col-md-4 text-end">
-            <div class="quick-stats">
-                <div class="stat-item">
-                    <h4 class="mb-0">{{ registered_events|length }}</h4>
-                    <small>Registered Events</small>
+        <div class="greeting-text">
+            <h1>Welcome back, {{ session.user_name }}! 👋</h1>
+            <p class="mb-0">Here's what's happening with your events and activities.</p>
+            
+            <div class="department-info">
+                {% if session.department_id and departments %}
+                    {% for dept in departments if dept.id == session.department_id %}
+                        <div class="department-badge">
+                            <i class="bi bi-building"></i>
+                            {{ dept.name }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <div class="department-badge">
+                    <i class="bi bi-person-badge"></i>
+                    Student ID: {{ session.get('registration_no', 'N/A') }}
                 </div>
-                <div class="stat-item">
-                    <h4 class="mb-0">{{ department_events|length }}</h4>
-                    <small>Dept Events</small>
-                </div>
+                
+                {% if session.get('program') %}
+                    <div class="department-badge">
+                        <i class="bi bi-book"></i>
+                        {{ session.program|upper }}
+                    </div>
+                {% endif %}
             </div>
+        </div>
+    </div>
+    
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+        <div class="stat-card animate-card delay-1">
+            <div class="stat-icon">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="stat-value">{{ registered_events|length }}</div>
+            <div class="stat-label">Registered Events</div>
+        </div>
+        
+        <div class="stat-card animate-card delay-2">
+            <div class="stat-icon">
+                <i class="bi bi-building"></i>
+            </div>
+            <div class="stat-value">{{ department_events|length }}</div>
+            <div class="stat-label">Department Events</div>
+        </div>
+        
+        <div class="stat-card animate-card delay-3">
+            <div class="stat-icon">
+                <i class="bi bi-ticket-perforated"></i>
+            </div>
+            <div class="stat-value">{{ upcoming_count }}</div>
+            <div class="stat-label">Upcoming</div>
+        </div>
+        
+        <div class="stat-card animate-card delay-4">
+            <div class="stat-icon">
+                <i class="bi bi-award"></i>
+            </div>
+            <div class="stat-value">{{ completed_count }}</div>
+            <div class="stat-label">Completed</div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <!-- My Registered Events -->
+<div class="row g-4">
+    <!-- Left Column: Events & Activities -->
     <div class="col-lg-8">
-        <div class="card mb-4">
+        <!-- Registered Events Section -->
+        <div class="card border-0 shadow mb-4 animate-card">
             <div class="card-body">
-                <h5 class="card-title cuk-text-primary mb-4">
-                    <i class="bi bi-calendar-check me-2"></i>My Registered Events
-                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="cuk-text-primary mb-1">
+                            <i class="bi bi-calendar-check me-2"></i>
+                            My Registered Events
+                        </h4>
+                        <p class="text-muted mb-0">Events you're participating in</p>
+                    </div>
+                    {% if registered_events %}
+                        <a href="{{ url_for('my_registrations') }}" class="btn btn-sm btn-outline-primary">
+                            View All <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    {% endif %}
+                </div>
                 
                 {% if registered_events %}
                     <div class="row row-cols-1 row-cols-md-2 g-4">
-                        {% for event in registered_events %}
-                            {% set event_date = event.date %}
+                        {% for event in registered_events[:4] %}
                             {% set today = now.date() %}
+                            {% set event_date = event.date %}
                             {% set status = 'upcoming' if event_date > today else 'ongoing' if event_date == today else 'completed' %}
+                            {% set status_class = 'status-' + status %}
                             
                             <div class="col">
-                                <div class="card event-card-student">
-                                    <div class="position-relative">
-                                        <div class="event-image-placeholder">
-                                            {% if event.category == 'academic' %}
-                                                <i class="bi bi-mortarboard-fill fs-1"></i>
-                                            {% elif event.category == 'cultural' %}
-                                                <i class="bi bi-mask fs-1"></i>
-                                            {% elif event.category == 'sports' %}
-                                                <i class="bi bi-trophy fs-1"></i>
-                                            {% else %}
-                                                <i class="bi bi-calendar-event fs-1"></i>
-                                            {% endif %}
-                                        </div>
-                                        <span class="badge-category 
-                                            {% if status == 'upcoming' %}upcoming-badge
-                                            {% elif status == 'ongoing' %}ongoing-badge
-                                            {% else %}completed-badge{% endif %}">
+                                <div class="event-card-dashboard">
+                                    <div class="event-image-container">
+                                        {% if event.category == 'academic' %}
+                                            <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3" 
+                                                 alt="Academic Event" 
+                                                 class="event-image">
+                                        {% elif event.category == 'cultural' %}
+                                            <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3" 
+                                                 alt="Cultural Event" 
+                                                 class="event-image">
+                                        {% elif event.category == 'sports' %}
+                                            <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-4.0.3" 
+                                                 alt="Sports Event" 
+                                                 class="event-image">
+                                        {% else %}
+                                            <img src="https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3" 
+                                                 alt="Event" 
+                                                 class="event-image">
+                                        {% endif %}
+                                        
+                                        <span class="event-status-badge {{ status_class }}">
                                             {{ status|title }}
                                         </span>
                                     </div>
-                                    <div class="card-body">
-                                        <h6 class="card-title">{{ event.name }}</h6>
-                                        <p class="card-text text-muted">
-                                            <i class="bi bi-calendar me-1"></i>{{ event.date.strftime('%d %b %Y') }}<br>
-                                            <i class="bi bi-clock me-1"></i>{{ event.start_time or 'TBD' }}<br>
-                                            <i class="bi bi-geo-alt me-1"></i>{{ event.venue }}
-                                        </p>
-                                        {% if event.department %}
-                                            <span class="badge bg-info">{{ event.department.code }}</span>
+                                    
+                                    <div class="event-card-content">
+                                        <h5 class="event-title">{{ event.name }}</h5>
+                                        
+                                        <div class="event-meta">
+                                            <div class="meta-item">
+                                                <i class="bi bi-calendar"></i>
+                                                <span>{{ event_date.strftime('%A, %d %B %Y') }}</span>
+                                            </div>
+                                            
+                                            {% if event.start_time %}
+                                                <div class="meta-item">
+                                                    <i class="bi bi-clock"></i>
+                                                    <span>{{ event.start_time }}
+                                                        {% if event.end_time %} - {{ event.end_time }}{% endif %}
+                                                    </span>
+                                                </div>
+                                            {% endif %}
+                                            
+                                            <div class="meta-item">
+                                                <i class="bi bi-geo-alt"></i>
+                                                <span>{{ event.venue|truncate(30) }}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="event-footer">
+                                            <div>
+                                                {% if event.department %}
+                                                    <span class="badge bg-light text-dark">
+                                                        <i class="bi bi-building me-1"></i>
+                                                        {{ event.department.code }}
+                                                    </span>
+                                                {% endif %}
+                                                
+                                                {% if event.category %}
+                                                    <span class="badge bg-primary ms-1">
+                                                        {{ event.category|title }}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="text-end">
+                                                <small class="text-muted d-block">
+                                                    <i class="bi bi-people me-1"></i>
+                                                    {{ event.registrations|length if event.registrations else 0 }}/{{ event.capacity or '∞' }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card-footer bg-white border-0 pt-0">
+                                        <div class="d-grid">
+                                            <a href="{{ url_for('event_detail', event_id=event.id) }}" 
+                                               class="btn btn-primary">
+                                                <i class="bi bi-info-circle me-2"></i>
+                                                Event Details
+                                            </a>
+                                        </div>
+                                        
+                                        {% if status == 'completed' and not user_feedbacks[event.id] %}
+                                            <div class="mt-2">
+                                                <a href="{{ url_for('submit_feedback', event_id=event.id) }}" 
+                                                   class="btn btn-outline-success w-100 btn-sm">
+                                                    <i class="bi bi-chat-left-text me-2"></i>
+                                                    Submit Feedback
+                                                </a>
+                                            </div>
                                         {% endif %}
                                     </div>
-                                    <div class="card-footer bg-white border-0 pt-0">
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="bi bi-calendar-x"></i>
+                        </div>
+                        <h5 class="mb-3">No Registered Events</h5>
+                        <p class="text-muted mb-4">
+                            You haven't registered for any events yet. Explore exciting events happening on campus!
+                        </p>
+                        <a href="{{ url_for('events') }}" class="btn btn-primary">
+                            <i class="bi bi-search me-2"></i>
+                            Browse Events
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Department Events -->
+        <div class="card border-0 shadow animate-card delay-1">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="cuk-text-primary mb-1">
+                            <i class="bi bi-building me-2"></i>
+                            Department Events
+                        </h4>
+                        <p class="text-muted mb-0">Latest events from your department</p>
+                    </div>
+                    {% if department_events %}
+                        <a href="{{ url_for('events') }}?department={{ session.department_id }}" 
+                           class="btn btn-sm btn-outline-primary">
+                            View All <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                
+                {% if department_events %}
+                    <div class="row g-3">
+                        {% for event in department_events[:3] %}
+                            <div class="col-12">
+                                <div class="department-event-card">
+                                    <div class="event-date-badge">
+                                        <div class="event-date-day">{{ event.date.strftime('%d') }}</div>
+                                        <div class="event-date-month">{{ event.date.strftime('%b') }}</div>
+                                    </div>
+                                    
+                                    <div class="event-info">
+                                        <h6 class="event-title-small">{{ event.name }}</h6>
+                                        <div class="d-flex flex-wrap gap-3 mb-2">
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock me-1"></i>
+                                                {{ event.start_time or 'TBD' }}
+                                            </small>
+                                            <small class="text-muted">
+                                                <i class="bi bi-geo-alt me-1"></i>
+                                                {{ event.venue|truncate(25) }}
+                                            </small>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="badge bg-primary me-2">
+                                                    {{ event.category|title }}
+                                                </span>
+                                                {% if event.faculty_coordinator %}
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-person me-1"></i>
+                                                        {{ event.faculty_coordinator.name }}
+                                                    </small>
+                                                {% endif %}
+                                            </div>
+                                            <span class="badge bg-light text-dark">
+                                                {{ event.registrations|length if event.registrations else 0 }}/{{ event.capacity or '∞' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="event-actions">
                                         <a href="{{ url_for('event_detail', event_id=event.id) }}" 
-                                           class="btn btn-sm btn-primary w-100">
-                                            View Details
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
                                         </a>
                                     </div>
                                 </div>
@@ -187,145 +803,404 @@
                     </div>
                 {% else %}
                     <div class="empty-state">
-                        <i class="bi bi-calendar-x fs-1 mb-3"></i>
-                        <h5>No registered events</h5>
-                        <p class="text-muted">You haven't registered for any events yet.</p>
-                        <a href="{{ url_for('events') }}" class="btn btn-primary">
-                            <i class="bi bi-search me-2"></i>Browse Events
-                        </a>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-        
-        <!-- Department Events -->
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title cuk-text-primary mb-4">
-                    <i class="bi bi-building me-2"></i>Events in Your Department
-                </h5>
-                
-                {% if department_events %}
-                    <div class="list-group">
-                        {% for event in department_events %}
-                            <a href="{{ url_for('event_detail', event_id=event.id) }}" 
-                               class="list-group-item list-group-item-action">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">{{ event.name }}</h6>
-                                    <small class="text-muted">{{ event.date.strftime('%d %b') }}</small>
-                                </div>
-                                <p class="mb-1 text-muted">
-                                    <i class="bi bi-clock me-1"></i>{{ event.start_time or 'TBD' }} • 
-                                    <i class="bi bi-geo-alt me-1"></i>{{ event.venue }}
-                                </p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small>
-                                        <span class="badge bg-primary">{{ event.category|title }}</span>
-                                        {% if event.faculty_coordinator %}
-                                            <span class="text-muted ms-2">
-                                                <i class="bi bi-person me-1"></i>{{ event.faculty_coordinator.name }}
-                                            </span>
-                                        {% endif %}
-                                    </small>
-                                    <small class="text-muted">
-                                        {{ event.registrations|length }}/{{ event.capacity }} seats
-                                    </small>
-                                </div>
-                            </a>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="empty-state">
-                        <i class="bi bi-building-slash fs-1 mb-3"></i>
-                        <h5>No department events</h5>
-                        <p class="text-muted">No upcoming events in your department.</p>
+                        <div class="empty-state-icon">
+                            <i class="bi bi-building-slash"></i>
+                        </div>
+                        <h5 class="mb-3">No Department Events</h5>
+                        <p class="text-muted mb-0">No upcoming events in your department at the moment.</p>
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
     
-    <!-- Right Column: Announcements & Quick Links -->
+    <!-- Right Column: Quick Actions & Announcements -->
     <div class="col-lg-4">
-        <!-- Announcements -->
-        <div class="card mb-4">
+        <!-- Quick Actions -->
+        <div class="card border-0 shadow mb-4 animate-card">
             <div class="card-body">
-                <h5 class="card-title cuk-text-primary mb-4">
-                    <i class="bi bi-megaphone me-2"></i>Latest Announcements
+                <h5 class="cuk-text-primary mb-4">
+                    <i class="bi bi-lightning me-2"></i>
+                    Quick Actions
                 </h5>
                 
-                {% if announcements %}
-                    {% for announcement in announcements %}
-                        <div class="announcement-card {% if announcement.priority == 'High' %}announcement-high{% endif %}">
-                            <h6>{{ announcement.title }}</h6>
-                            <p class="text-muted mb-2">{{ announcement.content[:100] }}{% if announcement.content|length > 100 %}...{% endif %}</p>
-                            <small class="text-muted">
-                                <i class="bi bi-tag me-1"></i>{{ announcement.category }} • 
-                                <i class="bi bi-calendar me-1"></i>{{ announcement.published_date.strftime('%d %b') }}
-                            </small>
+                <div class="quick-action-grid">
+                    <div class="quick-action-card" onclick="window.location.href='{{ url_for('events') }}'">
+                        <div class="action-icon">
+                            <i class="bi bi-search"></i>
                         </div>
-                    {% endfor %}
+                        <div class="action-title">Browse Events</div>
+                        <p class="action-description">
+                            Discover and register for upcoming campus events
+                        </p>
+                    </div>
+                    
+                    <div class="quick-action-card" onclick="window.location.href='{{ url_for('calendar') }}'">
+                        <div class="action-icon">
+                            <i class="bi bi-calendar-date"></i>
+                        </div>
+                        <div class="action-title">Event Calendar</div>
+                        <p class="action-description">
+                            View all events in calendar format
+                        </p>
+                    </div>
+                    
+                    <div class="quick-action-card" onclick="window.location.href='{{ url_for('profile') }}'">
+                        <div class="action-icon">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <div class="action-title">My Profile</div>
+                        <p class="action-description">
+                            Update your personal information
+                        </p>
+                    </div>
+                    
+                    <div class="quick-action-card" onclick="window.location.href='{{ url_for('my_registrations') }}'">
+                        <div class="action-icon">
+                            <i class="bi bi-ticket-perforated"></i>
+                        </div>
+                        <div class="action-title">My Registrations</div>
+                        <p class="action-description">
+                            View and manage your event registrations
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Announcements -->
+        <div class="card border-0 shadow mb-4 animate-card delay-1">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="cuk-text-primary mb-0">
+                        <i class="bi bi-megaphone me-2"></i>
+                        Announcements
+                    </h5>
+                    {% if announcements %}
+                        <span class="badge bg-primary">{{ announcements|length }}</span>
+                    {% endif %}
+                </div>
+                
+                {% if announcements %}
+                    <div class="announcements-list">
+                        {% for announcement in announcements[:3] %}
+                            <div class="announcement-card-dashboard {% if announcement.priority == 'High' %}priority-high{% endif %}">
+                                <div class="announcement-header">
+                                    <span class="announcement-category">
+                                        {{ announcement.category }}
+                                    </span>
+                                    <div class="announcement-date">
+                                        <i class="bi bi-calendar me-1"></i>
+                                        {{ announcement.published_date.strftime('%d %b') }}
+                                    </div>
+                                </div>
+                                <h6 class="mb-2">{{ announcement.title }}</h6>
+                                <p class="text-muted mb-0">
+                                    {{ announcement.content|truncate(80) }}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if announcements|length > 3 %}
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('announcements') }}" class="btn btn-sm btn-outline-primary">
+                                View All Announcements
+                            </a>
+                        </div>
+                    {% endif %}
                 {% else %}
                     <div class="empty-state">
-                        <i class="bi bi-megaphone fs-1 mb-3"></i>
-                        <p class="text-muted">No announcements</p>
+                        <div class="empty-state-icon">
+                            <i class="bi bi-megaphone"></i>
+                        </div>
+                        <p class="text-muted mb-0">No announcements at the moment.</p>
                     </div>
                 {% endif %}
             </div>
         </div>
         
-        <!-- Quick Links -->
-        <div class="card">
+        <!-- Calendar Widget -->
+        <div class="calendar-widget animate-card delay-2">
+            <div class="calendar-header">
+                <h5 class="cuk-text-primary mb-0">
+                    <i class="bi bi-calendar-week me-2"></i>
+                    Event Calendar
+                </h5>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="prevMonth()">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <span class="mx-2 fw-semibold" id="currentMonth">{{ now.strftime('%B %Y') }}</span>
+                    <button class="btn btn-sm btn-outline-primary" onclick="nextMonth()">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="calendar-grid">
+                <!-- Day headers -->
+                <div class="calendar-day">Sun</div>
+                <div class="calendar-day">Mon</div>
+                <div class="calendar-day">Tue</div>
+                <div class="calendar-day">Wed</div>
+                <div class="calendar-day">Thu</div>
+                <div class="calendar-day">Fri</div>
+                <div class="calendar-day">Sat</div>
+                
+                <!-- Calendar dates will be populated by JavaScript -->
+                <div id="calendarDates" class="w-100"></div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="{{ url_for('calendar') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-calendar3 me-2"></i>
+                    View Full Calendar
+                </a>
+            </div>
+        </div>
+        
+        <!-- Upcoming Deadlines -->
+        <div class="card border-0 shadow mt-4 animate-card delay-3">
             <div class="card-body">
-                <h5 class="card-title cuk-text-primary mb-4">
-                    <i class="bi bi-lightning me-2"></i>Quick Links
+                <h5 class="cuk-text-primary mb-4">
+                    <i class="bi bi-clock-history me-2"></i>
+                    Upcoming Deadlines
                 </h5>
                 
-                <div class="d-grid gap-2">
-                    <a href="{{ url_for('events') }}" class="btn btn-outline-primary text-start">
-                        <i class="bi bi-calendar3 me-2"></i>Browse All Events
-                    </a>
-                    <a href="{{ url_for('calendar') }}" class="btn btn-outline-primary text-start">
-                        <i class="bi bi-calendar-date me-2"></i>Event Calendar
-                    </a>
-                    <a href="#" class="btn btn-outline-primary text-start">
-                        <i class="bi bi-calendar-plus me-2"></i>My Schedule
-                    </a>
-                    <a href="#" class="btn btn-outline-primary text-start">
-                        <i class="bi bi-award me-2"></i>My Certificates
-                    </a>
-                    <a href="#" class="btn btn-outline-primary text-start">
-                        <i class="bi bi-chat-left-text me-2"></i>My Feedback
-                    </a>
-                </div>
-                
-                <!-- Upcoming Deadlines -->
-                <div class="mt-4">
-                    <h6 class="cuk-text-primary"><i class="bi bi-clock me-2"></i>Upcoming Deadlines</h6>
+                {% if upcoming_deadlines %}
                     <div class="list-group list-group-flush">
-                        {% if registered_events %}
-                            {% for event in registered_events[:3] %}
-                                {% if event.date >= now.date() %}
-                                    <div class="list-group-item px-0">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <small>{{ event.name[:20] }}{% if event.name|length > 20 %}...{% endif %}</small><br>
-                                                <small class="text-muted">{{ event.date.strftime('%d %b') }}</small>
-                                            </div>
-                                            <span class="badge bg-warning">Register</span>
-                                        </div>
+                        {% for event in upcoming_deadlines[:5] %}
+                            <div class="list-group-item px-0 py-3 border-bottom">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ event.name|truncate(25) }}</h6>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            {{ event.date.strftime('%d %b %Y') }}
+                                        </small>
                                     </div>
-                                {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            <div class="list-group-item px-0">
-                                <small class="text-muted">No upcoming deadlines</small>
+                                    <span class="badge bg-warning">
+                                        {{ (event.date - now.date()).days }} days
+                                    </span>
+                                </div>
                             </div>
-                        {% endif %}
+                        {% endfor %}
                     </div>
-                </div>
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="bi bi-check-circle text-success fs-4 mb-2 d-block"></i>
+                        <p class="text-muted mb-0">No upcoming deadlines</p>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Initialize calendar
+    function initCalendar() {
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        
+        renderCalendar(currentMonth, currentYear);
+    }
+    
+    function renderCalendar(month, year) {
+        const calendarDates = document.getElementById('calendarDates');
+        const currentMonth = document.getElementById('currentMonth');
+        
+        // Clear previous dates
+        calendarDates.innerHTML = '';
+        
+        // Set month title
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+        currentMonth.textContent = `${monthNames[month]} ${year}`;
+        
+        // Get first day of month
+        const firstDay = new Date(year, month, 1);
+        const startingDay = firstDay.getDay();
+        
+        // Get number of days in month
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        
+        // Get today's date
+        const today = new Date();
+        
+        // Create empty cells for days before first day of month
+        for (let i = 0; i < startingDay; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'calendar-date';
+            calendarDates.appendChild(emptyCell);
+        }
+        
+        // Create cells for each day of month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateCell = document.createElement('div');
+            dateCell.className = 'calendar-date';
+            dateCell.textContent = day;
+            
+            // Check if today
+            if (year === today.getFullYear() && 
+                month === today.getMonth() && 
+                day === today.getDate()) {
+                dateCell.classList.add('today');
+            }
+            
+            // Check if has event (simulate - in real app, check against event dates)
+            if (Math.random() > 0.7) { // 30% chance for demo
+                dateCell.classList.add('has-event');
+            }
+            
+            // Add click event
+            dateCell.addEventListener('click', () => {
+                const selectedDate = new Date(year, month, day);
+                showEventsForDate(selectedDate);
+            });
+            
+            calendarDates.appendChild(dateCell);
+        }
+    }
+    
+    function showEventsForDate(date) {
+        const eventsOnDate = {{ registered_events|selectattr('date')|map(attribute='date')|list|tojson|safe }};
+        
+        // Filter events for selected date (simplified for demo)
+        const filteredEvents = eventsOnDate.filter(eventDate => {
+            const eventDateObj = new Date(eventDate);
+            return eventDateObj.toDateString() === date.toDateString();
+        });
+        
+        if (filteredEvents.length > 0) {
+            alert(`You have ${filteredEvents.length} event(s) on ${date.toLocaleDateString()}`);
+        } else {
+            alert(`No events on ${date.toLocaleDateString()}`);
+        }
+    }
+    
+    function prevMonth() {
+        const current = document.getElementById('currentMonth').textContent;
+        const [month, year] = current.split(' ');
+        const monthIndex = new Date(`${month} 1, ${year}`).getMonth();
+        const yearNum = parseInt(year);
+        
+        let newMonth = monthIndex - 1;
+        let newYear = yearNum;
+        
+        if (newMonth < 0) {
+            newMonth = 11;
+            newYear--;
+        }
+        
+        renderCalendar(newMonth, newYear);
+    }
+    
+    function nextMonth() {
+        const current = document.getElementById('currentMonth').textContent;
+        const [month, year] = current.split(' ');
+        const monthIndex = new Date(`${month} 1, ${year}`).getMonth();
+        const yearNum = parseInt(year);
+        
+        let newMonth = monthIndex + 1;
+        let newYear = yearNum;
+        
+        if (newMonth > 11) {
+            newMonth = 0;
+            newYear++;
+        }
+        
+        renderCalendar(newMonth, newYear);
+    }
+    
+    // Event registration animation
+    function registerForEvent(eventId) {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registering...';
+        btn.disabled = true;
+        
+        // Simulate API call
+        setTimeout(() => {
+            btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Registered!';
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-success');
+            
+            // Show success toast
+            showToast('Successfully registered for event!', 'success');
+            
+            // Reload after 2 seconds
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }, 1500);
+    }
+    
+    // Toast notification
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        const container = document.createElement('div');
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.appendChild(toast);
+        
+        document.body.appendChild(container);
+        
+        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+        bsToast.show();
+        
+        toast.addEventListener('hidden.bs.toast', () => {
+            container.remove();
+        });
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        initCalendar();
+        
+        // Add hover effects to cards
+        document.querySelectorAll('.event-card-dashboard').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Add click animation to quick action cards
+        document.querySelectorAll('.quick-action-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 200);
+            });
+        });
+        
+        // Auto-refresh announcements every 5 minutes
+        setInterval(() => {
+            // In production, this would fetch new announcements via AJAX
+            console.log('Checking for new announcements...');
+        }, 300000);
+    });
+</script>
 {% endblock %}
