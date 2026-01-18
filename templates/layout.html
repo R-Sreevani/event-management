@@ -1,1166 +1,587 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="auto">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Event Management System{% endblock %} | Central University of Karnataka</title>
-    
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="Central University of Karnataka Event Management System - Discover, register, and manage campus events">
-    <meta name="keywords" content="CUK, University, Events, Campus, Registration, Karnataka">
-    <meta name="author" content="Central University of Karnataka">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
-    <link rel="apple-touch-icon" href="/static/images/logo.png">
-    
-    <!-- Preconnect for CDNs -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    
-    <!-- Bootstrap 5.3 with Dark Mode -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- FullCalendar CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
-    
-    <!-- AOS Animation Library -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
-    <!-- Custom CSS -->
+    <title>Central University Event Hub - {% block title %}{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root {
-            --cuk-blue: #003366;
-            --cuk-blue-light: #004080;
-            --cuk-blue-dark: #002244;
-            --cuk-gold: #FFD700;
-            --cuk-gold-light: #FFE55C;
-            --cuk-green: #006400;
-            --cuk-green-light: #008000;
-            --cuk-maroon: #800000;
-            --cuk-white: #FFFFFF;
-            --cuk-gray-50: #f8f9fa;
-            --cuk-gray-100: #e9ecef;
-            --cuk-gray-200: #dee2e6;
-            --cuk-gray-300: #ced4da;
-            --cuk-gray-400: #adb5bd;
-            --cuk-gray-500: #6c757d;
-            --cuk-gray-600: #495057;
-            --cuk-gray-700: #343a40;
-            --cuk-gray-800: #212529;
-            --cuk-gray-900: #121416;
-            
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
-            --shadow: 0 4px 20px rgba(0,0,0,0.12);
-            --shadow-lg: 0 8px 30px rgba(0,0,0,0.15);
-            --shadow-xl: 0 12px 40px rgba(0,0,0,0.18);
-            
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --border-radius: 12px;
-            --border-radius-lg: 20px;
-            
-            --header-height: 72px;
-        }
-        
-        [data-bs-theme="dark"] {
-            --cuk-blue: #4d88ff;
-            --cuk-blue-light: #6699ff;
-            --cuk-blue-dark: #3366cc;
-            --cuk-gold: #ffcc00;
-            --cuk-gold-light: #ffdd44;
-            --cuk-green: #4CAF50;
-            --cuk-green-light: #66BB6A;
-        }
-        
-        * {
+        body {
+            background-color: #f9f9f9;
+            color: #333;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            padding-bottom: 100px; /* Space for chatbot */
         }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: var(--bs-body-color);
-            background: var(--bs-body-bg);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: var(--transition);
+
+        header {
+            background-color: #ffffff;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
         }
-        
-        main {
-            flex: 1;
-            padding-top: var(--header-height);
-        }
-        
-        /* Typography */
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            line-height: 1.2;
-        }
-        
-        .cuk-text-primary {
-            color: var(--cuk-blue) !important;
-        }
-        
-        .cuk-text-gradient {
-            background: linear-gradient(135deg, var(--cuk-blue), var(--cuk-blue-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        /* Navbar */
-        .navbar {
-            height: var(--header-height);
-            padding: 0;
-            background: var(--bs-body-bg) !important;
-            box-shadow: var(--shadow-sm);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1030;
-            backdrop-filter: blur(10px);
-            background: rgba(var(--bs-body-bg-rgb), 0.95) !important;
-        }
-        
-        .navbar-brand {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--cuk-blue) !important;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .navbar-brand::before {
-            content: '🎓';
-            font-size: 1.8rem;
-        }
-        
-        .nav-link {
-            font-weight: 500;
-            padding: 0.75rem 1rem !important;
-            border-radius: 8px;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .nav-link:hover, .nav-link.active {
-            background: rgba(var(--cuk-blue), 0.1);
-            color: var(--cuk-blue) !important;
-            transform: translateY(-2px);
-        }
-        
-        .navbar-nav .nav-item {
-            margin: 0 0.25rem;
-        }
-        
-        .dropdown-menu {
-            border: none;
-            box-shadow: var(--shadow);
-            border-radius: var(--border-radius);
-            padding: 0.5rem;
-            margin-top: 0.5rem !important;
-            animation: dropdownSlide 0.3s ease;
-        }
-        
-        @keyframes dropdownSlide {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .dropdown-item {
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            transition: var(--transition);
-        }
-        
-        .dropdown-item:hover {
-            background: rgba(var(--cuk-blue), 0.1);
-            color: var(--cuk-blue);
-            transform: translateX(5px);
-        }
-        
-        /* Theme Toggle */
-        .theme-toggle {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(var(--cuk-blue), 0.1);
-            border: none;
-            color: var(--cuk-blue);
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            color: #0077cc;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
+            gap: 10px;
         }
-        
-        .theme-toggle:hover {
-            background: rgba(var(--cuk-blue), 0.2);
-            transform: scale(1.1);
-        }
-        
-        .theme-toggle i {
-            position: absolute;
-            transition: var(--transition);
-        }
-        
-        [data-bs-theme="dark"] .bi-sun {
-            opacity: 1;
-            transform: rotate(0deg);
-        }
-        
-        [data-bs-theme="dark"] .bi-moon {
-            opacity: 0;
-            transform: rotate(-90deg);
-        }
-        
-        [data-bs-theme="light"] .bi-sun {
-            opacity: 0;
-            transform: rotate(90deg);
-        }
-        
-        [data-bs-theme="light"] .bi-moon {
-            opacity: 1;
-            transform: rotate(0deg);
-        }
-        
-        /* User Avatar */
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--cuk-blue), var(--cuk-blue-light));
-            color: white;
+
+        nav {
+            margin-top: 15px;
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-weight: 600;
-            font-size: 1.1rem;
-            border: 2px solid rgba(var(--cuk-blue), 0.2);
-            transition: var(--transition);
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
         }
-        
-        .user-avatar:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(var(--cuk-blue), 0.3);
-        }
-        
-        /* Main Container */
-        .container-main {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem;
-        }
-        
-        @media (min-width: 1400px) {
-            .container-main {
-                padding: 2rem;
-            }
-        }
-        
-        /* Cards */
-        .card {
-            border: none;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            background: var(--bs-card-bg);
-        }
-        
-        .card:hover {
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-5px);
-        }
-        
-        .card-header {
-            background: transparent;
-            border-bottom: 1px solid var(--bs-border-color);
-            padding: 1.25rem 1.5rem;
-            font-weight: 600;
-        }
-        
-        .card-body {
-            padding: 1.5rem;
-        }
-        
-        /* Buttons */
-        .btn-primary {
-            background: linear-gradient(135deg, var(--cuk-blue), var(--cuk-blue-light));
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            border-radius: 10px;
-            transition: var(--transition);
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--cuk-blue-dark), var(--cuk-blue));
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(var(--cuk-blue), 0.3);
-        }
-        
-        .btn-outline-primary {
-            border: 2px solid var(--cuk-blue);
-            color: var(--cuk-blue);
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            border-radius: 10px;
-            transition: var(--transition);
-        }
-        
-        .btn-outline-primary:hover {
-            background: var(--cuk-blue);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(var(--cuk-blue), 0.3);
-        }
-        
-        /* Alerts */
-        .alert {
-            border: none;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
-            padding: 1rem 1.5rem;
-            margin-bottom: 1.5rem;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .alert-success {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            color: #155724;
-            border-left: 4px solid #28a745;
-        }
-        
-        .alert-danger {
-            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-            color: #721c24;
-            border-left: 4px solid #dc3545;
-        }
-        
-        .alert-warning {
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-            color: #856404;
-            border-left: 4px solid #ffc107;
-        }
-        
-        .alert-info {
-            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
-            color: #0c5460;
-            border-left: 4px solid #17a2b8;
-        }
-        
-        /* Footer */
-        .footer {
-            background: var(--bs-tertiary-bg);
-            padding: 4rem 0 2rem;
-            margin-top: auto;
-            border-top: 1px solid var(--bs-border-color);
-        }
-        
-        .footer h5 {
-            color: var(--cuk-blue);
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-        }
-        
-        .footer-links {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .footer-links li {
-            margin-bottom: 0.75rem;
-        }
-        
-        .footer-links a {
-            color: var(--bs-body-color);
+
+        nav a {
+            color: #0077cc;
             text-decoration: none;
-            transition: var(--transition);
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        nav a:hover {
+            color: #ffffff;
+            background-color: #0077cc;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 119, 204, 0.2);
+        }
+
+        main {
+            padding: 2rem;
+            min-height: calc(100vh - 200px);
+        }
+
+        footer {
+            background: linear-gradient(135deg, #0077cc, #005fa3);
+            color: #ffffff;
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+            border-top: 3px solid #ffc107;
+        }
+
+        footer a {
+            color: #ffc107;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #0077cc, #005fa3);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease-in-out;
+            font-weight: bold;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
         }
-        
-        .footer-links a:hover {
-            color: var(--cuk-blue);
-            transform: translateX(5px);
+
+        .btn:hover {
+            background: linear-gradient(135deg, #005fa3, #004d82);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 119, 204, 0.3);
         }
-        
-        .social-links {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
         }
-        
-        .social-link {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(var(--cuk-blue), 0.1);
-            color: var(--cuk-blue);
+
+        .user-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f0f8ff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-            text-decoration: none;
+            gap: 8px;
+            border: 1px solid #cce7ff;
         }
-        
-        .social-link:hover {
-            background: var(--cuk-blue);
-            color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(var(--cuk-blue), 0.3);
+
+        .user-status span {
+            font-weight: bold;
+            color: #0077cc;
         }
-        
-        .copyright {
-            text-align: center;
-            padding-top: 2rem;
-            margin-top: 2rem;
-            border-top: 1px solid var(--bs-border-color);
-            color: var(--bs-secondary-color);
-            font-size: 0.9rem;
-        }
-        
-        /* Chatbot */
-        .chatbot-container {
+
+        /* Chatbot Styles */
+        #chatbot-container {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            z-index: 1050;
+            z-index: 1000;
         }
-        
-        .chatbot-toggle {
-            width: 60px;
-            height: 60px;
+
+        #chat-window {
+            width: 380px;
+            height: 520px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #0077cc, #005fa3);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--cuk-blue), var(--cuk-blue-light));
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        #chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            font-size: 14px;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.4;
+            animation: messageAppear 0.3s ease-out;
+        }
+
+        @keyframes messageAppear {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #0077cc, #005fa3);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .quick-questions {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .quick-btn {
+            background: #f0f2f5;
+            border: 1px solid #ddd;
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .quick-btn:hover {
+            background: #0077cc;
+            color: white;
+            border-color: #0077cc;
+        }
+
+        .chat-input-area {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        #chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #chat-input:focus {
+            border-color: #0077cc;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #0077cc, #005fa3);
             color: white;
             border: none;
-            box-shadow: var(--shadow-lg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 12px 20px;
+            border-radius: 25px;
             cursor: pointer;
-            transition: var(--transition);
-            position: relative;
+            font-weight: bold;
+            transition: transform 0.2s;
         }
-        
-        .chatbot-toggle:hover {
-            transform: scale(1.1) rotate(15deg);
-            box-shadow: var(--shadow-xl);
+
+        .send-btn:hover {
+            transform: scale(1.05);
         }
-        
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #dc3545;
+
+        .chat-toggle-btn {
+            background: linear-gradient(135deg, #0077cc, #005fa3);
             color: white;
-            font-size: 0.75rem;
-            min-width: 20px;
-            height: 20px;
-            border-radius: 50%;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 0 5px;
-            font-weight: 600;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            gap: 8px;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(0, 119, 204, 0.4);
+            transition: all 0.3s;
+            margin-left: auto;
         }
-        
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+
+        .chat-toggle-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 119, 204, 0.5);
         }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--bs-secondary-bg);
-            border-radius: 4px;
+
+        .chat-icon {
+            font-size: 18px;
         }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--cuk-blue);
-            border-radius: 4px;
+
+        .chat-label {
+            font-size: 14px;
         }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--cuk-blue-light);
-        }
-        
-        /* Loading Skeleton */
-        .skeleton {
-            background: linear-gradient(90deg, 
-                var(--bs-secondary-bg) 25%, 
-                var(--bs-tertiary-bg) 50%, 
-                var(--bs-secondary-bg) 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-        }
-        
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
-        /* Responsive Design */
+
+        /* Responsive design */
         @media (max-width: 768px) {
-            :root {
-                --header-height: 60px;
+            header h1 {
+                font-size: 1.8rem;
             }
             
-            .navbar-brand {
-                font-size: 1.2rem;
+            nav {
+                gap: 10px;
             }
             
-            .container-main {
-                padding: 1.5rem 1rem;
+            #chat-window {
+                width: calc(100vw - 60px);
+                height: 450px;
+                right: 30px;
             }
             
-            .footer {
-                padding: 3rem 0 1.5rem;
+            .chat-toggle-btn {
+                padding: 10px 15px;
             }
             
-            .chatbot-container {
-                bottom: 20px;
-                right: 20px;
+            .chat-label {
+                display: none;
             }
             
-            .chatbot-toggle {
-                width: 50px;
-                height: 50px;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .container-main {
-                padding: 1rem 0.75rem;
-            }
-            
-            .navbar-nav .nav-item {
-                margin: 0.25rem 0;
-            }
-            
-            .dropdown-menu {
-                border: 1px solid var(--bs-border-color);
-                margin-top: 0.5rem;
-                width: 100%;
-            }
-        }
-        
-        /* Print Styles */
-        @media print {
-            .navbar,
-            .footer,
-            .chatbot-container,
-            .theme-toggle {
-                display: none !important;
-            }
-            
-            main {
-                padding-top: 0;
-            }
-            
-            .container-main {
-                padding: 0;
-                max-width: 100%;
-            }
-            
-            .card {
-                box-shadow: none;
-                border: 1px solid #ddd;
+            .user-status {
+                position: static;
+                justify-content: center;
+                margin-top: 10px;
             }
         }
     </style>
-    
-    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container container-main">
-            <!-- Brand -->
-            <a class="navbar-brand" href="{{ url_for('index') }}" data-aos="fade-right">
-                <span>CUK Events Hub</span>
-            </a>
+    <header>
+        <div class="container">
+            <h1>🎓 Central University Event Hub</h1>
             
-            <!-- Mobile Toggle -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            {% if session.get('user_id') %}
+            <div class="user-status">
+                <span>👤 {{ session.get('role')|title }}</span>
+                <span>|</span>
+                <a href="{{ url_for('logout') }}" style="color: #dc3545; font-size: 12px;">Logout</a>
+            </div>
+            {% endif %}
             
-            <!-- Navigation Content -->
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <!-- Left Navigation -->
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item" data-aos="fade-down" data-aos-delay="100">
-                        <a class="nav-link {{ 'active' if request.endpoint == 'index' }}" 
-                           href="{{ url_for('index') }}">
-                            <i class="bi bi-house"></i>
-                            <span>Home</span>
-                        </a>
-                    </li>
-                    <li class="nav-item" data-aos="fade-down" data-aos-delay="150">
-                        <a class="nav-link {{ 'active' if request.endpoint == 'events' }}" 
-                           href="{{ url_for('events') }}">
-                            <i class="bi bi-calendar3"></i>
-                            <span>Events</span>
-                        </a>
-                    </li>
-                    <li class="nav-item" data-aos="fade-down" data-aos-delay="200">
-                        <a class="nav-link {{ 'active' if request.endpoint == 'calendar' }}" 
-                           href="{{ url_for('calendar') }}">
-                            <i class="bi bi-calendar-date"></i>
-                            <span>Calendar</span>
-                        </a>
-                    </li>
-                    
-                    <!-- User Role Specific Links -->
-                    {% if session.get('user_id') %}
-                        {% if session.role == 'admin' %}
-                            <li class="nav-item dropdown" data-aos="fade-down" data-aos-delay="250">
-                                <a class="nav-link dropdown-toggle {{ 'active' if request.endpoint.startswith('admin_') }}" 
-                                   href="#" data-bs-toggle="dropdown">
-                                    <i class="bi bi-speedometer2"></i>
-                                    <span>Admin Panel</span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">
-                                            <i class="bi bi-grid"></i> Dashboard
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ url_for('admin_events') }}">
-                                            <i class="bi bi-calendar-plus"></i> Manage Events
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ url_for('admin_analytics') }}">
-                                            <i class="bi bi-graph-up"></i> Analytics
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ url_for('admin_users') }}">
-                                            <i class="bi bi-people"></i> User Management
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ url_for('admin_settings') }}">
-                                            <i class="bi bi-gear"></i> System Settings
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                        {% elif session.role == 'faculty' %}
-                            <li class="nav-item" data-aos="fade-down" data-aos-delay="250">
-                                <a class="nav-link {{ 'active' if request.endpoint == 'faculty_dashboard' }}" 
-                                   href="{{ url_for('faculty_dashboard') }}">
-                                    <i class="bi bi-person-workspace"></i>
-                                    <span>Faculty Dashboard</span>
-                                </a>
-                            </li>
-                        {% else %}
-                            <li class="nav-item" data-aos="fade-down" data-aos-delay="250">
-                                <a class="nav-link {{ 'active' if request.endpoint == 'student_dashboard' }}" 
-                                   href="{{ url_for('student_dashboard') }}">
-                                    <i class="bi bi-person-video3"></i>
-                                    <span>My Dashboard</span>
-                                </a>
-                            </li>
-                        {% endif %}
-                        
-                        <li class="nav-item" data-aos="fade-down" data-aos-delay="300">
-                            <a class="nav-link {{ 'active' if request.endpoint == 'my_registrations' }}" 
-                               href="{{ url_for('my_registrations') }}">
-                                <i class="bi bi-ticket-perforated"></i>
-                                <span>My Events</span>
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
+            <nav>
+                <a href="{{ url_for('index') }}">🏠 Home</a>
                 
-                <!-- Right Navigation -->
-                <ul class="navbar-nav">
-                    <!-- Theme Toggle -->
-                    <li class="nav-item d-flex align-items-center me-2" data-aos="fade-left" data-aos-delay="100">
-                        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-                            <i class="bi bi-sun"></i>
-                            <i class="bi bi-moon"></i>
-                        </button>
-                    </li>
-                    
-                    <!-- Authentication -->
-                    {% if session.get('user_id') %}
-                        <li class="nav-item dropdown" data-aos="fade-left" data-aos-delay="150">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" 
-                               href="#" data-bs-toggle="dropdown">
-                                <div class="user-avatar" title="{{ session.user_name }}">
-                                    {{ session.user_name[:1]|upper }}
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <div class="dropdown-header">
-                                        <div class="fw-semibold">{{ session.user_name }}</div>
-                                        <small class="text-muted">{{ session.email }}</small>
-                                    </div>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('profile') }}">
-                                        <i class="bi bi-person-circle"></i> My Profile
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('notifications') }}">
-                                        <i class="bi bi-bell"></i> Notifications
-                                        {% if unread_notifications %}
-                                            <span class="badge bg-danger ms-auto">{{ unread_notifications }}</span>
-                                        {% endif %}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('settings') }}">
-                                        <i class="bi bi-gear"></i> Settings
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
-                                        <i class="bi bi-box-arrow-right"></i> Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                {% if session.get('user_id') %}
+                    {% if session.get('role') == 'admin' %}
+                        <a href="{{ url_for('admin_dashboard') }}">🛠️ Admin Dashboard</a>
                     {% else %}
-                        <li class="nav-item" data-aos="fade-left" data-aos-delay="150">
-                            <a class="nav-link" href="{{ url_for('login') }}">
-                                <i class="bi bi-box-arrow-in-right"></i>
-                                <span>Login</span>
-                            </a>
-                        </li>
-                        <li class="nav-item" data-aos="fade-left" data-aos-delay="200">
-                            <a class="btn btn-primary" href="{{ url_for('register_user') }}">
-                                <i class="bi bi-person-plus"></i>
-                                <span>Register</span>
-                            </a>
-                        </li>
+                        <a href="{{ url_for('dashboard') }}">📊 Student Dashboard</a>
                     {% endif %}
-                </ul>
-            </div>
+                {% else %}
+                    <a href="{{ url_for('register') }}">📝 Register</a>
+                    <a href="{{ url_for('login') }}">🔐 Login</a>
+                {% endif %}
+                
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('dashboard') if session.get('role') == 'student' else url_for('admin_dashboard') }}">
+                        📅 My Events
+                    </a>
+                {% endif %}
+                
+                <a href="javascript:void(0)" onclick="toggleChat()">🤖 Ask Assistant</a>
+            </nav>
         </div>
-    </nav>
+    </header>
 
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="container container-main mt-4">
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'info' }} 
-                                alert-dismissible fade show" role="alert" data-aos="fade-up">
-                        <div class="d-flex align-items-center">
-                            {% if category == 'success' %}
-                                <i class="bi bi-check-circle-fill me-3 fs-4"></i>
-                            {% elif category == 'danger' %}
-                                <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
-                            {% elif category == 'warning' %}
-                                <i class="bi bi-exclamation-circle-fill me-3 fs-4"></i>
-                            {% else %}
-                                <i class="bi bi-info-circle-fill me-3 fs-4"></i>
-                            {% endif %}
-                            <div class="flex-grow-1">
-                                {{ message }}
-                            </div>
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-
-    <!-- Main Content -->
-    <main>
-        <div class="container container-main">
-            {% block content %}{% endblock %}
-        </div>
+    <main class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    {% for message in messages %}
+                        {{ message }}<br>
+                    {% endfor %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container container-main">
-            <div class="row g-4">
-                <!-- University Info -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="user-avatar me-3" style="width: 50px; height: 50px;">
-                            🎓
-                        </div>
-                        <div>
-                            <h5 class="mb-0">Central University of Karnataka</h5>
-                            <small class="text-muted">Empowering through Education</small>
-                        </div>
-                    </div>
-                    <p class="mb-3">
-                        Kadaganchi, Aland Road<br>
-                        Gulbarga - 585 367, Karnataka
+    <footer>
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <strong>&copy; {{ now.year }} Central University Hub</strong>
+                    <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.9;">
+                        Developed with ❤️ for better event management
                     </p>
-                    <div class="contact-info">
-                        <p class="mb-1">
-                            <i class="bi bi-telephone me-2"></i>
-                            <a href="tel:+918388251100" class="text-decoration-none">08388-251100</a>
-                        </p>
-                        <p class="mb-0">
-                            <i class="bi bi-envelope me-2"></i>
-                            <a href="mailto:info@cuk.ac.in" class="text-decoration-none">info@cuk.ac.in</a>
-                        </p>
-                    </div>
                 </div>
-                
-                <!-- Quick Links -->
-                <div class="col-lg-2 col-md-6">
-                    <h5>Quick Links</h5>
-                    <ul class="footer-links">
-                        <li>
-                            <a href="{{ url_for('events') }}">
-                                <i class="bi bi-arrow-right-short"></i>
-                                Browse Events
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('calendar') }}">
-                                <i class="bi bi-arrow-right-short"></i>
-                                Event Calendar
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('announcements') }}">
-                                <i class="bi bi-arrow-right-short"></i>
-                                Announcements
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('departments') }}">
-                                <i class="bi bi-arrow-right-short"></i>
-                                Departments
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('contact') }}">
-                                <i class="bi bi-arrow-right-short"></i>
-                                Contact Us
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                
-                <!-- Resources -->
-                <div class="col-lg-3 col-md-6">
-                    <h5>Resources</h5>
-                    <ul class="footer-links">
-                        <li>
-                            <a href="{{ url_for('faq') }}">
-                                <i class="bi bi-question-circle"></i>
-                                FAQ
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('help') }}">
-                                <i class="bi bi-life-preserver"></i>
-                                Help Center
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('privacy') }}">
-                                <i class="bi bi-shield-check"></i>
-                                Privacy Policy
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('terms') }}">
-                                <i class="bi bi-file-text"></i>
-                                Terms of Service
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('sitemap') }}">
-                                <i class="bi bi-diagram-3"></i>
-                                Sitemap
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                
-                <!-- Connect -->
-                <div class="col-lg-3 col-md-6">
-                    <h5>Stay Connected</h5>
-                    <p class="mb-3">Follow us for updates and announcements</p>
-                    
-                    <div class="social-links">
-                        <a href="https://facebook.com/CUKarnataka" class="social-link" target="_blank" title="Facebook">
-                            <i class="bi bi-facebook"></i>
-                        </a>
-                        <a href="https://twitter.com/CUKarnataka" class="social-link" target="_blank" title="Twitter">
-                            <i class="bi bi-twitter"></i>
-                        </a>
-                        <a href="https://instagram.com/CUKarnataka" class="social-link" target="_blank" title="Instagram">
-                            <i class="bi bi-instagram"></i>
-                        </a>
-                        <a href="https://linkedin.com/school/central-university-of-karnataka" class="social-link" target="_blank" title="LinkedIn">
-                            <i class="bi bi-linkedin"></i>
-                        </a>
-                        <a href="https://youtube.com/@CUKarnataka" class="social-link" target="_blank" title="YouTube">
-                            <i class="bi bi-youtube"></i>
-                        </a>
-                    </div>
-                    
-                    <!-- Newsletter -->
-                    <div class="mt-4">
-                        <h6>Subscribe to Newsletter</h6>
-                        <div class="input-group">
-                            <input type="email" class="form-control" placeholder="Your email" aria-label="Email">
-                            <button class="btn btn-primary" type="button">
-                                <i class="bi bi-send"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Copyright -->
-            <div class="copyright">
-                <div class="row align-items-center">
-                    <div class="col-md-6 text-md-start mb-2 mb-md-0">
-                        &copy; {{ now.year }} Central University of Karnataka. All rights reserved.
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <span class="me-3">Version 2.0.0</span>
-                        <a href="#" class="text-decoration-none me-3">Accessibility</a>
-                        <a href="#" class="text-decoration-none">Report Issue</a>
-                    </div>
+                <div style="display: flex; gap: 15px;">
+                    <a href="#" style="color: #ffc107;">Privacy Policy</a>
+                    <a href="#" style="color: #ffc107;">Terms of Service</a>
+                    <a href="#" style="color: #ffc107;">Contact Us</a>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Chatbot -->
-    <div class="chatbot-container">
-        <div id="chatbot-window" style="display: none;"></div>
-        <button class="chatbot-toggle" id="chatbotToggle" aria-label="Open chatbot">
-            <i class="bi bi-robot"></i>
-            <span class="notification-badge" id="chatNotification" style="display: none;">0</span>
+    <!-- Global Chatbot (appears on all pages) -->
+    <div id="chatbot-container">
+        <div id="chat-window" style="display: none;">
+            <div class="chat-header">
+                <strong>Event Assistant 🤖</strong>
+                <button onclick="toggleChat()" class="close-btn">×</button>
+            </div>
+            <div id="chat-messages">
+                <div class="message bot">
+                    {% if session.get('user_id') %}
+                        Hello {{ session.get('role')|title }}! 👋 I'm your event assistant.
+                    {% else %}
+                        Welcome to Central University Event Hub! 👋 I'm your event assistant.
+                    {% endif %}
+                </div>
+                <div class="message bot">I can help you with:
+                    <ul style="margin: 5px 0 5px 20px;">
+                        <li>Event information</li>
+                        <li>Registration assistance</li>
+                        <li>Dashboard navigation</li>
+                        <li>General queries</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="quick-questions">
+                {% if session.get('user_id') %}
+                    {% if session.get('role') == 'admin' %}
+                        <button onclick="askQuestion('How many events are there?')" class="quick-btn">📊 Events</button>
+                        <button onclick="askQuestion('Show recent registrations')" class="quick-btn">👥 Registrations</button>
+                        <button onclick="askQuestion('Admin commands')" class="quick-btn">🛠️ Commands</button>
+                    {% else %}
+                        <button onclick="askQuestion('What events are coming up?')" class="quick-btn">📅 Events</button>
+                        <button onclick="askQuestion('My registered events')" class="quick-btn">🎟️ My Events</button>
+                        <button onclick="askQuestion('How to register?')" class="quick-btn">❓ Help</button>
+                    {% endif %}
+                {% else %}
+                    <button onclick="askQuestion('What events are coming up?')" class="quick-btn">📅 Events</button>
+                    <button onclick="askQuestion('How do I register?')" class="quick-btn">📝 Register</button>
+                    <button onclick="askQuestion('Login help')" class="quick-btn">🔐 Login</button>
+                {% endif %}
+                <button onclick="askQuestion('Current time')" class="quick-btn">🕒 Time</button>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Ask me anything about events..." 
+                       onkeypress="if(event.keyCode==13) sendMessage()">
+                <button onclick="sendMessage()" class="send-btn">Send</button>
+            </div>
+        </div>
+        <button onclick="toggleChat()" class="chat-toggle-btn">
+            <span class="chat-icon">🤖</span>
+            <span class="chat-label">Ask Assistant</span>
         </button>
     </div>
 
-    <!-- Back to Top -->
-    <button class="btn btn-primary rounded-circle position-fixed bottom-5 start-5" 
-            id="backToTop" 
-            style="width: 50px; height: 50px; display: none; z-index: 1040;"
-            aria-label="Back to top">
-        <i class="bi bi-arrow-up"></i>
-    </button>
-
-    <!-- JavaScript Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" 
-            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" 
-            crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" 
-            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" 
-            crossorigin="anonymous"></script>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    
-    <!-- Main JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Initialize AOS
-        AOS.init({
-            duration: 800,
-            easing: 'ease-out',
-            once: true,
-            offset: 50
-        });
-        
-        // Theme Toggle
-        const themeToggle = document.getElementById('themeToggle');
-        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-        const currentTheme = localStorage.getItem('theme') || 'auto';
-        
-        function setTheme(theme) {
-            const html = document.documentElement;
-            if (theme === 'dark' || (theme === 'auto' && prefersDarkScheme.matches)) {
-                html.setAttribute('data-bs-theme', 'dark');
-            } else {
-                html.setAttribute('data-bs-theme', 'light');
-            }
-            localStorage.setItem('theme', theme);
+    let chatOpen = false;
+
+    function toggleChat() {
+        const chatWindow = document.getElementById('chat-window');
+        chatOpen = !chatOpen;
+        chatWindow.style.display = chatOpen ? 'flex' : 'none';
+        if (chatOpen) {
+            setTimeout(() => {
+                document.getElementById('chat-input').focus();
+            }, 100);
         }
+    }
+
+    function askQuestion(question) {
+        document.getElementById('chat-input').value = question;
+        sendMessage();
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
         
-        themeToggle.addEventListener('click', () => {
-            const current = localStorage.getItem('theme') || 'auto';
-            const next = current === 'light' ? 'dark' : 'light';
-            setTheme(next);
-        });
+        if (!message) return;
         
-        // Set initial theme
-        setTheme(currentTheme);
+        // Add user message
+        addMessage(message, 'user');
+        input.value = '';
         
-        // Watch for system theme changes
-        prefersDarkScheme.addEventListener('change', (e) => {
-            if (localStorage.getItem('theme') === 'auto') {
-                setTheme('auto');
+        // Show typing indicator
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'message bot';
+        typingIndicator.id = 'typing';
+        typingIndicator.innerHTML = 'Typing...';
+        document.getElementById('chat-messages').appendChild(typingIndicator);
+        document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+        
+        // Send to backend
+        fetch('/chatbot', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        });
-        
-        // Auto-dismiss alerts
-        setTimeout(() => {
-            document.querySelectorAll('.alert').forEach(alert => {
-                const bsAlert = new bootstrap.Alert(alert);
-                setTimeout(() => bsAlert.close(), 5000);
-            });
-        }, 3000);
-        
-        // Back to Top button
-        const backToTop = document.getElementById('backToTop');
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 300) {
-                backToTop.style.display = 'flex';
+            return response.json();
+        })
+        .then(data => {
+            // Remove typing indicator
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+            
+            // Add bot response
+            addMessage(data.response, 'bot');
+        })
+        .catch(error => {
+            // Remove typing indicator
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+            
+            // Fallback response for offline or error
+            let fallbackResponse = "I'm having trouble connecting right now. ";
+            if (message.toLowerCase().includes('event')) {
+                fallbackResponse += "You can view events on the homepage or dashboard.";
+            } else if (message.toLowerCase().includes('register')) {
+                fallbackResponse += "Use the Register button in the navigation to create an account.";
+            } else if (message.toLowerCase().includes('login')) {
+                fallbackResponse += "Use the Login button to access your account.";
             } else {
-                backToTop.style.display = 'none';
-            }
-        });
-        
-        backToTop.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-        
-        // Chatbot functionality
-        const chatbotToggle = document.getElementById('chatbotToggle');
-        const chatWindow = document.getElementById('chatbot-window');
-        
-        chatbotToggle.addEventListener('click', () => {
-            if (chatWindow.style.display === 'none') {
-                loadChatbot();
-                chatWindow.style.display = 'block';
-            } else {
-                chatWindow.style.display = 'none';
-            }
-        });
-        
-        function loadChatbot() {
-            // Load chatbot component
-            fetch('/chatbot/component')
-                .then(response => response.text())
-                .then(html => {
-                    chatWindow.innerHTML = html;
-                    // Initialize chatbot functionality
-                    initializeChatbot();
-                })
-                .catch(error => {
-                    console.error('Error loading chatbot:', error);
-                });
-        }
-        
-        function initializeChatbot() {
-            // Chatbot initialization logic here
-            console.log('Chatbot initialized');
-        }
-        
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            // Ctrl + / to focus search
-            if (e.ctrlKey && e.key === '/') {
-                e.preventDefault();
-                document.querySelector('input[type="search"]')?.focus();
+                fallbackResponse += "Please try again or refresh the page.";
             }
             
-            // Escape to close modals
-            if (e.key === 'Escape') {
-                const openModal = document.querySelector('.modal.show');
-                if (openModal) {
-                    bootstrap.Modal.getInstance(openModal).hide();
-                }
-            }
+            addMessage(fallbackResponse, 'bot');
         });
+    }
+
+    function addMessage(text, sender) {
+        const messagesDiv = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}`;
+        messageDiv.innerHTML = text.replace(/\n/g, '<br>');
         
-        // Service Worker for PWA (optional)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registered:', registration);
-                    })
-                    .catch(error => {
-                        console.log('ServiceWorker registration failed:', error);
-                    });
-            });
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // Auto-open chatbot for first-time visitors
+    window.addEventListener('load', function() {
+        const firstVisit = localStorage.getItem('firstVisit');
+        if (!firstVisit) {
+            localStorage.setItem('firstVisit', 'true');
+            setTimeout(() => {
+                const welcomeMessage = document.createElement('div');
+                welcomeMessage.className = 'message bot';
+                welcomeMessage.innerHTML = "💡 <strong>Tip:</strong> I'm here to help! Click my button anytime or type your question.";
+                document.getElementById('chat-messages').appendChild(welcomeMessage);
+            }, 2000);
         }
-        
-        // Performance monitoring
-        window.addEventListener('load', () => {
-            const timing = performance.timing;
-            const loadTime = timing.loadEventEnd - timing.navigationStart;
-            console.log(`Page loaded in ${loadTime}ms`);
-            
-            // Report to analytics if needed
-            if (loadTime > 3000) {
-                console.warn('Page load time is high:', loadTime);
-            }
-        });
-        
-        // Network status monitoring
-        window.addEventListener('online', () => {
-            showNotification('You are back online', 'success');
-        });
-        
-        window.addEventListener('offline', () => {
-            showNotification('You are offline. Some features may not work.', 'warning');
-        });
-        
-        function showNotification(message, type = 'info') {
-            // Implement notification system
-            console.log(`${type}: ${message}`);
+    });
+
+    // Keyboard shortcut for chatbot (Ctrl + /)
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === '/') {
+            e.preventDefault();
+            toggleChat();
         }
+    });
     </script>
-    
-    {% block extra_js %}{% endblock %}
 </body>
 </html>
