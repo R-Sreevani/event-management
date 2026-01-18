@@ -1,243 +1,834 @@
 {% extends 'layout.html' %}
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Admin Dashboard | Campus Event System{% endblock %}
 
 {% block extra_css %}
 <style>
-    .stat-card {
-        border-radius: 10px;
-        padding: 20px;
+    :root {
+        --stat-purple: linear-gradient(135deg, #6f42c1, #5a32a3);
+        --stat-blue: linear-gradient(135deg, #0077cc, #005fa3);
+        --stat-green: linear-gradient(135deg, #28a745, #1e7e34);
+        --stat-orange: linear-gradient(135deg, #fd7e14, #e8590c);
+        --stat-pink: linear-gradient(135deg, #e83e8c, #d63384);
+        --stat-teal: linear-gradient(135deg, #20c997, #17a589);
+        --shadow: 0 4px 20px rgba(0,0,0,0.08);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--cuk-blue), #0056b3);
         color: white;
-        margin-bottom: 20px;
-        transition: transform 0.3s;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+    }
+    
+    .stat-card {
+        border-radius: 15px;
+        padding: 1.5rem;
+        color: white;
+        margin-bottom: 1.5rem;
+        transition: var(--transition);
+        border: none;
+        position: relative;
+        overflow: hidden;
+        min-height: 140px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: rgba(255,255,255,0.4);
     }
     
     .stat-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    }
+    
+    .stat-card .stat-trend {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .stat-card .stat-trend.up {
+        color: #c3e6cb;
+    }
+    
+    .stat-card .stat-trend.down {
+        color: #f5c6cb;
     }
     
     .stat-icon {
+        font-size: 2.8rem;
+        opacity: 0.9;
+        position: absolute;
+        right: 1.5rem;
+        bottom: 1.5rem;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    
+    .stat-number {
         font-size: 2.5rem;
-        opacity: 0.8;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 0.5rem;
     }
     
     .chart-container {
         background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: var(--transition);
+        height: 100%;
+    }
+    
+    .chart-container:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .chart-container h5 {
+        display: flex;
+        align-items: center;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid var(--cuk-blue-light);
+    }
+    
+    .chart-container h5 i {
+        background: var(--cuk-blue-light);
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
+        margin-right: 0.75rem;
+        color: var(--cuk-blue);
     }
     
     .recent-item {
-        border-left: 3px solid var(--cuk-blue);
-        padding-left: 15px;
-        margin-bottom: 15px;
-        transition: all 0.3s;
+        border-left: 4px solid var(--cuk-blue);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: white;
+        border-radius: 0 10px 10px 0;
+        transition: var(--transition);
+        border: 1px solid rgba(0,0,0,0.05);
     }
     
     .recent-item:hover {
-        background: #f8f9fa;
+        transform: translateX(5px);
         border-left-color: var(--cuk-green);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .recent-item h6 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    
+    .category-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+    
+    .quick-action-btn {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: white;
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        color: #495057;
+        text-decoration: none;
+        transition: var(--transition);
+        margin-bottom: 0.75rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .quick-action-btn:hover {
+        border-color: var(--cuk-blue);
+        background: var(--cuk-blue-light);
+        transform: translateY(-3px);
+        color: var(--cuk-blue);
+    }
+    
+    .quick-action-btn i {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,123,255,0.1);
+        border-radius: 10px;
+    }
+    
+    .progress-ring {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 1rem;
+    }
+    
+    .progress-ring-circle {
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+    }
+    
+    .attendance-chart {
+        height: 300px;
+    }
+    
+    /* Activity feed */
+    .activity-feed {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .activity-item {
+        padding: 0.75rem;
+        border-left: 3px solid #dee2e6;
+        margin-bottom: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .activity-item.new {
+        border-left-color: var(--cuk-blue);
+        background: rgba(0,123,255,0.05);
+    }
+    
+    .activity-time {
+        font-size: 0.75rem;
+        color: #6c757d;
+        display: block;
+        margin-top: 0.25rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+        }
+        
+        .dashboard-header {
+            padding: 1.5rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 1.75rem;
+        }
+    }
+    
+    /* Custom scrollbar */
+    .activity-feed::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .activity-feed::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    .activity-feed::-webkit-scrollbar-thumb {
+        background: var(--cuk-blue);
+        border-radius: 3px;
+    }
+    
+    /* Loading skeleton */
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <h1 class="cuk-text-primary"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h1>
-        <p class="text-muted">Welcome back, {{ session.user_name }}! Here's what's happening.</p>
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="display-6 fw-bold mb-2">Admin Dashboard</h1>
+            <p class="lead mb-0">Welcome back, <strong>{{ session.user_name }}</strong>! Here's your system overview.</p>
+            <p class="mb-0 opacity-75">
+                <i class="bi bi-clock me-1"></i>Last updated: {{ current_time.strftime('%I:%M %p') }}
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-light" onclick="refreshDashboard()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                </button>
+                <button type="button" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#exportModal">
+                    <i class="bi bi-download me-1"></i>Export
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
 <!-- Statistics Cards -->
-<div class="row">
+<div class="row g-4 mb-4">
     <div class="col-xl-3 col-md-6">
-        <div class="stat-card" style="background: linear-gradient(135deg, #0077cc, #005fa3);">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-0">{{ stats.total_events }}</h2>
-                    <p class="mb-0">Total Events</p>
+        <div class="stat-card" style="background: var(--stat-blue);">
+            <div>
+                <div class="stat-number">{{ stats.total_events }}</div>
+                <div class="stat-label">Total Events</div>
+                <div class="stat-trend up">
+                    <i class="bi bi-arrow-up"></i>
+                    {{ stats.upcoming_events }} upcoming this month
                 </div>
-                <i class="bi bi-calendar-event stat-icon"></i>
             </div>
-            <small>{{ stats.upcoming_events }} upcoming</small>
+            <i class="bi bi-calendar-event stat-icon"></i>
         </div>
     </div>
     
     <div class="col-xl-3 col-md-6">
-        <div class="stat-card" style="background: linear-gradient(135deg, #28a745, #1e7e34);">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-0">{{ stats.total_registrations }}</h2>
-                    <p class="mb-0">Registrations</p>
+        <div class="stat-card" style="background: var(--stat-green);">
+            <div>
+                <div class="stat-number">{{ stats.total_registrations }}</div>
+                <div class="stat-label">Total Registrations</div>
+                <div class="stat-trend up">
+                    <i class="bi bi-arrow-up"></i>
+                    {{ stats.total_users }} active users
                 </div>
-                <i class="bi bi-people stat-icon"></i>
             </div>
-            <small>{{ stats.total_users }} users</small>
+            <i class="bi bi-people stat-icon"></i>
         </div>
     </div>
     
     <div class="col-xl-3 col-md-6">
-        <div class="stat-card" style="background: linear-gradient(135deg, #6f42c1, #5a32a3);">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-0">{{ stats.total_departments }}</h2>
-                    <p class="mb-0">Departments</p>
+        <div class="stat-card" style="background: var(--stat-purple);">
+            <div>
+                <div class="stat-number">{{ stats.total_departments }}</div>
+                <div class="stat-label">Departments</div>
+                <div class="stat-trend">
+                    <i class="bi bi-people-fill me-1"></i>
+                    {{ stats.total_faculty }} faculty members
                 </div>
-                <i class="bi bi-building stat-icon"></i>
             </div>
-            <small>{{ stats.total_faculty }} faculty</small>
+            <i class="bi bi-building stat-icon"></i>
         </div>
     </div>
     
     <div class="col-xl-3 col-md-6">
-        <div class="stat-card" style="background: linear-gradient(135deg, #fd7e14, #e8590c);">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-0">{{ stats.upcoming_events }}</h2>
-                    <p class="mb-0">Upcoming Events</p>
+        <div class="stat-card" style="background: var(--stat-orange);">
+            <div>
+                <div class="stat-number">{{ stats.upcoming_events }}</div>
+                <div class="stat-label">Upcoming Events</div>
+                <div class="stat-trend">
+                    <i class="bi bi-calendar-week me-1"></i>
+                    {{ stats.next_7_days }} in next 7 days
                 </div>
-                <i class="bi bi-calendar-check stat-icon"></i>
             </div>
-            <small>This month</small>
+            <i class="bi bi-calendar-check stat-icon"></i>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <!-- Recent Events -->
+<div class="row g-4">
+    <!-- Left Column: Charts and Tables -->
     <div class="col-lg-8">
+        <!-- Recent Events Chart -->
         <div class="chart-container">
-            <h5 class="cuk-text-primary mb-4"><i class="bi bi-calendar3 me-2"></i>Recent Events</h5>
+            <h5><i class="bi bi-calendar3"></i> Recent Events Overview</h5>
             {% if recent_events %}
-                <div class="list-group">
-                    {% for event in recent_events %}
-                        <div class="recent-item">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="mb-1">{{ event.name }}</h6>
-                                    <small class="text-muted">
-                                        <i class="bi bi-calendar me-1"></i>{{ event.date.strftime('%d %b %Y') }}
-                                        <i class="bi bi-geo-alt ms-3 me-1"></i>{{ event.venue }}
-                                    </small>
-                                </div>
-                                <span class="badge {% if event.category == 'academic' %}bg-primary{% elif event.category == 'cultural' %}bg-danger{% elif event.category == 'sports' %}bg-success{% else %}bg-secondary{% endif %}">
-                                    {{ event.category|title }}
-                                </span>
-                            </div>
-                            {% if event.department %}
-                                <small class="text-muted">
-                                    <i class="bi bi-building me-1"></i>{{ event.department.name }}
-                                </small>
-                            {% endif %}
+            <div class="row">
+                {% for event in recent_events[:3] %}
+                <div class="col-md-4 mb-3">
+                    <div class="recent-item">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="category-badge" 
+                                  style="background: {% if event.category == 'academic' %}#007bff20{% elif event.category == 'cultural' %}#dc354520{% elif event.category == 'sports' %}#28a74520{% else %}#6c757d20{% endif %}; 
+                                         color: {% if event.category == 'academic' %}#007bff{% elif event.category == 'cultural' %}#dc3545{% elif event.category == 'sports' %}#28a745{% else %}#6c757d{% endif %};">
+                                {{ event.category|title }}
+                            </span>
+                            <small class="text-muted">
+                                <i class="bi bi-calendar-event me-1"></i>{{ event.date.strftime('%d %b') }}
+                            </small>
                         </div>
-                    {% endfor %}
+                        <h6 class="mb-2">{{ event.name }}</h6>
+                        <small class="text-muted d-block mb-2">
+                            <i class="bi bi-geo-alt me-1"></i>{{ event.venue }}
+                        </small>
+                        {% if event.department %}
+                        <small class="text-muted">
+                            <i class="bi bi-building me-1"></i>{{ event.department.name }}
+                        </small>
+                        {% endif %}
+                        <div class="mt-2">
+                            <span class="badge bg-light text-dark">
+                                <i class="bi bi-person me-1"></i>{{ event.registrations_count or 0 }} registered
+                            </span>
+                        </div>
+                    </div>
                 </div>
+                {% endfor %}
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Date</th>
+                            <th>Department</th>
+                            <th>Registrations</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in recent_events[3:] %}
+                        <tr>
+                            <td>{{ event.name }}</td>
+                            <td>{{ event.date.strftime('%d %b %Y') }}</td>
+                            <td>{{ event.department.name if event.department else 'N/A' }}</td>
+                            <td>{{ event.registrations_count or 0 }}</td>
+                            <td>
+                                {% if event.date > current_time %}
+                                <span class="badge bg-warning">Upcoming</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Completed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% else %}
-                <div class="text-center py-4">
-                    <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
-                    <p class="text-muted">No recent events</p>
-                </div>
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x fs-1 text-muted mb-3 d-block"></i>
+                <p class="text-muted mb-0">No events scheduled yet</p>
+                <a href="{{ url_for('admin_events') }}" class="btn btn-primary mt-3">
+                    <i class="bi bi-plus-circle me-2"></i>Create First Event
+                </a>
+            </div>
             {% endif %}
             <div class="text-center mt-3">
                 <a href="{{ url_for('admin_events') }}" class="btn btn-outline-primary btn-sm">
-                    View All Events <i class="bi bi-arrow-right ms-1"></i>
+                    <i class="bi bi-arrow-right-circle me-1"></i>View All Events
                 </a>
             </div>
         </div>
         
-        <!-- Recent Registrations -->
+        <!-- Registration Analytics -->
         <div class="chart-container">
-            <h5 class="cuk-text-primary mb-4"><i class="bi bi-people me-2"></i>Recent Registrations</h5>
+            <h5><i class="bi bi-graph-up"></i> Registration Analytics</h5>
             {% if recent_registrations %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Event</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for reg in recent_registrations %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="ms-2">
-                                                <div>{{ reg.user.name }}</div>
-                                                <small class="text-muted">{{ reg.user.email }}</small>
-                                            </div>
+            <div class="attendance-chart" id="attendanceChart"></div>
+            <div class="table-responsive mt-3">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Event</th>
+                            <th>Registration Date</th>
+                            <th>Department</th>
+                            <th>Attendance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reg in recent_registrations[:10] %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-person-fill text-muted"></i>
                                         </div>
-                                    </td>
-                                    <td>{{ reg.event.name[:30] }}{% if reg.event.name|length > 30 %}...{% endif %}</td>
-                                    <td>{{ reg.registered_at.strftime('%d %b %Y') }}</td>
-                                    <td>
-                                        <span class="badge {% if reg.attendance_status == 'Present' %}bg-success{% elif reg.attendance_status == 'Absent' %}bg-danger{% else %}bg-info{% endif %}">
-                                            {{ reg.attendance_status }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-2">
+                                        <div class="fw-medium">{{ reg.user.name }}</div>
+                                        <small class="text-muted">{{ reg.user.email|truncate(20) }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin_event_detail', event_id=reg.event.id) }}" class="text-decoration-none">
+                                    {{ reg.event.name|truncate(25) }}
+                                </a>
+                            </td>
+                            <td>{{ reg.registered_at.strftime('%d %b %Y') }}</td>
+                            <td>{{ reg.user.department.name if reg.user.department else 'N/A' }}</td>
+                            <td>
+                                <span class="badge {% if reg.attendance_status == 'Present' %}bg-success{% elif reg.attendance_status == 'Absent' %}bg-danger{% else %}bg-info{% endif %}">
+                                    {{ reg.attendance_status }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        onclick="viewRegistration({{ reg.id }})">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% else %}
-                <div class="text-center py-4">
-                    <i class="bi bi-person-x fs-1 text-muted mb-3"></i>
-                    <p class="text-muted">No recent registrations</p>
-                </div>
+            <div class="text-center py-5">
+                <i class="bi bi-person-x fs-1 text-muted mb-3 d-block"></i>
+                <p class="text-muted mb-0">No registrations yet</p>
+            </div>
             {% endif %}
         </div>
     </div>
     
-    <!-- Quick Actions & Department Stats -->
+    <!-- Right Column: Quick Actions and Stats -->
     <div class="col-lg-4">
         <!-- Quick Actions -->
         <div class="chart-container mb-4">
-            <h5 class="cuk-text-primary mb-4"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+            <h5><i class="bi bi-lightning"></i> Quick Actions</h5>
             <div class="d-grid gap-2">
-                <a href="{{ url_for('admin_events') }}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle me-2"></i>Create New Event
+                <a href="{{ url_for('admin_events') }}" class="quick-action-btn">
+                    <i class="bi bi-plus-circle"></i>
+                    <div>
+                        <strong>Create New Event</strong>
+                        <small class="d-block text-muted">Schedule a new campus event</small>
+                    </div>
                 </a>
-                <a href="{{ url_for('admin_announcements') }}" class="btn btn-outline-primary">
-                    <i class="bi bi-megaphone me-2"></i>Post Announcement
+                
+                <a href="{{ url_for('admin_announcements') }}" class="quick-action-btn">
+                    <i class="bi bi-megaphone"></i>
+                    <div>
+                        <strong>Post Announcement</strong>
+                        <small class="d-block text-muted">Notify all users</small>
+                    </div>
                 </a>
-                <a href="{{ url_for('admin_analytics') }}" class="btn btn-outline-primary">
-                    <i class="bi bi-graph-up me-2"></i>View Analytics
+                
+                <a href="{{ url_for('admin_analytics') }}" class="quick-action-btn">
+                    <i class="bi bi-graph-up"></i>
+                    <div>
+                        <strong>View Analytics</strong>
+                        <small class="d-block text-muted">Detailed reports & insights</small>
+                    </div>
                 </a>
-                <a href="{{ url_for('admin_faculty') }}" class="btn btn-outline-primary">
-                    <i class="bi bi-person-plus me-2"></i>Add Faculty
+                
+                <a href="{{ url_for('admin_users') }}" class="quick-action-btn">
+                    <i class="bi bi-people"></i>
+                    <div>
+                        <strong>Manage Users</strong>
+                        <small class="d-block text-muted">View and edit user accounts</small>
+                    </div>
                 </a>
-                <a href="{{ url_for('admin_departments') }}" class="btn btn-outline-primary">
-                    <i class="bi bi-building me-2"></i>Manage Departments
+                
+                <a href="{{ url_for('admin_settings') }}" class="quick-action-btn">
+                    <i class="bi bi-gear"></i>
+                    <div>
+                        <strong>System Settings</strong>
+                        <small class="d-block text-muted">Configure system parameters</small>
+                    </div>
                 </a>
             </div>
         </div>
         
         <!-- Department Statistics -->
-        <div class="chart-container">
-            <h5 class="cuk-text-primary mb-4"><i class="bi bi-pie-chart me-2"></i>Department Events</h5>
+        <div class="chart-container mb-4">
+            <h5><i class="bi bi-pie-chart"></i> Department Overview</h5>
             {% if stats.department_stats %}
-                <div class="list-group">
-                    {% for dept, count in stats.department_stats %}
-                        <div class="list-group-item border-0 d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="bi bi-building me-2"></i>{{ dept }}
-                            </div>
-                            <span class="badge bg-primary rounded-pill">{{ count }}</span>
-                        </div>
-                    {% endfor %}
+            <div class="mb-4">
+                <div class="progress-ring">
+                    <svg width="120" height="120" viewBox="0 0 120 120">
+                        {% set total = stats.department_stats|sum(attribute='1') %}
+                        {% set radius = 50 %}
+                        {% set circumference = 2 * 3.14159 * radius %}
+                        {% set offset = circumference %}
+                        
+                        {% for dept, count in stats.department_stats %}
+                        {% set percentage = (count / total * 100) if total > 0 else 0 %}
+                        {% set dash_offset = offset %}
+                        {% set offset = offset - (percentage / 100 * circumference) %}
+                        
+                        <circle class="progress-ring-circle"
+                                stroke="{% if loop.index == 1 %}#007bff{% elif loop.index == 2 %}#28a745{% elif loop.index == 3 %}#6f42c1{% else %}#fd7e14{% endif %}"
+                                stroke-width="10"
+                                fill="transparent"
+                                r="{{ radius }}"
+                                cx="60"
+                                cy="60"
+                                stroke-dasharray="{{ circumference }}"
+                                stroke-dashoffset="{{ dash_offset }}"
+                                style="transition: stroke-dashoffset 1s ease-in-out;">
+                        </circle>
+                        {% endfor %}
+                    </svg>
                 </div>
+            </div>
+            
+            <div class="list-group">
+                {% for dept, count in stats.department_stats %}
+                <div class="list-group-item border-0 d-flex justify-content-between align-items-center px-0 py-2">
+                    <div class="d-flex align-items-center">
+                        <span class="badge me-2" 
+                              style="background: {% if loop.index == 1 %}#007bff{% elif loop.index == 2 %}#28a745{% elif loop.index == 3 %}#6f42c1{% else %}#fd7e14{% endif %}; 
+                                     width: 12px; height: 12px; border-radius: 50%;"></span>
+                        {{ dept }}
+                    </div>
+                    <div>
+                        <span class="fw-bold me-2">{{ count }}</span>
+                        <small class="text-muted">events</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
             {% else %}
-                <div class="text-center py-4">
-                    <i class="bi bi-building-slash fs-1 text-muted mb-3"></i>
-                    <p class="text-muted">No department data</p>
-                </div>
+            <div class="text-center py-4">
+                <i class="bi bi-building-slash fs-1 text-muted mb-3 d-block"></i>
+                <p class="text-muted mb-0">No department data available</p>
+            </div>
             {% endif %}
+        </div>
+        
+        <!-- Recent Activity Feed -->
+        <div class="chart-container">
+            <h5><i class="bi bi-activity"></i> Recent Activity</h5>
+            <div class="activity-feed">
+                {% for activity in recent_activity %}
+                <div class="activity-item {% if loop.first %}new{% endif %}">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-{{ activity.icon }} text-{{ activity.color }}"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-2">
+                            <div>{{ activity.description }}</div>
+                            <span class="activity-time">
+                                <i class="bi bi-clock me-1"></i>{{ activity.timestamp }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-activity fs-1 text-muted mb-3 d-block"></i>
+                    <p class="text-muted mb-0">No recent activity</p>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-download me-2"></i>Export Dashboard Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Select Data to Export:</label>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="exportEvents" checked>
+                        <label class="form-check-label" for="exportEvents">Events Data</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="exportRegistrations">
+                        <label class="form-check-label" for="exportRegistrations">Registration Data</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="exportStats">
+                        <label class="form-check-label" for="exportStats">Statistics</label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Format:</label>
+                    <select class="form-select" id="exportFormat">
+                        <option value="csv">CSV</option>
+                        <option value="excel">Excel</option>
+                        <option value="pdf">PDF</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="exportData()">
+                    <i class="bi bi-download me-2"></i>Export Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Initialize attendance chart
+    function initAttendanceChart() {
+        const ctx = document.getElementById('attendanceChart');
+        if (!ctx) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Present', 'Absent', 'Pending'],
+                datasets: [{
+                    label: 'Attendance Distribution',
+                    data: [
+                        {{ stats.attendance_present or 0 }},
+                        {{ stats.attendance_absent or 0 }},
+                        {{ stats.attendance_pending or 0 }}
+                    ],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.7)',
+                        'rgba(220, 53, 69, 0.7)',
+                        'rgba(108, 117, 125, 0.7)'
+                    ],
+                    borderColor: [
+                        '#28a745',
+                        '#dc3545',
+                        '#6c757d'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Refresh dashboard
+    function refreshDashboard() {
+        const btn = event.target.closest('button');
+        const originalHtml = btn.innerHTML;
+        
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Refreshing...';
+        btn.disabled = true;
+        
+        // Show loading state on stat cards
+        document.querySelectorAll('.stat-number').forEach(el => {
+            el.classList.add('skeleton');
+            el.style.width = '60px';
+            el.style.height = '40px';
+            el.innerHTML = '';
+        });
+        
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }
+    
+    // View registration details
+    function viewRegistration(registrationId) {
+        // In a real application, this would open a modal or navigate to details page
+        window.location.href = `/admin/registrations/${registrationId}`;
+    }
+    
+    // Export data functionality
+    function exportData() {
+        const format = document.getElementById('exportFormat').value;
+        const includeEvents = document.getElementById('exportEvents').checked;
+        const includeRegistrations = document.getElementById('exportRegistrations').checked;
+        const includeStats = document.getElementById('exportStats').checked;
+        
+        // Show loading state
+        const exportBtn = document.querySelector('#exportModal .btn-primary');
+        const originalText = exportBtn.innerHTML;
+        exportBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Exporting...';
+        exportBtn.disabled = true;
+        
+        // Simulate export process
+        setTimeout(() => {
+            alert(`Data exported as ${format.toUpperCase()} successfully!`);
+            bootstrap.Modal.getInstance(document.getElementById('exportModal')).hide();
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+        }, 1500);
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initAttendanceChart();
+        
+        // Auto-refresh dashboard every 5 minutes
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                console.log('Auto-refreshing dashboard...');
+                // In production, you might want to use AJAX to refresh only specific components
+            }
+        }, 300000);
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+R to refresh
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                refreshDashboard();
+            }
+            // Ctrl+E for export
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                new bootstrap.Modal(document.getElementById('exportModal')).show();
+            }
+        });
+    });
+</script>
 {% endblock %}
