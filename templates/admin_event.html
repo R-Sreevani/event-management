@@ -1,221 +1,944 @@
 {% extends 'layout.html' %}
-{% block title %}Event Registrations - {{ event.name }}{% endblock %}
+{% block title %}{{ event.name }} - Registrations | Event Management{% endblock %}
 
 {% block extra_css %}
 <style>
+    :root {
+        --stat-present: linear-gradient(135deg, #28a745, #1e7e34);
+        --stat-absent: linear-gradient(135deg, #dc3545, #c82333);
+        --stat-registered: linear-gradient(135deg, #6c757d, #545b62);
+        --stat-total: linear-gradient(135deg, #007bff, #0056b3);
+        --shadow: 0 4px 20px rgba(0,0,0,0.08);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, var(--cuk-blue), #0056b3);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+    }
+    
+    .header-stats {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
     .export-btn {
         background: linear-gradient(135deg, #28a745, #1e7e34);
         color: white;
         border: none;
-        padding: 8px 20px;
-        border-radius: 5px;
-        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 0.5rem;
+        transition: var(--transition);
+        text-decoration: none;
     }
     
     .export-btn:hover {
-        background: linear-gradient(135deg, #218838, #1c7430);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
         color: white;
         text-decoration: none;
     }
     
-    .attendance-btn {
-        padding: 3px 10px;
-        border-radius: 4px;
+    .stat-card {
+        border-radius: 15px;
+        padding: 1.5rem;
+        color: white;
+        margin-bottom: 1.5rem;
+        transition: var(--transition);
         border: none;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
     
-    .present-btn { background: #d4edda; color: #155724; }
-    .absent-btn { background: #f8d7da; color: #721c24; }
-    .present-btn:hover { background: #c3e6cb; }
-    .absent-btn:hover { background: #f5c6cb; }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+    }
+    
+    .stat-card i {
+        position: absolute;
+        right: 1.5rem;
+        bottom: 1.5rem;
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+    
+    .attendance-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 120px;
+        justify-content: center;
+    }
+    
+    .present-btn { 
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+        color: white;
+    }
+    
+    .absent-btn { 
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+    }
+    
+    .pending-btn { 
+        background: linear-gradient(135deg, #6c757d, #545b62);
+        color: white;
+    }
+    
+    .present-btn:hover { 
+        background: linear-gradient(135deg, #218838, #1e7e34);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+    
+    .absent-btn:hover { 
+        background: linear-gradient(135deg, #c82333, #bd2130);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+    
+    .pending-btn:hover { 
+        background: linear-gradient(135deg, #545b62, #4a5056);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+    
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--cuk-blue), #0056b3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    
+    .search-box {
+        position: relative;
+    }
+    
+    .search-box input {
+        padding-left: 2.5rem;
+        border-radius: 10px;
+        border: 2px solid #dee2e6;
+        transition: var(--transition);
+    }
+    
+    .search-box input:focus {
+        border-color: var(--cuk-blue);
+        box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.1);
+    }
+    
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    
+    .filter-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        background: var(--cuk-blue-light);
+        color: var(--cuk-blue);
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .filter-badge:hover, .filter-badge.active {
+        background: var(--cuk-blue);
+        color: white;
+    }
+    
+    .table-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    
+    .table-container h3 {
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .registration-row {
+        transition: var(--transition);
+        cursor: pointer;
+    }
+    
+    .registration-row:hover {
+        background: #f8fafc;
+        transform: translateX(5px);
+    }
+    
+    .qr-code {
+        width: 80px;
+        height: 80px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 2rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .qr-code:hover {
+        background: var(--cuk-blue-light);
+        color: var(--cuk-blue);
+        transform: scale(1.05);
+    }
+    
+    .qr-modal .modal-content {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .qr-modal .modal-header {
+        background: linear-gradient(135deg, var(--cuk-blue), #0056b3);
+        color: white;
+        border: none;
+    }
+    
+    .modal-qr {
+        width: 200px;
+        height: 200px;
+        margin: 0 auto;
+    }
+    
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 1.5rem;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .table-container {
+            padding: 1rem;
+        }
+        
+        .mobile-hide {
+            display: none;
+        }
+    }
+    
+    .badge-status {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        letter-spacing: 0.3px;
+    }
+    
+    .attendance-legend {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+    }
+    
+    .search-info {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        display: none;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-8">
-        <h1 class="cuk-text-primary">
-            <i class="bi bi-people me-2"></i>Event Registrations
-        </h1>
-        <p class="text-muted">{{ event.name }}</p>
-        <div class="d-flex align-items-center gap-3 mb-3">
-            <span class="badge bg-primary">{{ event.category|title }}</span>
-            <span><i class="bi bi-calendar me-1"></i>{{ event.date.strftime('%d %b %Y') }}</span>
-            <span><i class="bi bi-geo-alt me-1"></i>{{ event.venue }}</span>
-            <span class="text-muted">{{ registrations|length }}/{{ event.capacity }} registered</span>
-        </div>
-    </div>
-    <div class="col-md-4 text-end">
-        <a href="{{ url_for('export_registrations', event_id=event.id) }}" class="export-btn">
-            <i class="bi bi-download me-1"></i>Export as CSV
-        </a>
-        <a href="{{ url_for('admin_events') }}" class="btn btn-outline-primary ms-2">
-            <i class="bi bi-arrow-left me-1"></i>Back to Events
-        </a>
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-body">
-        {% if registrations %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Registration No</th>
-                            <th>Department</th>
-                            <th>Registered At</th>
-                            <th>Attendance</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for reg in registrations %}
-                            <tr>
-                                <td>{{ loop.index }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="ms-2">
-                                            <div>{{ reg.user.name }}</div>
-                                            {% if reg.user.phone %}
-                                                <small class="text-muted">{{ reg.user.phone }}</small>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>{{ reg.user.email }}</td>
-                                <td>{{ reg.user.registration_no or 'N/A' }}</td>
-                                <td>
-                                    {% if reg.user.department %}
-                                        <span class="badge bg-info">{{ reg.user.department.code }}</span>
-                                    {% else %}
-                                        <span class="text-muted">N/A</span>
-                                    {% endif %}
-                                </td>
-                                <td>{{ reg.registered_at.strftime('%d %b %Y %H:%M') }}</td>
-                                <td>
-                                    <span class="badge 
-                                        {% if reg.attendance_status == 'Present' %}bg-success
-                                        {% elif reg.attendance_status == 'Absent' %}bg-danger
-                                        {% else %}bg-secondary{% endif %}">
-                                        {{ reg.attendance_status }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="attendance-btn present-btn" 
-                                                onclick="updateAttendance({{ reg.id }}, 'Present')"
-                                                title="Mark as Present">
-                                            <i class="bi bi-check-circle"></i>
-                                        </button>
-                                        <button class="attendance-btn absent-btn"
-                                                onclick="updateAttendance({{ reg.id }}, 'Absent')"
-                                                title="Mark as Absent">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center mb-2">
+                <h1 class="display-6 fw-bold mb-0">{{ event.name }}</h1>
+                <span class="badge bg-light text-dark ms-3" style="font-size: 1rem;">
+                    <i class="bi bi-people-fill me-1"></i>{{ registrations|length }}/{{ event.capacity }}
+                </span>
             </div>
             
-            <!-- Summary Statistics -->
-            <div class="row mt-4">
-                <div class="col-md-3">
-                    <div class="card border-primary">
-                        <div class="card-body text-center">
-                            <h3 class="text-primary">{{ registrations|length }}</h3>
-                            <p class="text-muted mb-0">Total Registered</p>
-                        </div>
+            <div class="d-flex align-items-center flex-wrap gap-3 mb-3">
+                <span class="badge bg-white text-primary" style="font-size: 1rem;">
+                    <i class="bi bi-calendar-event me-1"></i>{{ event.date.strftime('%d %b %Y') }}
+                </span>
+                <span class="badge bg-white text-primary" style="font-size: 1rem;">
+                    <i class="bi bi-clock me-1"></i>{{ event.date.strftime('%I:%M %p') }}
+                </span>
+                <span class="badge bg-white text-primary" style="font-size: 1rem;">
+                    <i class="bi bi-geo-alt me-1"></i>{{ event.venue }}
+                </span>
+            </div>
+            
+            <div class="header-stats">
+                <div class="row">
+                    <div class="col-auto">
+                        <strong>Category:</strong> {{ event.category|title }}
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card border-success">
-                        <div class="card-body text-center">
-                            <h3 class="text-success">
-                                {{ registrations|selectattr('attendance_status', 'equalto', 'Present')|list|length }}
-                            </h3>
-                            <p class="text-muted mb-0">Present</p>
-                        </div>
+                    <div class="col-auto">
+                        <strong>Department:</strong> {{ event.department.name if event.department else 'General' }}
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card border-danger">
-                        <div class="card-body text-center">
-                            <h3 class="text-danger">
-                                {{ registrations|selectattr('attendance_status', 'equalto', 'Absent')|list|length }}
-                            </h3>
-                            <p class="text-muted mb-0">Absent</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card border-secondary">
-                        <div class="card-body text-center">
-                            <h3 class="text-secondary">
-                                {{ registrations|selectattr('attendance_status', 'equalto', 'Registered')|list|length }}
-                            </h3>
-                            <p class="text-muted mb-0">Not Marked</p>
-                        </div>
+                    <div class="col-auto">
+                        <strong>Created:</strong> {{ event.created_at.strftime('%d %b %Y') }}
                     </div>
                 </div>
             </div>
-        {% else %}
-            <div class="text-center py-5">
-                <i class="bi bi-people-slash fs-1 text-muted mb-3"></i>
-                <h4 class="text-muted">No Registrations Yet</h4>
-                <p class="text-muted">No one has registered for this event yet.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="btn-group" role="group">
+                <button type="button" class="export-btn" onclick="exportData('csv')">
+                    <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV
+                </button>
+                <button type="button" class="btn btn-light ms-2" onclick="exportData('excel')">
+                    <i class="bi bi-file-earmark-excel"></i> Excel
+                </button>
             </div>
-        {% endif %}
+            <a href="{{ url_for('admin_events') }}" class="btn btn-outline-light ms-2">
+                <i class="bi bi-arrow-left me-1"></i>Back to Events
+            </a>
+        </div>
     </div>
 </div>
 
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card" style="background: var(--stat-total);">
+            <div class="stat-number" style="font-size: 2.5rem; font-weight: 700;">
+                {{ registrations|length }}
+            </div>
+            <div class="stat-label">Total Registered</div>
+            <small>{{ ((registrations|length / event.capacity) * 100)|round(1) if event.capacity > 0 else 0 }}% capacity</small>
+            <i class="bi bi-people-fill"></i>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card" style="background: var(--stat-present);">
+            <div class="stat-number" style="font-size: 2.5rem; font-weight: 700;">
+                {{ present_count }}
+            </div>
+            <div class="stat-label">Present</div>
+            <small>{{ ((present_count / registrations|length) * 100)|round(1) if registrations|length > 0 else 0 }}% of registrants</small>
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card" style="background: var(--stat-absent);">
+            <div class="stat-number" style="font-size: 2.5rem; font-weight: 700;">
+                {{ absent_count }}
+            </div>
+            <div class="stat-label">Absent</div>
+            <small>{{ ((absent_count / registrations|length) * 100)|round(1) if registrations|length > 0 else 0 }}% of registrants</small>
+            <i class="bi bi-x-circle-fill"></i>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card" style="background: var(--stat-registered);">
+            <div class="stat-number" style="font-size: 2.5rem; font-weight: 700;">
+                {{ pending_count }}
+            </div>
+            <div class="stat-label">Pending</div>
+            <small>Not marked yet</small>
+            <i class="bi bi-clock-history"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by name, email, or registration number...">
+        </div>
+        <div id="searchInfo" class="search-info">
+            Showing <span id="searchCount">0</span> results for "<span id="searchTerm"></span>"
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="d-flex gap-2 justify-content-md-end">
+            <div class="btn-group" role="group">
+                <button type="button" class="filter-badge {% if filter_status == 'all' %}active{% endif %}" 
+                        onclick="filterRegistrations('all')">All</button>
+                <button type="button" class="filter-badge {% if filter_status == 'Present' %}active{% endif %}" 
+                        onclick="filterRegistrations('Present')">Present</button>
+                <button type="button" class="filter-badge {% if filter_status == 'Absent' %}active{% endif %}" 
+                        onclick="filterRegistrations('Absent')">Absent</button>
+                <button type="button" class="filter-badge {% if filter_status == 'Registered' %}active{% endif %}" 
+                        onclick="filterRegistrations('Registered')">Pending</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Attendance Legend -->
+<div class="attendance-legend mb-3">
+    <div class="legend-item">
+        <div class="legend-color" style="background: #28a745;"></div>
+        <span>Present</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #dc3545;"></div>
+        <span>Absent</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #6c757d;"></div>
+        <span>Pending</span>
+    </div>
+</div>
+
+<!-- Registrations Table -->
+<div class="table-container">
+    <h3>
+        <span><i class="bi bi-list-check me-2"></i>Registrations List</span>
+        <span class="text-muted" style="font-size: 1rem;">
+            <span id="filterCount">{{ registrations|length }}</span> registrations
+        </span>
+    </h3>
+    
+    {% if registrations %}
+        <div class="table-responsive">
+            <table class="table table-hover" id="registrationsTable">
+                <thead>
+                    <tr>
+                        <th width="50">#</th>
+                        <th>Participant</th>
+                        <th class="mobile-hide">Contact</th>
+                        <th class="mobile-hide">Department</th>
+                        <th>Registration Date</th>
+                        <th width="150">Attendance</th>
+                        <th width="150">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reg in registrations %}
+                        <tr class="registration-row {% if reg.attendance_status == 'Present' %}table-success{% elif reg.attendance_status == 'Absent' %}table-danger{% endif %}" 
+                            data-status="{{ reg.attendance_status }}"
+                            data-name="{{ reg.user.name|lower }}"
+                            data-email="{{ reg.user.email|lower }}"
+                            data-regno="{{ reg.user.registration_no|default('')|lower }}">
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar me-3">
+                                        {{ reg.user.name[:1]|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">{{ reg.user.name }}</div>
+                                        <small class="text-muted mobile-show">{{ reg.user.email|truncate(20) }}</small>
+                                        {% if reg.user.registration_no %}
+                                            <small class="text-muted d-block">{{ reg.user.registration_no }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="mobile-hide">
+                                <div>{{ reg.user.email }}</div>
+                                {% if reg.user.phone %}
+                                    <small class="text-muted">{{ reg.user.phone }}</small>
+                                {% endif %}
+                            </td>
+                            <td class="mobile-hide">
+                                {% if reg.user.department %}
+                                    <span class="badge bg-info">{{ reg.user.department.code }}</span>
+                                    <small class="d-block text-muted">{{ reg.user.department.name }}</small>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>{{ reg.registered_at.strftime('%d %b %Y') }}</div>
+                                <small class="text-muted">{{ reg.registered_at.strftime('%I:%M %p') }}</small>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <button class="attendance-btn present-btn {% if reg.attendance_status == 'Present' %}active{% endif %}" 
+                                            onclick="updateAttendance({{ reg.id }}, 'Present')"
+                                            data-registration-id="{{ reg.id }}">
+                                        <i class="bi bi-check-circle"></i> Present
+                                    </button>
+                                    <button class="attendance-btn absent-btn {% if reg.attendance_status == 'Absent' %}active{% endif %}" 
+                                            onclick="updateAttendance({{ reg.id }}, 'Absent')"
+                                            data-registration-id="{{ reg.id }}">
+                                        <i class="bi bi-x-circle"></i> Absent
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-primary" 
+                                            onclick="viewRegistration({{ reg.id }})"
+                                            title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" 
+                                            onclick="showQR('{{ reg.id }}', '{{ reg.user.name }}')"
+                                            title="Show QR Code">
+                                        <i class="bi bi-qr-code"></i>
+                                    </button>
+                                    {% if current_user.is_admin %}
+                                    <button type="button" class="btn btn-outline-danger" 
+                                            onclick="deleteRegistration({{ reg.id }})"
+                                            title="Remove Registration">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="text-muted">
+                Showing {{ registrations|length }} of {{ total_registrations }} registrations
+            </div>
+            <div>
+                <a href="#" class="btn btn-outline-primary">
+                    <i class="bi bi-printer me-1"></i>Print List
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-people-slash" style="font-size: 4rem; color: #dee2e6;"></i>
+            </div>
+            <h4 class="text-muted mb-3">No Registrations Yet</h4>
+            <p class="text-muted mb-4">No participants have registered for this event yet.</p>
+            <a href="{{ url_for('admin_event_detail', event_id=event.id) }}" class="btn btn-primary">
+                <i class="bi bi-share me-1"></i>Share Event Link
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-primary">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="markAllPresent()">
+                        <i class="bi bi-check-all me-2"></i>Mark All Present
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="markAllAbsent()">
+                        <i class="bi bi-x-circle me-2"></i>Mark All Absent
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="resetAllAttendance()">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i>Reset All to Pending
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-success">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-graph-up me-2"></i>Attendance Analytics</h5>
+                <div id="attendanceChart" style="height: 200px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade qr-modal" id="qrModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-qr-code me-2"></i>Registration QR Code
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrCode" class="modal-qr mb-3"></div>
+                <h5 id="qrUserName" class="mb-2"></h5>
+                <p class="text-muted" id="qrEventName">{{ event.name }}</p>
+                <div class="mt-4">
+                    <button class="btn btn-outline-primary" onclick="printQRCode()">
+                        <i class="bi bi-printer me-2"></i>Print QR Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
-function updateAttendance(registrationId, status) {
-    if (confirm(`Mark attendance as ${status}?`)) {
-        fetch(`/api/attendance/${registrationId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status: status })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
+    // Initialize variables
+    let allRegistrations = {{ registrations|tojson|safe }};
+    let currentFilter = 'all';
+    
+    // Update attendance function
+    function updateAttendance(registrationId, status) {
+        if (confirm(`Mark attendance as ${status}?`)) {
+            const btn = event.target.closest('button');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+            
+            fetch(`/api/attendance/${registrationId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ status: status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Failed to update attendance');
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="bi bi-${status === 'Present' ? 'check-circle' : 'x-circle'}"></i> ${status}`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
                 alert('Failed to update attendance');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="bi bi-${status === 'Present' ? 'check-circle' : 'x-circle'}"></i> ${status}`;
+            });
+        }
+    }
+    
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#registrationsTable tbody tr');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const name = row.getAttribute('data-name');
+            const email = row.getAttribute('data-email');
+            const regno = row.getAttribute('data-regno');
+            const status = row.getAttribute('data-status');
+            
+            const matchesSearch = searchTerm === '' || 
+                name.includes(searchTerm) || 
+                email.includes(searchTerm) || 
+                regno.includes(searchTerm);
+            
+            const matchesFilter = currentFilter === 'all' || status === currentFilter;
+            
+            if (matchesSearch && matchesFilter) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to update attendance');
+        });
+        
+        // Update counter
+        document.getElementById('filterCount').textContent = visibleCount;
+        
+        // Show search info
+        const searchInfo = document.getElementById('searchInfo');
+        if (searchTerm) {
+            document.getElementById('searchTerm').textContent = searchTerm;
+            document.getElementById('searchCount').textContent = visibleCount;
+            searchInfo.style.display = 'block';
+        } else {
+            searchInfo.style.display = 'none';
+        }
+    });
+    
+    // Filter registrations
+    function filterRegistrations(status) {
+        currentFilter = status;
+        const rows = document.querySelectorAll('#registrationsTable tbody tr');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const rowStatus = row.getAttribute('data-status');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const name = row.getAttribute('data-name');
+            const email = row.getAttribute('data-email');
+            const regno = row.getAttribute('data-regno');
+            
+            const matchesSearch = searchTerm === '' || 
+                name.includes(searchTerm) || 
+                email.includes(searchTerm) || 
+                regno.includes(searchTerm);
+            
+            const matchesFilter = status === 'all' || rowStatus === status;
+            
+            if (matchesSearch && matchesFilter) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update active filter button
+        document.querySelectorAll('.filter-badge').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // Update counter
+        document.getElementById('filterCount').textContent = visibleCount;
+    }
+    
+    // Initialize attendance chart
+    function initAttendanceChart() {
+        const ctx = document.getElementById('attendanceChart');
+        if (!ctx) return;
+        
+        const data = {
+            labels: ['Present', 'Absent', 'Pending'],
+            datasets: [{
+                data: [{{ present_count }}, {{ absent_count }}, {{ pending_count }}],
+                backgroundColor: ['#28a745', '#dc3545', '#6c757d'],
+                borderWidth: 1
+            }]
+        };
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
         });
     }
-}
-
-// Add this route to your app.py if not already present
-/*
-@app.route('/api/attendance/<int:registration_id>', methods=['PUT'])
-@admin_required
-def update_attendance(registration_id):
-    registration = Registration.query.get_or_404(registration_id)
-    data = request.json
-    registration.attendance_status = data.get('status', 'Registered')
-    db.session.commit()
-    return jsonify({'success': True})
-*/
+    
+    // Show QR code
+    function showQR(registrationId, userName) {
+        const qrContent = JSON.stringify({
+            registration_id: registrationId,
+            event_id: {{ event.id }},
+            timestamp: new Date().toISOString()
+        });
+        
+        QRCode.toCanvas(document.getElementById('qrCode'), qrContent, {
+            width: 200,
+            margin: 1,
+            color: {
+                dark: '#007bff',
+                light: '#ffffff'
+            }
+        }, function(error) {
+            if (error) console.error(error);
+        });
+        
+        document.getElementById('qrUserName').textContent = userName;
+        new bootstrap.Modal(document.getElementById('qrModal')).show();
+    }
+    
+    // Print QR code
+    function printQRCode() {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>QR Code - {{ event.name }}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+                        h3 { color: #333; margin-bottom: 10px; }
+                        p { color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <h3>{{ event.name }}</h3>
+                    <p>${document.getElementById('qrUserName').textContent}</p>
+                    <img src="${document.getElementById('qrCode').toDataURL()}" width="200" height="200">
+                    <p><small>Generated on ${new Date().toLocaleDateString()}</small></p>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+    }
+    
+    // Export data
+    function exportData(format) {
+        fetch(`/api/export/registrations/{{ event.id }}?format=${format}`)
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `registrations_${format}_{{ event.id }}_${new Date().toISOString().split('T')[0]}.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to export data');
+            });
+    }
+    
+    // Bulk actions
+    function markAllPresent() {
+        if (confirm('Mark all registrations as Present? This cannot be undone.')) {
+            // Implementation for bulk update
+        }
+    }
+    
+    function markAllAbsent() {
+        if (confirm('Mark all registrations as Absent? This cannot be undone.')) {
+            // Implementation for bulk update
+        }
+    }
+    
+    function resetAllAttendance() {
+        if (confirm('Reset all attendance to Pending? This cannot be undone.')) {
+            // Implementation for bulk update
+        }
+    }
+    
+    // View registration details
+    function viewRegistration(registrationId) {
+        window.location.href = `/admin/registrations/${registrationId}/detail`;
+    }
+    
+    // Delete registration
+    function deleteRegistration(registrationId) {
+        if (confirm('Are you sure you want to remove this registration? This action cannot be undone.')) {
+            fetch(`/api/registrations/${registrationId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Failed to delete registration');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to delete registration');
+            });
+        }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initAttendanceChart();
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+F for search
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+            // Ctrl+P for print
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+        });
+    });
 </script>
 {% endblock %}
