@@ -68,17 +68,21 @@
             <div class="col-md-8">
                 <div class="d-flex align-items-center mb-3">
                     <span class="badge bg-light text-dark me-3">
-                        {{ event.category|title }}
+                        {{ event.category|title if event.category else 'General' }}
                     </span>
                     {% if event.department %}
-                        <span class="badge bg-info">{{ event.department.code }}</span>
+                        <span class="badge bg-info">{{ event.department.code if event.department.code else event.department }}</span>
                     {% endif %}
                 </div>
                 <h1 class="display-5 fw-bold mb-3">{{ event.name }}</h1>
                 <div class="d-flex flex-wrap gap-4">
                     <div>
                         <i class="bi bi-calendar me-2"></i>
-                        {{ event.date.strftime('%A, %d %B %Y') }}
+                        {% if event.date %}
+                            {{ event.date.strftime('%A, %d %B %Y') }}
+                        {% else %}
+                            Date TBD
+                        {% endif %}
                     </div>
                     {% if event.start_time %}
                         <div>
@@ -88,19 +92,27 @@
                     {% endif %}
                     <div>
                         <i class="bi bi-geo-alt me-2"></i>
-                        {{ event.venue }}
+                        {{ event.venue or 'Venue TBD' }}
                     </div>
                 </div>
             </div>
             <div class="col-md-4 text-end">
                 <div class="rating-stars mb-2">
+                    {% set avg_rating_value = avg_rating or 0 %}
                     {% for i in range(5) %}
-                        <i class="bi bi-star{% if i < avg_rating %}fill{% endif %}"></i>
+                        {% if i < avg_rating_value %}
+                            <i class="bi bi-star-fill"></i>
+                        {% else %}
+                            <i class="bi bi-star"></i>
+                        {% endif %}
                     {% endfor %}
-                    <span class="ms-2">{{ avg_rating }}/5 ({{ feedbacks|length }} reviews)</span>
+                    <span class="ms-2">
+                        {{ "%.1f"|format(avg_rating_value) if avg_rating_value else "0.0" }}/5 
+                        ({{ feedbacks|length if feedbacks else 0 }} reviews)
+                    </span>
                 </div>
                 <div class="badge bg-light text-dark fs-6">
-                    {{ event.registrations|length }}/{{ event.capacity }} Registered
+                    {{ event.registrations|length if event.registrations else 0 }}/{{ event.capacity or 0 }} Registered
                 </div>
             </div>
         </div>
@@ -115,7 +127,7 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h4 class="cuk-text-primary mb-3">About this Event</h4>
-                    <p class="card-text">{{ event.description|safe }}</p>
+                    <p class="card-text">{{ event.description|safe if event.description else 'No description available.' }}</p>
                 </div>
             </div>
             
@@ -131,7 +143,11 @@
                             </div>
                             <div>
                                 <strong>Date</strong><br>
-                                {{ event.date.strftime('%d %B %Y') }}
+                                {% if event.date %}
+                                    {{ event.date.strftime('%d %B %Y') }}
+                                {% else %}
+                                    To be announced
+                                {% endif %}
                             </div>
                         </div>
                         
@@ -151,7 +167,7 @@
                             </div>
                             <div>
                                 <strong>Venue</strong><br>
-                                {{ event.venue }}
+                                {{ event.venue or 'To be announced' }}
                             </div>
                         </div>
                         
@@ -161,7 +177,7 @@
                             </div>
                             <div>
                                 <strong>Capacity</strong><br>
-                                {{ event.capacity }} seats
+                                {{ event.capacity or 'Unlimited' }} seats
                             </div>
                         </div>
                     </div>
@@ -178,8 +194,10 @@
                                 </div>
                                 <div>
                                     <strong>Faculty Coordinator</strong><br>
-                                    {{ event.faculty_coordinator.name }}<br>
-                                    <small class="text-muted">{{ event.faculty_coordinator.designation }}</small>
+                                    {{ event.faculty_coordinator.name if event.faculty_coordinator.name else event.faculty_coordinator }}<br>
+                                    {% if event.faculty_coordinator.designation %}
+                                        <small class="text-muted">{{ event.faculty_coordinator.designation }}</small>
+                                    {% endif %}
                                 </div>
                             </div>
                         {% endif %}
@@ -191,8 +209,14 @@
                                 </div>
                                 <div>
                                     <strong>Department</strong><br>
-                                    {{ event.department.name }} ({{ event.department.code }})<br>
-                                    <small class="text-muted">{{ event.department.description }}</small>
+                                    {{ event.department.name if event.department.name else event.department }} 
+                                    {% if event.department.code %}
+                                        ({{ event.department.code }})
+                                    {% endif %}
+                                    <br>
+                                    {% if event.department.description %}
+                                        <small class="text-muted">{{ event.department.description }}</small>
+                                    {% endif %}
                                 </div>
                             </div>
                         {% endif %}
@@ -205,23 +229,29 @@
                 <div class="card-body">
                     <h4 class="cuk-text-primary mb-4">Feedback & Reviews</h4>
                     
-                    {% if feedbacks %}
+                    {% if feedbacks and feedbacks|length > 0 %}
                         {% for feedback in feedbacks %}
                             <div class="feedback-card">
                                 <div class="d-flex justify-content-between mb-2">
                                     <div>
-                                        <strong>{{ feedback.user.name }}</strong>
+                                        <strong>{{ feedback.user.name if feedback.user.name else 'Anonymous' }}</strong>
                                         <small class="text-muted ms-2">
-                                            {{ feedback.submitted_date.strftime('%d %b %Y') }}
+                                            {% if feedback.submitted_date %}
+                                                {{ feedback.submitted_date.strftime('%d %b %Y') }}
+                                            {% endif %}
                                         </small>
                                     </div>
                                     <div class="rating-stars">
                                         {% for i in range(5) %}
-                                            <i class="bi bi-star{% if i < feedback.rating %}fill{% endif %}"></i>
+                                            {% if i < feedback.rating %}
+                                                <i class="bi bi-star-fill"></i>
+                                            {% else %}
+                                                <i class="bi bi-star"></i>
+                                            {% endif %}
                                         {% endfor %}
                                     </div>
                                 </div>
-                                <p class="mb-0">{{ feedback.comment }}</p>
+                                <p class="mb-0">{{ feedback.comment or 'No comment' }}</p>
                             </div>
                         {% endfor %}
                     {% else %}
@@ -296,12 +326,16 @@
                                 </a>
                             </div>
                         {% else %}
+                            {# Fixed: Using current_datetime instead of now #}
+                            {% set current_date = current_datetime.date() if current_datetime else none %}
+                            {% set event_date = event.date if event.date else none %}
+                            
                             {% if event.registrations|length >= event.capacity %}
                                 <div class="alert alert-danger">
                                     <i class="bi bi-exclamation-triangle me-2"></i>
                                     Event is full!
                                 </div>
-                            {% elif event.date < now.date() %}
+                            {% elif event_date and current_date and event_date < current_date %}
                                 <div class="alert alert-warning">
                                     <i class="bi bi-clock-history me-2"></i>
                                     Event has passed
@@ -319,7 +353,7 @@
                         <div class="text-center">
                             <small class="text-muted">
                                 <i class="bi bi-info-circle me-1"></i>
-                                {{ event.registrations|length }} out of {{ event.capacity }} seats filled
+                                {{ event.registrations|length if event.registrations else 0 }} out of {{ event.capacity or 'Unlimited' }} seats filled
                             </small>
                         </div>
                     </div>
@@ -367,5 +401,14 @@ function setRating(rating) {
     
     ratingInput.value = rating;
 }
+
+// Initialize with no rating selected
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('#ratingStars i');
+    stars.forEach(star => {
+        star.classList.remove('bi-star-fill');
+        star.classList.add('bi-star');
+    });
+});
 </script>
 {% endblock %}
