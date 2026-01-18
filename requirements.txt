@@ -1,32 +1,4 @@
-# Core Flask - MUST USE THESE VERSIONS
-Flask==2.3.3
+Flask==3.0.0
 gunicorn==21.2.0
-Werkzeug==2.3.7
-
-# Database - SQLAlchemy 1.4.x (compatible with Python 3.13)
-Flask-SQLAlchemy==3.0.3
-SQLAlchemy==1.4.47
-psycopg2-binary==2.9.9
-
-# Authentication & Security
-Flask-Login==0.6.2
-python-dotenv==1.0.0
-itsdangerous==2.1.2
-
-# Forms
-Flask-WTF==1.1.1
-WTForms==3.0.1
-email-validator==2.2.0
-
-# File Processing
-Pillow==10.4.0
-
-# Additional Features
-Flask-CORS==4.0.0
-Flask-RESTful==0.3.10
-Flask-Caching==2.1.0
-Flask-Limiter==3.5.0
-
-# Utilities
-qrcode==7.4.2
-matplotlib==3.8.0
+Flask-SQLAlchemy==3.0.5
+Werkzeug==3.0.1
