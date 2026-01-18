@@ -1,64 +1,221 @@
 {% extends 'layout.html' %}
-{% block title %}Login{% endblock %}
+{% block title %}Login | CUK Events Portal{% endblock %}
 
 {% block extra_css %}
 <style>
+    :root {
+        --login-gradient: linear-gradient(135deg, #003366 0%, #004080 50%, #0055a5 100%);
+        --shadow: 0 10px 40px rgba(0,0,0,0.1);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Background Animation */
+    .login-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--login-gradient);
+        z-index: -2;
+        overflow: hidden;
+    }
+    
+    .login-bg::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: float 20s linear infinite;
+    }
+    
+    @keyframes float {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        100% { transform: translate(-50px, -50px) rotate(360deg); }
+    }
+    
+    .login-bg::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(0,0,0,0.1) 50%, transparent 70%);
+        animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+        0%, 100% { opacity: 0.1; }
+        50% { opacity: 0.3; }
+    }
+    
+    /* Login Container */
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    
     .login-container {
-        max-width: 450px;
-        margin: 0 auto;
-        padding: 40px 20px;
+        max-width: 480px;
+        width: 100%;
+        animation: slideUp 0.6s ease;
     }
     
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Card Styling */
     .login-card {
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        padding: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
     }
     
-    .university-header-login {
+    .login-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, var(--cuk-blue), var(--cuk-green));
+    }
+    
+    /* Header */
+    .login-header {
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 2.5rem;
     }
     
     .logo-circle {
-        width: 70px;
-        height: 70px;
+        width: 80px;
+        height: 80px;
         background: linear-gradient(135deg, var(--cuk-blue), var(--cuk-green));
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 15px;
+        margin: 0 auto 1.5rem;
         color: white;
-        font-size: 1.8rem;
+        font-size: 2rem;
+        box-shadow: 0 8px 20px rgba(0, 51, 102, 0.3);
+        position: relative;
+        overflow: hidden;
+        animation: pulse 2s infinite;
+    }
+    
+    .logo-circle::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+        animation: rotate 4s linear infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .university-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--cuk-blue);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
+    }
+    
+    .university-subtitle {
+        color: #6c757d;
+        font-size: 0.95rem;
+        margin-bottom: 0;
+    }
+    
+    /* Form Styling */
+    .form-group {
+        margin-bottom: 1.75rem;
+        position: relative;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: #495057;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .input-group {
+        position: relative;
     }
     
     .form-icon {
         position: absolute;
-        left: 15px;
+        left: 1rem;
         top: 50%;
         transform: translateY(-50%);
-        color: #6c757d;
+        color: var(--cuk-blue);
         z-index: 10;
+        font-size: 1.1rem;
+        transition: var(--transition);
     }
     
     .form-control {
-        padding-left: 45px;
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
-        transition: all 0.3s;
-        height: 45px;
+        padding: 0.875rem 1rem 0.875rem 3rem;
+        border-radius: 12px;
+        border: 2px solid #e9ecef;
+        font-size: 1rem;
+        transition: var(--transition);
+        background: white;
+        height: 52px;
     }
     
     .form-control:focus {
         border-color: var(--cuk-blue);
-        box-shadow: 0 0 0 0.25rem rgba(0, 51, 102, 0.25);
+        box-shadow: 0 0 0 0.25rem rgba(0, 51, 102, 0.15);
+        transform: translateY(-1px);
     }
     
+    .form-control:focus + .form-icon {
+        color: var(--cuk-green);
+        transform: translateY(-50%) scale(1.1);
+    }
+    
+    /* Password Toggle */
     .password-toggle {
         position: absolute;
-        right: 15px;
+        right: 1rem;
         top: 50%;
         transform: translateY(-50%);
         background: none;
@@ -66,167 +223,445 @@
         color: #6c757d;
         cursor: pointer;
         z-index: 10;
-    }
-    
-    .demo-section {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 15px;
-        margin-top: 20px;
-    }
-    
-    .demo-account {
-        background: white;
+        padding: 0.5rem;
         border-radius: 8px;
-        padding: 10px;
-        margin-bottom: 10px;
-        border: 1px solid #dee2e6;
+        transition: var(--transition);
+    }
+    
+    .password-toggle:hover {
+        background: #f8f9fa;
+        color: var(--cuk-blue);
+    }
+    
+    /* Remember Me & Forgot Password */
+    .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .form-check {
+        margin-bottom: 0;
+    }
+    
+    .form-check-input {
+        width: 1.1em;
+        height: 1.1em;
+        margin-top: 0.1em;
+        border: 2px solid #dee2e6;
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--cuk-blue);
+        border-color: var(--cuk-blue);
+    }
+    
+    .form-check-label {
+        font-size: 0.9rem;
+        color: #495057;
+        cursor: pointer;
     }
     
     .forgot-password {
         color: var(--cuk-blue);
         text-decoration: none;
         font-size: 0.9rem;
+        font-weight: 500;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     
     .forgot-password:hover {
-        text-decoration: underline;
+        color: var(--cuk-green);
+        transform: translateX(3px);
+    }
+    
+    /* Submit Button */
+    .submit-btn {
+        background: linear-gradient(135deg, var(--cuk-blue), var(--cuk-green));
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        width: 100%;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: 0.5s;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 51, 102, 0.3);
+    }
+    
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+    
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Register Link */
+    .register-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .register-link a {
+        color: var(--cuk-blue);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .register-link a:hover {
+        color: var(--cuk-green);
+        transform: translateX(5px);
+    }
+    
+    /* Demo Accounts */
+    .demo-section {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .demo-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        color: #495057;
+    }
+    
+    .demo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+    }
+    
+    .demo-account {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 2px solid transparent;
+        transition: var(--transition);
+        cursor: pointer;
+        text-align: center;
+    }
+    
+    .demo-account:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-color: var(--cuk-blue);
+    }
+    
+    .demo-account.admin { border-left: 4px solid var(--cuk-blue); }
+    .demo-account.student { border-left: 4px solid var(--cuk-green); }
+    .demo-account.faculty { border-left: 4px solid #ffc107; }
+    
+    .demo-role {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .demo-account.admin .demo-role { color: var(--cuk-blue); }
+    .demo-account.student .demo-role { color: var(--cuk-green); }
+    .demo-account.faculty .demo-role { color: #ffc107; }
+    
+    .demo-credentials {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-align: left;
+        line-height: 1.5;
+    }
+    
+    .demo-btn {
+        margin-top: 0.75rem;
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        transition: var(--transition);
+    }
+    
+    .demo-btn:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 576px) {
+        .login-page {
+            padding: 1rem;
+        }
+        
+        .login-card {
+            padding: 2rem;
+        }
+        
+        .demo-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-options {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .login-bg::before {
+            background-size: 30px 30px;
+        }
+    }
+    
+    /* Loading State */
+    .loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+    
+    .loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        margin: -10px 0 0 -10px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <div class="login-card">
-        <!-- University Header -->
-        <div class="university-header-login">
-            <div class="logo-circle">
-                <i class="bi bi-building"></i>
-            </div>
-            <h4 class="cuk-text-primary mb-2">Central University of Karnataka</h4>
-            <p class="text-muted">Event Management System</p>
-        </div>
-        
-        <h5 class="text-center mb-4">Sign in to your account</h5>
-        
-        <form method="POST" id="loginForm">
-            <!-- Email -->
-            <div class="mb-3">
-                <label class="form-label">University Email</label>
-                <div class="position-relative">
-                    <i class="bi bi-envelope form-icon"></i>
-                    <input type="email" name="email" class="form-control" 
-                           placeholder="name@cuk.ac.in" required
-                           value="admin@cuk.ac.in">
+<div class="login-bg"></div>
+
+<div class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Header -->
+            <div class="login-header">
+                <div class="logo-circle">
+                    <i class="bi bi-mortarboard"></i>
                 </div>
+                <h1 class="university-title">Central University of Karnataka</h1>
+                <p class="university-subtitle">Event Management Portal</p>
             </div>
             
-            <!-- Password -->
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label class="form-label">Password</label>
-                    <a href="javascript:void(0)" class="forgot-password" 
+            <!-- Login Form -->
+            <form method="POST" id="loginForm" novalidate>
+                <!-- Email Field -->
+                <div class="form-group">
+                    <label class="form-label" for="email">
+                        <i class="bi bi-envelope"></i>
+                        University Email
+                    </label>
+                    <div class="input-group">
+                        <i class="bi bi-envelope form-icon"></i>
+                        <input type="email" 
+                               name="email" 
+                               id="email" 
+                               class="form-control" 
+                               placeholder="name@cuk.ac.in" 
+                               required
+                               autocomplete="username"
+                               value="admin@cuk.ac.in">
+                    </div>
+                    <div class="invalid-feedback" id="emailError">
+                        Please enter a valid university email address.
+                    </div>
+                </div>
+                
+                <!-- Password Field -->
+                <div class="form-group">
+                    <label class="form-label" for="password">
+                        <i class="bi bi-lock"></i>
+                        Password
+                    </label>
+                    <div class="input-group">
+                        <i class="bi bi-lock form-icon"></i>
+                        <input type="password" 
+                               name="password" 
+                               id="password" 
+                               class="form-control" 
+                               placeholder="Enter your password" 
+                               required
+                               autocomplete="current-password"
+                               value="admin123">
+                        <button type="button" 
+                                class="password-toggle" 
+                                onclick="togglePassword()"
+                                aria-label="Toggle password visibility">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div class="invalid-feedback" id="passwordError">
+                        Please enter your password.
+                    </div>
+                </div>
+                
+                <!-- Form Options -->
+                <div class="form-options">
+                    <div class="form-check">
+                        <input class="form-check-input" 
+                               type="checkbox" 
+                               id="remember"
+                               name="remember">
+                        <label class="form-check-label" for="remember">
+                            Remember me
+                        </label>
+                    </div>
+                    <a href="javascript:void(0)" 
+                       class="forgot-password" 
                        onclick="showPasswordHelp()">
+                        <i class="bi bi-key"></i>
                         Forgot password?
                     </a>
                 </div>
-                <div class="position-relative">
-                    <i class="bi bi-lock form-icon"></i>
-                    <input type="password" name="password" id="password" 
-                           class="form-control" placeholder="Enter your password" required
-                           value="admin123">
-                    <button type="button" class="password-toggle" 
-                            onclick="togglePassword()">
-                        <i class="bi bi-eye"></i>
-                    </button>
+                
+                <!-- Submit Button -->
+                <button type="submit" 
+                        class="submit-btn" 
+                        id="submitBtn"
+                        onclick="validateForm()">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    Sign In to Dashboard
+                </button>
+                
+                <!-- Register Link -->
+                <div class="register-link">
+                    <p class="mb-0">
+                        New to CUK Events? 
+                        <a href="{{ url_for('register_user') }}">
+                            <i class="bi bi-person-plus"></i>
+                            Create an account
+                        </a>
+                    </p>
                 </div>
-            </div>
+            </form>
             
-            <!-- Remember Me -->
-            <div class="mb-4">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="remember">
-                    <label class="form-check-label" for="remember">
-                        Remember me
-                    </label>
+            <!-- Demo Accounts -->
+            <div class="demo-section">
+                <div class="demo-header">
+                    <i class="bi bi-info-circle-fill text-primary"></i>
+                    <h6 class="mb-0">Quick Access Demo Accounts</h6>
                 </div>
-            </div>
-            
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
-                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
-            </button>
-            
-            <div class="text-center">
-                <small class="text-muted">
-                    Don't have an account? 
-                    <a href="{{ url_for('register_user') }}" class="text-primary text-decoration-none">
-                        Register here
-                    </a>
-                </small>
-            </div>
-        </form>
-        
-        <!-- Demo Accounts -->
-        <div class="demo-section">
-            <h6 class="text-center mb-3"><i class="bi bi-info-circle me-2"></i>Demo Accounts</h6>
-            
-            <!-- Admin Account -->
-            <div class="demo-account">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <small><strong>Admin Account</strong></small><br>
-                        <small class="text-muted">Full system access</small>
+                
+                <div class="demo-grid">
+                    <!-- Admin Account -->
+                    <div class="demo-account admin" onclick="fillCredentials('admin')">
+                        <div class="demo-role">
+                            <i class="bi bi-shield-check"></i>
+                            <span>Administrator</span>
+                        </div>
+                        <div class="demo-credentials">
+                            <div class="mb-1">
+                                <small><i class="bi bi-envelope me-1"></i>admin@cuk.ac.in</small>
+                            </div>
+                            <div>
+                                <small><i class="bi bi-key me-1"></i>admin123</small>
+                            </div>
+                        </div>
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-primary demo-btn"
+                                onclick="fillCredentials('admin', event)">
+                            Use This Account
+                        </button>
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-primary" 
-                            onclick="fillCredentials('admin')">
-                        <i class="bi bi-clipboard me-1"></i>Fill
-                    </button>
-                </div>
-                <div class="mt-2">
-                    <small class="text-muted">
-                        <i class="bi bi-envelope me-1"></i>admin@cuk.ac.in<br>
-                        <i class="bi bi-key me-1"></i>admin123
-                    </small>
-                </div>
-            </div>
-            
-            <!-- Student Account -->
-            <div class="demo-account">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <small><strong>Student Account</strong></small><br>
-                        <small class="text-muted">Event registration access</small>
+                    
+                    <!-- Student Account -->
+                    <div class="demo-account student" onclick="fillCredentials('student')">
+                        <div class="demo-role">
+                            <i class="bi bi-person-circle"></i>
+                            <span>Student</span>
+                        </div>
+                        <div class="demo-credentials">
+                            <div class="mb-1">
+                                <small><i class="bi bi-envelope me-1"></i>student@cuk.ac.in</small>
+                            </div>
+                            <div>
+                                <small><i class="bi bi-key me-1"></i>student123</small>
+                            </div>
+                        </div>
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-success demo-btn"
+                                onclick="fillCredentials('student', event)">
+                            Use This Account
+                        </button>
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-success" 
-                            onclick="fillCredentials('student')">
-                        <i class="bi bi-clipboard me-1"></i>Fill
-                    </button>
-                </div>
-                <div class="mt-2">
-                    <small class="text-muted">
-                        <i class="bi bi-envelope me-1"></i>student@cuk.ac.in<br>
-                        <i class="bi bi-key me-1"></i>student123
-                    </small>
-                </div>
-            </div>
-            
-            <!-- Faculty Account (if needed) -->
-            <div class="demo-account">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <small><strong>Faculty Account</strong></small><br>
-                        <small class="text-muted">Event management access</small>
+                    
+                    <!-- Faculty Account -->
+                    <div class="demo-account faculty" onclick="fillCredentials('faculty')">
+                        <div class="demo-role">
+                            <i class="bi bi-person-workspace"></i>
+                            <span>Faculty</span>
+                        </div>
+                        <div class="demo-credentials">
+                            <div class="mb-1">
+                                <small><i class="bi bi-envelope me-1"></i>faculty@cuk.ac.in</small>
+                            </div>
+                            <div>
+                                <small><i class="bi bi-key me-1"></i>faculty123</small>
+                            </div>
+                        </div>
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-warning demo-btn"
+                                onclick="fillCredentials('faculty', event)">
+                            Use This Account
+                        </button>
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-warning" 
-                            onclick="fillCredentials('faculty')">
-                        <i class="bi bi-clipboard me-1"></i>Fill
-                    </button>
                 </div>
-                <div class="mt-2">
+                
+                <div class="text-center mt-3">
                     <small class="text-muted">
-                        <i class="bi bi-envelope me-1"></i>faculty@cuk.ac.in<br>
-                        <i class="bi bi-key me-1"></i>faculty123
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Demo accounts reset daily. Use your university email for permanent access.
                     </small>
                 </div>
             </div>
@@ -234,90 +669,277 @@
     </div>
 </div>
 
+<!-- Password Help Modal -->
+<div class="modal fade" id="passwordHelpModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-key me-2"></i>Password Assistance</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>University Email Required</strong><br>
+                    Please use your official <code>@cuk.ac.in</code> email address.
+                </div>
+                
+                <h6>Password Reset Options:</h6>
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-envelope text-primary me-3"></i>
+                        <div>
+                            <strong>Email Support</strong><br>
+                            <small>itsupport@cuk.ac.in</small>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-telephone text-success me-3"></i>
+                        <div>
+                            <strong>Phone Support</strong><br>
+                            <small>08388-251100 (Ext: 123)</small>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-building text-warning me-3"></i>
+                        <div>
+                            <strong>In-Person</strong><br>
+                            <small>IT Department, Admin Block</small>
+                        </div>
+                    </li>
+                </ul>
+                
+                <div class="alert alert-warning">
+                    <i class="bi bi-shield-exclamation me-2"></i>
+                    <small>For security reasons, password reset requests require identity verification.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="mailto:itsupport@cuk.ac.in" class="btn btn-primary">
+                    <i class="bi bi-envelope me-2"></i>Contact Support
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-function togglePassword() {
-    const passwordField = document.getElementById('password');
-    const toggleButton = document.querySelector('.password-toggle i');
-    
-    if (passwordField.type === 'password') {
-        passwordField.type = 'text';
-        toggleButton.classList.remove('bi-eye');
-        toggleButton.classList.add('bi-eye-slash');
-    } else {
-        passwordField.type = 'password';
-        toggleButton.classList.remove('bi-eye-slash');
-        toggleButton.classList.add('bi-eye');
-    }
-}
-
-function fillCredentials(type) {
-    const emailField = document.querySelector('input[name="email"]');
-    const passwordField = document.getElementById('password');
-    
-    if (type === 'admin') {
-        emailField.value = 'admin@cuk.ac.in';
-        passwordField.value = 'admin123';
-    } else if (type === 'student') {
-        emailField.value = 'student@cuk.ac.in';
-        passwordField.value = 'student123';
-    } else if (type === 'faculty') {
-        emailField.value = 'faculty@cuk.ac.in';
-        passwordField.value = 'faculty123';
+    // Password visibility toggle
+    function togglePassword() {
+        const passwordField = document.getElementById('password');
+        const toggleIcon = document.querySelector('.password-toggle i');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+            passwordField.setAttribute('data-visible', 'true');
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+            passwordField.removeAttribute('data-visible');
+        }
     }
     
-    // Visual feedback
-    emailField.focus();
-    emailField.style.borderColor = '#28a745';
-    passwordField.style.borderColor = '#28a745';
+    // Fill demo credentials
+    function fillCredentials(type, event = null) {
+        if (event) event.stopPropagation();
+        
+        const credentials = {
+            admin: { email: 'admin@cuk.ac.in', password: 'admin123' },
+            student: { email: 'student@cuk.ac.in', password: 'student123' },
+            faculty: { email: 'faculty@cuk.ac.in', password: 'faculty123' }
+        };
+        
+        const cred = credentials[type];
+        if (!cred) return;
+        
+        // Fill fields
+        const emailField = document.getElementById('email');
+        const passwordField = document.getElementById('password');
+        
+        emailField.value = cred.email;
+        passwordField.value = cred.password;
+        
+        // Visual feedback
+        const originalBorder = emailField.style.borderColor;
+        emailField.style.borderColor = '#28a745';
+        passwordField.style.borderColor = '#28a745';
+        
+        // Focus and scroll to form
+        emailField.focus();
+        document.querySelector('.login-card').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+        });
+        
+        // Show success message
+        showToast(`🎯 ${type.charAt(0).toUpperCase() + type.slice(1)} credentials loaded`, 'success');
+        
+        // Reset border color
+        setTimeout(() => {
+            emailField.style.borderColor = originalBorder;
+            passwordField.style.borderColor = originalBorder;
+        }, 1500);
+    }
     
-    setTimeout(() => {
-        emailField.style.borderColor = '#dee2e6';
-        passwordField.style.borderColor = '#dee2e6';
-    }, 1000);
-}
-
-function showPasswordHelp() {
-    const message = `
-    🔐 **Password Assistance**
+    // Show password help modal
+    function showPasswordHelp() {
+        const modal = new bootstrap.Modal(document.getElementById('passwordHelpModal'));
+        modal.show();
+    }
     
-    For password reset, please contact:
-    📧 Email: admin@cuk.ac.in
-    📞 Phone: 08388-251100
-    
-    **Demo Accounts Available:**
-    • Admin: admin@cuk.ac.in / admin123
-    • Student: student@cuk.ac.in / student123
-    • Faculty: faculty@cuk.ac.in / faculty123
-    
-    Please use your official university email (@cuk.ac.in) for registration.
-    `;
-    
-    alert(message);
-}
-
-// Form validation
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-    const email = document.querySelector('input[name="email"]').value;
-    const password = document.getElementById('password').value;
-    
-    if (!email || !password) {
-        e.preventDefault();
-        alert('Please fill in all fields');
+    // Form validation
+    function validateForm() {
+        const form = document.getElementById('loginForm');
+        const emailField = document.getElementById('email');
+        const passwordField = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
+        let isValid = true;
+        
+        // Reset validation states
+        emailField.classList.remove('is-invalid');
+        passwordField.classList.remove('is-invalid');
+        
+        // Email validation
+        if (!emailField.value) {
+            emailField.classList.add('is-invalid');
+            document.getElementById('emailError').textContent = 'Email is required';
+            isValid = false;
+        } else if (!validateEmail(emailField.value)) {
+            emailField.classList.add('is-invalid');
+            document.getElementById('emailError').textContent = 'Please enter a valid email address';
+            isValid = false;
+        } else if (!emailField.value.endsWith('@cuk.ac.in')) {
+            emailField.classList.add('is-invalid');
+            document.getElementById('emailError').textContent = 'Please use your university email (@cuk.ac.in)';
+            isValid = false;
+        }
+        
+        // Password validation
+        if (!passwordField.value) {
+            passwordField.classList.add('is-invalid');
+            document.getElementById('passwordError').textContent = 'Password is required';
+            isValid = false;
+        } else if (passwordField.value.length < 6) {
+            passwordField.classList.add('is-invalid');
+            document.getElementById('passwordError').textContent = 'Password must be at least 6 characters';
+            isValid = false;
+        }
+        
+        // If valid, simulate loading state
+        if (isValid) {
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = '<span>Authenticating...</span>';
+            submitBtn.disabled = true;
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                submitBtn.classList.remove('loading');
+                submitBtn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Sign In to Dashboard';
+                submitBtn.disabled = false;
+                
+                // In production, this would be the form submission
+                form.submit();
+            }, 1500);
+            
+            // Prevent default for demo
+            return false;
+        }
+        
         return false;
     }
     
-    if (!email.includes('@')) {
-        e.preventDefault();
-        alert('Please enter a valid email address');
-        return false;
+    // Email validation helper
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
     }
     
-    return true;
-});
-
-// Auto-focus on email field
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelector('input[name="email"]').focus();
-});
+    // Toast notification
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        const container = document.createElement('div');
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.appendChild(toast);
+        
+        document.body.appendChild(container);
+        
+        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+        bsToast.show();
+        
+        toast.addEventListener('hidden.bs.toast', () => {
+            container.remove();
+        });
+    }
+    
+    // Auto-focus and validation on load
+    document.addEventListener('DOMContentLoaded', function() {
+        const emailField = document.getElementById('email');
+        emailField.focus();
+        
+        // Real-time validation
+        emailField.addEventListener('input', function() {
+            if (this.value && !this.value.endsWith('@cuk.ac.in')) {
+                this.classList.add('is-invalid');
+                document.getElementById('emailError').textContent = 'Please use your university email (@cuk.ac.in)';
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+        
+        // Prevent form submission on Enter key for demo accounts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.closest('.demo-account')) {
+                e.preventDefault();
+            }
+        });
+        
+        // Add loading animation to form on submit
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            validateForm();
+        });
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Alt + 1 for admin credentials
+        if (e.altKey && e.key === '1') {
+            e.preventDefault();
+            fillCredentials('admin');
+        }
+        // Alt + 2 for student credentials
+        if (e.altKey && e.key === '2') {
+            e.preventDefault();
+            fillCredentials('student');
+        }
+        // Alt + 3 for faculty credentials
+        if (e.altKey && e.key === '3') {
+            e.preventDefault();
+            fillCredentials('faculty');
+        }
+        // Alt + H for password help
+        if (e.altKey && e.key === 'h') {
+            e.preventDefault();
+            showPasswordHelp();
+        }
+    });
 </script>
 {% endblock %}
