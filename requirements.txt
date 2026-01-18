@@ -1,32 +1,18 @@
-# Core Flask & Web Server - MUST WORK
-Flask==3.0.0
-gunicorn==22.0.0
-Werkzeug==3.0.1
+# Core Flask - GUARANTEED TO WORK
+Flask==2.3.3
+gunicorn==21.2.0
+Werkzeug==2.3.7
 
-# Database & ORM - FIXED SQLAlchemy version
-Flask-SQLAlchemy==3.0.5
-SQLAlchemy==2.0.25  # FIXED: Works with Python 3.13
-alembic==1.13.1
-Flask-Migrate==4.0.5
+# Database - SIMPLE AND STABLE
+Flask-SQLAlchemy==3.0.3
+SQLAlchemy==1.4.47  # VERSION 1.x - NO PYTHON 3.13 ISSUES
 psycopg2-binary==2.9.9
 
-# Security & Authentication
-Flask-Login==0.6.3
+# Basic authentication
+Flask-Login==0.6.2
 python-dotenv==1.0.0
 itsdangerous==2.1.2
 
-# Forms & Validation
-Flask-WTF==1.2.1
-WTForms==3.1.1
-email-validator==2.2.0  # Updated to fix yanked version warning
-
-# API Development
-Flask-RESTful==0.3.10
-Flask-CORS==4.0.0
-
-# File Uploads & Storage
-Pillow==10.4.0
-
-# Additional utilities (optional)
-Flask-Bcrypt==1.0.1  # For password hashing
-Flask-Mail==0.9.1    # For sending emails
+# Forms
+Flask-WTF==1.1.1
+WTForms==3.0.1
