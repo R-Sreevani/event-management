@@ -28,6 +28,16 @@ class Event(db.Model):
     date = db.Column(db.String(20), nullable=False)
     venue = db.Column(db.String(100), nullable=True)
     description = db.Column(db.Text, nullable=True)  # Added for chatbot
+    
+    def to_dict(self):
+        """Convert Event object to dictionary for JSON serialization"""
+        return {
+            'id': self.id,
+            'name': self.name,
+            'date': self.date,
+            'venue': self.venue,
+            'description': self.description
+        }
 
 class Registration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -121,7 +131,9 @@ class EventChatbot:
 @app.route('/')
 def index():
     events = Event.query.all()
-    return render_template('index.html', events=events)
+    # Convert events to dictionaries for safe JSON serialization
+    events_data = [event.to_dict() for event in events]
+    return render_template('index.html', events=events_data)
 
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
