@@ -1,207 +1,611 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="en" data-bs-theme="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Central University of Karnataka - {% block title %}Event Management System{% endblock %}</title>
+    <title>{% block title %}Event Management System{% endblock %} | Central University of Karnataka</title>
     
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Central University of Karnataka Event Management System - Discover, register, and manage campus events">
+    <meta name="keywords" content="CUK, University, Events, Campus, Registration, Karnataka">
+    <meta name="author" content="Central University of Karnataka">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    <link rel="apple-touch-icon" href="/static/images/logo.png">
+    
+    <!-- Preconnect for CDNs -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    
+    <!-- Bootstrap 5.3 with Dark Mode -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
-    <!-- FullCalendar -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FullCalendar CSS -->
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <!-- Custom CSS -->
     <style>
         :root {
             --cuk-blue: #003366;
+            --cuk-blue-light: #004080;
+            --cuk-blue-dark: #002244;
             --cuk-gold: #FFD700;
+            --cuk-gold-light: #FFE55C;
             --cuk-green: #006400;
+            --cuk-green-light: #008000;
+            --cuk-maroon: #800000;
+            --cuk-white: #FFFFFF;
+            --cuk-gray-50: #f8f9fa;
+            --cuk-gray-100: #e9ecef;
+            --cuk-gray-200: #dee2e6;
+            --cuk-gray-300: #ced4da;
+            --cuk-gray-400: #adb5bd;
+            --cuk-gray-500: #6c757d;
+            --cuk-gray-600: #495057;
+            --cuk-gray-700: #343a40;
+            --cuk-gray-800: #212529;
+            --cuk-gray-900: #121416;
+            
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow: 0 4px 20px rgba(0,0,0,0.12);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.15);
+            --shadow-xl: 0 12px 40px rgba(0,0,0,0.18);
+            
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius: 12px;
+            --border-radius-lg: 20px;
+            
+            --header-height: 72px;
         }
         
-        .cuk-bg-primary {
-            background: linear-gradient(135deg, var(--cuk-blue), #004080) !important;
+        [data-bs-theme="dark"] {
+            --cuk-blue: #4d88ff;
+            --cuk-blue-light: #6699ff;
+            --cuk-blue-dark: #3366cc;
+            --cuk-gold: #ffcc00;
+            --cuk-gold-light: #ffdd44;
+            --cuk-green: #4CAF50;
+            --cuk-green-light: #66BB6A;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--bs-body-color);
+            background: var(--bs-body-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+        
+        main {
+            flex: 1;
+            padding-top: var(--header-height);
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            line-height: 1.2;
         }
         
         .cuk-text-primary {
             color: var(--cuk-blue) !important;
         }
         
-        .cuk-btn-primary {
-            background-color: var(--cuk-blue) !important;
-            border-color: var(--cuk-blue) !important;
+        .cuk-text-gradient {
+            background: linear-gradient(135deg, var(--cuk-blue), var(--cuk-blue-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        .cuk-btn-primary:hover {
-            background-color: #002244 !important;
-            border-color: #002244 !important;
+        /* Navbar */
+        .navbar {
+            height: var(--header-height);
+            padding: 0;
+            background: var(--bs-body-bg) !important;
+            box-shadow: var(--shadow-sm);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            backdrop-filter: blur(10px);
+            background: rgba(var(--bs-body-bg-rgb), 0.95) !important;
         }
         
         .navbar-brand {
-            font-weight: bold;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
             font-size: 1.5rem;
+            color: var(--cuk-blue) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
         
-        .university-header {
-            background: linear-gradient(rgba(0, 51, 102, 0.9), rgba(0, 51, 102, 0.9)),
-                        url('https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            padding: 4rem 0;
-            margin-bottom: 2rem;
+        .navbar-brand::before {
+            content: '🎓';
+            font-size: 1.8rem;
         }
         
-        .event-card {
-            transition: transform 0.3s, box-shadow 0.3s;
+        .nav-link {
+            font-weight: 500;
+            padding: 0.75rem 1rem !important;
+            border-radius: 8px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: rgba(var(--cuk-blue), 0.1);
+            color: var(--cuk-blue) !important;
+            transform: translateY(-2px);
+        }
+        
+        .navbar-nav .nav-item {
+            margin: 0 0.25rem;
+        }
+        
+        .dropdown-menu {
             border: none;
-            border-radius: 10px;
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            padding: 0.5rem;
+            margin-top: 0.5rem !important;
+            animation: dropdownSlide 0.3s ease;
+        }
+        
+        @keyframes dropdownSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(var(--cuk-blue), 0.1);
+            color: var(--cuk-blue);
+            transform: translateX(5px);
+        }
+        
+        /* Theme Toggle */
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(var(--cuk-blue), 0.1);
+            border: none;
+            color: var(--cuk-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
             overflow: hidden;
         }
         
-        .event-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        .theme-toggle:hover {
+            background: rgba(var(--cuk-blue), 0.2);
+            transform: scale(1.1);
         }
         
-        .category-badge {
+        .theme-toggle i {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
+            transition: var(--transition);
         }
         
-        .academic-badge { background-color: #0077cc; color: white; }
-        .cultural-badge { background-color: #e83e8c; color: white; }
-        .sports-badge { background-color: #28a745; color: white; }
-        .workshop-badge { background-color: #ffc107; color: #212529; }
-        
-        .department-tag {
-            display: inline-block;
-            padding: 3px 10px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            margin: 2px;
+        [data-bs-theme="dark"] .bi-sun {
+            opacity: 1;
+            transform: rotate(0deg);
         }
         
-        .stats-card {
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
+        [data-bs-theme="dark"] .bi-moon {
+            opacity: 0;
+            transform: rotate(-90deg);
+        }
+        
+        [data-bs-theme="light"] .bi-sun {
+            opacity: 0;
+            transform: rotate(90deg);
+        }
+        
+        [data-bs-theme="light"] .bi-moon {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
+        
+        /* User Avatar */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cuk-blue), var(--cuk-blue-light));
             color: white;
-            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: 2px solid rgba(var(--cuk-blue), 0.2);
+            transition: var(--transition);
         }
         
-        .stats-card.blue { background: linear-gradient(135deg, #0077cc, #005fa3); }
-        .stats-card.green { background: linear-gradient(135deg, #28a745, #1e7e34); }
-        .stats-card.orange { background: linear-gradient(135deg, #fd7e14, #e8590c); }
-        .stats-card.purple { background: linear-gradient(135deg, #6f42c1, #5a32a3); }
-        
-        .announcement-card {
-            border-left: 4px solid var(--cuk-blue);
-            padding-left: 15px;
-            margin-bottom: 15px;
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(var(--cuk-blue), 0.3);
         }
         
-        .announcement-high {
-            border-left-color: #dc3545;
+        /* Main Container */
+        .container-main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
         }
         
-        .announcement-medium {
-            border-left-color: #ffc107;
+        @media (min-width: 1400px) {
+            .container-main {
+                padding: 2rem;
+            }
         }
         
-        .footer {
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            background: var(--bs-card-bg);
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid var(--bs-border-color);
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cuk-blue), var(--cuk-blue-light));
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--cuk-blue-dark), var(--cuk-blue));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(var(--cuk-blue), 0.3);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--cuk-blue);
+            color: var(--cuk-blue);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+        
+        .btn-outline-primary:hover {
             background: var(--cuk-blue);
             color: white;
-            padding: 3rem 0;
-            margin-top: 4rem;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(var(--cuk-blue), 0.3);
         }
         
-        .chatbot-toggle {
+        /* Alerts */
+        .alert {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--bs-tertiary-bg);
+            padding: 4rem 0 2rem;
+            margin-top: auto;
+            border-top: 1px solid var(--bs-border-color);
+        }
+        
+        .footer h5 {
+            color: var(--cuk-blue);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .footer-links a {
+            color: var(--bs-body-color);
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .footer-links a:hover {
+            color: var(--cuk-blue);
+            transform: translateX(5px);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(var(--cuk-blue), 0.1);
+            color: var(--cuk-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        
+        .social-link:hover {
+            background: var(--cuk-blue);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(var(--cuk-blue), 0.3);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid var(--bs-border-color);
+            color: var(--bs-secondary-color);
+            font-size: 0.9rem;
+        }
+        
+        /* Chatbot */
+        .chatbot-container {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            z-index: 1000;
+            z-index: 1050;
+        }
+        
+        .chatbot-toggle {
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: var(--cuk-blue);
+            background: linear-gradient(135deg, var(--cuk-blue), var(--cuk-blue-light));
             color: white;
             border: none;
-            box-shadow: 0 4px 15px rgba(0, 51, 102, 0.3);
-            transition: all 0.3s;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
         }
         
         .chatbot-toggle:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0, 51, 102, 0.4);
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: var(--shadow-xl);
         }
         
-        .chat-window {
-            position: fixed;
-            bottom: 100px;
-            right: 30px;
-            width: 350px;
-            height: 500px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .chat-header {
-            background: var(--cuk-blue);
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
             color: white;
-            padding: 15px;
+            font-size: 0.75rem;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 50%;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
-        .chat-messages {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
         
-        .message {
-            margin: 10px 0;
-            padding: 10px 15px;
-            border-radius: 15px;
-            max-width: 80%;
+        ::-webkit-scrollbar-track {
+            background: var(--bs-secondary-bg);
+            border-radius: 4px;
         }
         
-        .user-message {
+        ::-webkit-scrollbar-thumb {
             background: var(--cuk-blue);
-            color: white;
-            margin-left: auto;
-            border-bottom-right-radius: 5px;
+            border-radius: 4px;
         }
         
-        .bot-message {
-            background: #f8f9fa;
-            color: #333;
-            margin-right: auto;
-            border-bottom-left-radius: 5px;
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--cuk-blue-light);
         }
         
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, 
+                var(--bs-secondary-bg) 25%, 
+                var(--bs-tertiary-bg) 50%, 
+                var(--bs-secondary-bg) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .chat-window {
-                width: calc(100vw - 60px);
-                right: 30px;
-                left: 30px;
+            :root {
+                --header-height: 60px;
+            }
+            
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .container-main {
+                padding: 1.5rem 1rem;
+            }
+            
+            .footer {
+                padding: 3rem 0 1.5rem;
+            }
+            
+            .chatbot-container {
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            .chatbot-toggle {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container-main {
+                padding: 1rem 0.75rem;
+            }
+            
+            .navbar-nav .nav-item {
+                margin: 0.25rem 0;
+            }
+            
+            .dropdown-menu {
+                border: 1px solid var(--bs-border-color);
+                margin-top: 0.5rem;
+                width: 100%;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            .navbar,
+            .footer,
+            .chatbot-container,
+            .theme-toggle {
+                display: none !important;
+            }
+            
+            main {
+                padding-top: 0;
+            }
+            
+            .container-main {
+                padding: 0;
+                max-width: 100%;
+            }
+            
+            .card {
+                box-shadow: none;
+                border: 1px solid #ddd;
             }
         }
     </style>
@@ -210,90 +614,174 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark cuk-bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="bi bi-calendar-event me-2"></i>
-                CUK Events Hub
+    <nav class="navbar navbar-expand-lg">
+        <div class="container container-main">
+            <!-- Brand -->
+            <a class="navbar-brand" href="{{ url_for('index') }}" data-aos="fade-right">
+                <span>CUK Events Hub</span>
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Navigation Content -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- Left Navigation -->
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">
-                            <i class="bi bi-house"></i> Home
+                    <li class="nav-item" data-aos="fade-down" data-aos-delay="100">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'index' }}" 
+                           href="{{ url_for('index') }}">
+                            <i class="bi bi-house"></i>
+                            <span>Home</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('events') }}">
-                            <i class="bi bi-calendar3"></i> Events
+                    <li class="nav-item" data-aos="fade-down" data-aos-delay="150">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'events' }}" 
+                           href="{{ url_for('events') }}">
+                            <i class="bi bi-calendar3"></i>
+                            <span>Events</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('calendar') }}">
-                            <i class="bi bi-calendar-date"></i> Calendar
+                    <li class="nav-item" data-aos="fade-down" data-aos-delay="200">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'calendar' }}" 
+                           href="{{ url_for('calendar') }}">
+                            <i class="bi bi-calendar-date"></i>
+                            <span>Calendar</span>
                         </a>
                     </li>
                     
+                    <!-- User Role Specific Links -->
                     {% if session.get('user_id') %}
                         {% if session.role == 'admin' %}
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                    <i class="bi bi-speedometer2"></i> Admin
+                            <li class="nav-item dropdown" data-aos="fade-down" data-aos-delay="250">
+                                <a class="nav-link dropdown-toggle {{ 'active' if request.endpoint.startswith('admin_') }}" 
+                                   href="#" data-bs-toggle="dropdown">
+                                    <i class="bi bi-speedometer2"></i>
+                                    <span>Admin Panel</span>
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('admin_events') }}">Manage Events</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('admin_announcements') }}">Announcements</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('admin_analytics') }}">Analytics</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">
+                                            <i class="bi bi-grid"></i> Dashboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('admin_events') }}">
+                                            <i class="bi bi-calendar-plus"></i> Manage Events
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('admin_analytics') }}">
+                                            <i class="bi bi-graph-up"></i> Analytics
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('admin_users') }}">
+                                            <i class="bi bi-people"></i> User Management
+                                        </a>
+                                    </li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('admin_departments') }}">Departments</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('admin_faculty') }}">Faculty</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('admin_settings') }}">
+                                            <i class="bi bi-gear"></i> System Settings
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                         {% elif session.role == 'faculty' %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('faculty_dashboard') }}">
-                                    <i class="bi bi-person-workspace"></i> Faculty Dashboard
+                            <li class="nav-item" data-aos="fade-down" data-aos-delay="250">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'faculty_dashboard' }}" 
+                                   href="{{ url_for('faculty_dashboard') }}">
+                                    <i class="bi bi-person-workspace"></i>
+                                    <span>Faculty Dashboard</span>
                                 </a>
                             </li>
                         {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('student_dashboard') }}">
-                                    <i class="bi bi-person-circle"></i> Student Dashboard
+                            <li class="nav-item" data-aos="fade-down" data-aos-delay="250">
+                                <a class="nav-link {{ 'active' if request.endpoint == 'student_dashboard' }}" 
+                                   href="{{ url_for('student_dashboard') }}">
+                                    <i class="bi bi-person-video3"></i>
+                                    <span>My Dashboard</span>
                                 </a>
                             </li>
                         {% endif %}
+                        
+                        <li class="nav-item" data-aos="fade-down" data-aos-delay="300">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'my_registrations' }}" 
+                               href="{{ url_for('my_registrations') }}">
+                                <i class="bi bi-ticket-perforated"></i>
+                                <span>My Events</span>
+                            </a>
+                        </li>
                     {% endif %}
                 </ul>
                 
+                <!-- Right Navigation -->
                 <ul class="navbar-nav">
+                    <!-- Theme Toggle -->
+                    <li class="nav-item d-flex align-items-center me-2" data-aos="fade-left" data-aos-delay="100">
+                        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                            <i class="bi bi-sun"></i>
+                            <i class="bi bi-moon"></i>
+                        </button>
+                    </li>
+                    
+                    <!-- Authentication -->
                     {% if session.get('user_id') %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle"></i> {{ session.user_name }}
+                        <li class="nav-item dropdown" data-aos="fade-left" data-aos-delay="150">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" 
+                               href="#" data-bs-toggle="dropdown">
+                                <div class="user-avatar" title="{{ session.user_name }}">
+                                    {{ session.user_name[:1]|upper }}
+                                </div>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><span class="dropdown-item-text">Role: {{ session.role|title }}</span></li>
+                                <li>
+                                    <div class="dropdown-header">
+                                        <div class="fw-semibold">{{ session.user_name }}</div>
+                                        <small class="text-muted">{{ session.email }}</small>
+                                    </div>
+                                </li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">
-                                    <i class="bi bi-box-arrow-right"></i> Logout
-                                </a></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('profile') }}">
+                                        <i class="bi bi-person-circle"></i> My Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('notifications') }}">
+                                        <i class="bi bi-bell"></i> Notifications
+                                        {% if unread_notifications %}
+                                            <span class="badge bg-danger ms-auto">{{ unread_notifications }}</span>
+                                        {% endif %}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('settings') }}">
+                                        <i class="bi bi-gear"></i> Settings
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     {% else %}
-                        <li class="nav-item">
+                        <li class="nav-item" data-aos="fade-left" data-aos-delay="150">
                             <a class="nav-link" href="{{ url_for('login') }}">
-                                <i class="bi bi-box-arrow-in-right"></i> Login
+                                <i class="bi bi-box-arrow-in-right"></i>
+                                <span>Login</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('register_user') }}">
-                                <i class="bi bi-person-plus"></i> Register
+                        <li class="nav-item" data-aos="fade-left" data-aos-delay="200">
+                            <a class="btn btn-primary" href="{{ url_for('register_user') }}">
+                                <i class="bi bi-person-plus"></i>
+                                <span>Register</span>
                             </a>
                         </li>
                     {% endif %}
@@ -305,10 +793,24 @@
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="container mt-3">
+            <div class="container container-main mt-4">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'info' }} alert-dismissible fade show">
-                        {{ message }}
+                    <div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'info' }} 
+                                alert-dismissible fade show" role="alert" data-aos="fade-up">
+                        <div class="d-flex align-items-center">
+                            {% if category == 'success' %}
+                                <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                            {% elif category == 'danger' %}
+                                <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+                            {% elif category == 'warning' %}
+                                <i class="bi bi-exclamation-circle-fill me-3 fs-4"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+                            {% endif %}
+                            <div class="flex-grow-1">
+                                {{ message }}
+                            </div>
+                        </div>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 {% endfor %}
@@ -317,140 +819,346 @@
     {% endwith %}
 
     <!-- Main Content -->
-    <main class="container mt-4">
-        {% block content %}{% endblock %}
+    <main>
+        <div class="container container-main">
+            {% block content %}{% endblock %}
+        </div>
     </main>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5>Central University of Karnataka</h5>
-                    <p>Kadaganchi, Aland Road</p>
-                    <p>Gulbarga - 585 367, Karnataka</p>
-                    <p>📞 08388-251100</p>
-                    <p>📧 info@cuk.ac.in</p>
+        <div class="container container-main">
+            <div class="row g-4">
+                <!-- University Info -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="user-avatar me-3" style="width: 50px; height: 50px;">
+                            🎓
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Central University of Karnataka</h5>
+                            <small class="text-muted">Empowering through Education</small>
+                        </div>
+                    </div>
+                    <p class="mb-3">
+                        Kadaganchi, Aland Road<br>
+                        Gulbarga - 585 367, Karnataka
+                    </p>
+                    <div class="contact-info">
+                        <p class="mb-1">
+                            <i class="bi bi-telephone me-2"></i>
+                            <a href="tel:+918388251100" class="text-decoration-none">08388-251100</a>
+                        </p>
+                        <p class="mb-0">
+                            <i class="bi bi-envelope me-2"></i>
+                            <a href="mailto:info@cuk.ac.in" class="text-decoration-none">info@cuk.ac.in</a>
+                        </p>
+                    </div>
                 </div>
-                <div class="col-md-4">
+                
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
                     <h5>Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="{{ url_for('events') }}" class="text-white-50 text-decoration-none">Events</a></li>
-                        <li><a href="{{ url_for('calendar') }}" class="text-white-50 text-decoration-none">Calendar</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">About CUK</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">Contact Us</a></li>
+                    <ul class="footer-links">
+                        <li>
+                            <a href="{{ url_for('events') }}">
+                                <i class="bi bi-arrow-right-short"></i>
+                                Browse Events
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('calendar') }}">
+                                <i class="bi bi-arrow-right-short"></i>
+                                Event Calendar
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('announcements') }}">
+                                <i class="bi bi-arrow-right-short"></i>
+                                Announcements
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('departments') }}">
+                                <i class="bi bi-arrow-right-short"></i>
+                                Departments
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('contact') }}">
+                                <i class="bi bi-arrow-right-short"></i>
+                                Contact Us
+                            </a>
+                        </li>
                     </ul>
                 </div>
-                <div class="col-md-4">
-                    <h5>Connect With Us</h5>
-                    <div class="d-flex gap-3">
-                        <a href="#" class="text-white fs-4"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="text-white fs-4"><i class="bi bi-twitter"></i></a>
-                        <a href="#" class="text-white fs-4"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="text-white fs-4"><i class="bi bi-linkedin"></i></a>
+                
+                <!-- Resources -->
+                <div class="col-lg-3 col-md-6">
+                    <h5>Resources</h5>
+                    <ul class="footer-links">
+                        <li>
+                            <a href="{{ url_for('faq') }}">
+                                <i class="bi bi-question-circle"></i>
+                                FAQ
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('help') }}">
+                                <i class="bi bi-life-preserver"></i>
+                                Help Center
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('privacy') }}">
+                                <i class="bi bi-shield-check"></i>
+                                Privacy Policy
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('terms') }}">
+                                <i class="bi bi-file-text"></i>
+                                Terms of Service
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('sitemap') }}">
+                                <i class="bi bi-diagram-3"></i>
+                                Sitemap
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Connect -->
+                <div class="col-lg-3 col-md-6">
+                    <h5>Stay Connected</h5>
+                    <p class="mb-3">Follow us for updates and announcements</p>
+                    
+                    <div class="social-links">
+                        <a href="https://facebook.com/CUKarnataka" class="social-link" target="_blank" title="Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="https://twitter.com/CUKarnataka" class="social-link" target="_blank" title="Twitter">
+                            <i class="bi bi-twitter"></i>
+                        </a>
+                        <a href="https://instagram.com/CUKarnataka" class="social-link" target="_blank" title="Instagram">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                        <a href="https://linkedin.com/school/central-university-of-karnataka" class="social-link" target="_blank" title="LinkedIn">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                        <a href="https://youtube.com/@CUKarnataka" class="social-link" target="_blank" title="YouTube">
+                            <i class="bi bi-youtube"></i>
+                        </a>
                     </div>
-                    <p class="mt-3 text-white-50">
+                    
+                    <!-- Newsletter -->
+                    <div class="mt-4">
+                        <h6>Subscribe to Newsletter</h6>
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Your email" aria-label="Email">
+                            <button class="btn btn-primary" type="button">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Copyright -->
+            <div class="copyright">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-md-start mb-2 mb-md-0">
                         &copy; {{ now.year }} Central University of Karnataka. All rights reserved.
-                    </p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <span class="me-3">Version 2.0.0</span>
+                        <a href="#" class="text-decoration-none me-3">Accessibility</a>
+                        <a href="#" class="text-decoration-none">Report Issue</a>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
 
     <!-- Chatbot -->
-    <button class="chatbot-toggle" onclick="toggleChat()">
-        <i class="bi bi-robot fs-5"></i>
-    </button>
-    
-    <div class="chat-window" id="chatWindow">
-        <div class="chat-header">
-            <h6 class="mb-0"><i class="bi bi-robot me-2"></i> CUK Event Assistant</h6>
-            <button class="btn btn-sm btn-light" onclick="toggleChat()">
-                <i class="bi bi-x"></i>
-            </button>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-            <div class="bot-message">
-                Hello! 👋 I'm your CUK event assistant. How can I help you today?
-            </div>
-        </div>
-        <div class="p-3 border-top">
-            <div class="input-group">
-                <input type="text" class="form-control" id="chatInput" placeholder="Type your message...">
-                <button class="btn btn-primary" onclick="sendMessage()">
-                    <i class="bi bi-send"></i>
-                </button>
-            </div>
-            <div class="mt-2">
-                <small class="text-muted">Try asking: events, calendar, departments, contact</small>
-            </div>
-        </div>
+    <div class="chatbot-container">
+        <div id="chatbot-window" style="display: none;"></div>
+        <button class="chatbot-toggle" id="chatbotToggle" aria-label="Open chatbot">
+            <i class="bi bi-robot"></i>
+            <span class="notification-badge" id="chatNotification" style="display: none;">0</span>
+        </button>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!-- Back to Top -->
+    <button class="btn btn-primary rounded-circle position-fixed bottom-5 start-5" 
+            id="backToTop" 
+            style="width: 50px; height: 50px; display: none; z-index: 1040;"
+            aria-label="Back to top">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" 
+            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" 
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" 
+            crossorigin="anonymous"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
+    <!-- Main JavaScript -->
     <script>
-        // Chatbot functionality
-        function toggleChat() {
-            const chatWindow = document.getElementById('chatWindow');
-            chatWindow.style.display = chatWindow.style.display === 'flex' ? 'none' : 'flex';
-            if (chatWindow.style.display === 'flex') {
-                document.getElementById('chatInput').focus();
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out',
+            once: true,
+            offset: 50
+        });
+        
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const currentTheme = localStorage.getItem('theme') || 'auto';
+        
+        function setTheme(theme) {
+            const html = document.documentElement;
+            if (theme === 'dark' || (theme === 'auto' && prefersDarkScheme.matches)) {
+                html.setAttribute('data-bs-theme', 'dark');
+            } else {
+                html.setAttribute('data-bs-theme', 'light');
             }
+            localStorage.setItem('theme', theme);
         }
         
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            if (!message) return;
-            
-            // Add user message
-            addMessage(message, 'user');
-            input.value = '';
-            
-            // Send to backend
-            fetch('/chatbot', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message: message })
-            })
-            .then(response => response.json())
-            .then(data => {
-                addMessage(data.response, 'bot');
-            })
-            .catch(error => {
-                addMessage('Sorry, I encountered an error. Please try again.', 'bot');
-            });
-        }
+        themeToggle.addEventListener('click', () => {
+            const current = localStorage.getItem('theme') || 'auto';
+            const next = current === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        });
         
-        function addMessage(text, sender) {
-            const messagesDiv = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}-message`;
-            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
+        // Set initial theme
+        setTheme(currentTheme);
         
-        // Enter key support for chat
-        document.getElementById('chatInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
+        // Watch for system theme changes
+        prefersDarkScheme.addEventListener('change', (e) => {
+            if (localStorage.getItem('theme') === 'auto') {
+                setTheme('auto');
             }
         });
         
-        // Auto-dismiss alerts after 5 seconds
+        // Auto-dismiss alerts
         setTimeout(() => {
             document.querySelectorAll('.alert').forEach(alert => {
                 const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
+                setTimeout(() => bsAlert.close(), 5000);
             });
-        }, 5000);
+        }, 3000);
+        
+        // Back to Top button
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTop.style.display = 'flex';
+            } else {
+                backToTop.style.display = 'none';
+            }
+        });
+        
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Chatbot functionality
+        const chatbotToggle = document.getElementById('chatbotToggle');
+        const chatWindow = document.getElementById('chatbot-window');
+        
+        chatbotToggle.addEventListener('click', () => {
+            if (chatWindow.style.display === 'none') {
+                loadChatbot();
+                chatWindow.style.display = 'block';
+            } else {
+                chatWindow.style.display = 'none';
+            }
+        });
+        
+        function loadChatbot() {
+            // Load chatbot component
+            fetch('/chatbot/component')
+                .then(response => response.text())
+                .then(html => {
+                    chatWindow.innerHTML = html;
+                    // Initialize chatbot functionality
+                    initializeChatbot();
+                })
+                .catch(error => {
+                    console.error('Error loading chatbot:', error);
+                });
+        }
+        
+        function initializeChatbot() {
+            // Chatbot initialization logic here
+            console.log('Chatbot initialized');
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl + / to focus search
+            if (e.ctrlKey && e.key === '/') {
+                e.preventDefault();
+                document.querySelector('input[type="search"]')?.focus();
+            }
+            
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                const openModal = document.querySelector('.modal.show');
+                if (openModal) {
+                    bootstrap.Modal.getInstance(openModal).hide();
+                }
+            }
+        });
+        
+        // Service Worker for PWA (optional)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+        
+        // Performance monitoring
+        window.addEventListener('load', () => {
+            const timing = performance.timing;
+            const loadTime = timing.loadEventEnd - timing.navigationStart;
+            console.log(`Page loaded in ${loadTime}ms`);
+            
+            // Report to analytics if needed
+            if (loadTime > 3000) {
+                console.warn('Page load time is high:', loadTime);
+            }
+        });
+        
+        // Network status monitoring
+        window.addEventListener('online', () => {
+            showNotification('You are back online', 'success');
+        });
+        
+        window.addEventListener('offline', () => {
+            showNotification('You are offline. Some features may not work.', 'warning');
+        });
+        
+        function showNotification(message, type = 'info') {
+            // Implement notification system
+            console.log(`${type}: ${message}`);
+        }
     </script>
     
     {% block extra_js %}{% endblock %}
