@@ -1,24 +1,179 @@
 {% extends 'layout.html' %}
-{% block title %}Register{% endblock %}
+{% block title %}Register | CUK Events Portal{% endblock %}
 
 {% block extra_css %}
 <style>
+    :root {
+        --register-gradient: linear-gradient(135deg, #003366 0%, #004080 50%, #0055a5 100%);
+        --shadow: 0 10px 40px rgba(0,0,0,0.1);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Background Animation */
+    .register-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--register-gradient);
+        z-index: -2;
+        overflow: hidden;
+    }
+    
+    .register-bg::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+        background-size: 40px 40px;
+        animation: float 25s linear infinite;
+    }
+    
+    @keyframes float {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        100% { transform: translate(-50px, -50px) rotate(360deg); }
+    }
+    
+    .register-bg::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+        animation: shimmer 4s infinite;
+    }
+    
+    /* Main Container */
+    .register-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    
     .register-container {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 40px 20px;
+        max-width: 800px;
+        width: 100%;
+        animation: slideUp 0.6s ease;
     }
     
+    /* Card Styling */
     .register-card {
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        padding: 40px;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
     }
     
-    .university-logo {
+    .register-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, var(--cuk-blue), var(--cuk-green));
+    }
+    
+    /* Progress Steps */
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        padding: 2rem 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .progress-steps::before {
+        content: '';
+        position: absolute;
+        top: 25px;
+        left: 50px;
+        right: 50px;
+        height: 3px;
+        background: #e9ecef;
+        z-index: 1;
+    }
+    
+    .step {
         text-align: center;
-        margin-bottom: 30px;
+        position: relative;
+        z-index: 2;
+        flex: 1;
+    }
+    
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        font-weight: 600;
+        color: #6c757d;
+        transition: var(--transition);
+    }
+    
+    .step.active .step-circle {
+        background: var(--cuk-blue);
+        border-color: var(--cuk-blue);
+        color: white;
+        transform: scale(1.1);
+    }
+    
+    .step.completed .step-circle {
+        background: var(--cuk-green);
+        border-color: var(--cuk-green);
+        color: white;
+    }
+    
+    .step-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .step.active .step-label {
+        color: var(--cuk-blue);
+        font-weight: 600;
+    }
+    
+    /* Form Container */
+    .form-container {
+        padding: 0 2rem 2rem;
+    }
+    
+    .form-section {
+        display: none;
+        animation: fadeIn 0.5s ease;
+    }
+    
+    .form-section.active {
+        display: block;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Header */
+    .register-header {
+        text-align: center;
+        margin-bottom: 2rem;
     }
     
     .logo-circle {
@@ -29,370 +184,1170 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 15px;
+        margin: 0 auto 1rem;
         color: white;
         font-size: 2rem;
+        box-shadow: 0 8px 20px rgba(0, 51, 102, 0.3);
+    }
+    
+    .university-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--cuk-blue);
+        margin-bottom: 0.25rem;
+    }
+    
+    .university-subtitle {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+    
+    /* Form Groups */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: #495057;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .required::after {
+        content: ' *';
+        color: #dc3545;
+    }
+    
+    /* Input Groups */
+    .input-group {
+        position: relative;
     }
     
     .form-icon {
         position: absolute;
-        left: 15px;
+        left: 1rem;
         top: 50%;
         transform: translateY(-50%);
-        color: #6c757d;
+        color: var(--cuk-blue);
+        z-index: 10;
+        font-size: 1.1rem;
+        transition: var(--transition);
     }
     
     .form-control {
-        padding-left: 45px;
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
-        transition: all 0.3s;
+        padding: 0.875rem 1rem 0.875rem 3rem;
+        border-radius: 12px;
+        border: 2px solid #e9ecef;
+        font-size: 1rem;
+        transition: var(--transition);
+        background: white;
+        width: 100%;
     }
     
     .form-control:focus {
         border-color: var(--cuk-blue);
-        box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        box-shadow: 0 0 0 0.25rem rgba(0, 51, 102, 0.15);
+        transform: translateY(-1px);
     }
     
+    .form-control:focus + .form-icon {
+        color: var(--cuk-green);
+        transform: translateY(-50%) scale(1.1);
+    }
+    
+    /* Password Strength */
     .password-strength {
-        height: 5px;
-        background: #e9ecef;
-        border-radius: 3px;
-        margin-top: 5px;
-        overflow: hidden;
+        margin-top: 0.5rem;
     }
     
     .strength-meter {
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    
+    .strength-fill {
         height: 100%;
         width: 0%;
-        transition: width 0.3s;
-        border-radius: 3px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+    
+    .strength-text {
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: flex;
+        justify-content: space-between;
     }
     
     .password-requirements {
-        font-size: 0.85rem;
-        color: #6c757d;
-        margin-top: 10px;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
     }
     
     .requirement {
         display: flex;
         align-items: center;
-        gap: 5px;
-        margin-bottom: 3px;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .requirement i {
+        font-size: 0.75rem;
+        transition: var(--transition);
     }
     
     .requirement.valid {
-        color: #28a745;
+        color: var(--cuk-green);
     }
     
-    .demo-accounts {
+    .requirement.valid i {
+        color: var(--cuk-green);
+    }
+    
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .form-btn {
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: var(--transition);
+        min-width: 150px;
+    }
+    
+    .btn-prev {
         background: #f8f9fa;
-        border-radius: 10px;
-        padding: 20px;
-        margin-top: 30px;
+        border: 2px solid #dee2e6;
+        color: #495057;
+    }
+    
+    .btn-prev:hover {
+        background: #e9ecef;
+        transform: translateX(-3px);
+    }
+    
+    .btn-next, .btn-submit {
+        background: linear-gradient(135deg, var(--cuk-blue), var(--cuk-blue-light));
+        color: white;
+        border: none;
+    }
+    
+    .btn-next:hover, .btn-submit:hover {
+        background: linear-gradient(135deg, var(--cuk-blue-dark), var(--cuk-blue));
+        transform: translateX(3px);
+        box-shadow: 0 5px 15px rgba(0, 51, 102, 0.3);
+    }
+    
+    /* Demo Accounts */
+    .demo-section {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .demo-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        color: #495057;
+    }
+    
+    .demo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .demo-account {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 2px solid transparent;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+    
+    .demo-account:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .demo-account.admin { border-color: var(--cuk-blue); }
+    .demo-account.student { border-color: var(--cuk-green); }
+    .demo-account.faculty { border-color: #ffc107; }
+    
+    .demo-btn {
+        margin-top: 0.75rem;
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        transition: var(--transition);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .register-page {
+            padding: 1rem;
+        }
+        
+        .form-container {
+            padding: 0 1rem 1rem;
+        }
+        
+        .progress-steps {
+            padding: 1rem 1rem 0;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            font-size: 0.9rem;
+        }
+        
+        .step-label {
+            font-size: 0.8rem;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .form-btn {
+            width: 100%;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="register-container">
-    <div class="register-card">
-        <div class="university-logo">
-            <div class="logo-circle">
-                <i class="bi bi-building"></i>
-            </div>
-            <h3 class="cuk-text-primary">Central University of Karnataka</h3>
-            <p class="text-muted">Student Registration Portal</p>
-        </div>
-        
-        <h4 class="text-center mb-4">Create Your Account</h4>
-        
-        <form method="POST" id="registerForm">
-            <!-- Name -->
-            <div class="mb-3">
-                <label class="form-label">Full Name *</label>
-                <div class="position-relative">
-                    <i class="bi bi-person form-icon"></i>
-                    <input type="text" name="name" class="form-control" 
-                           placeholder="Enter your full name" required
-                           value="{{ request.form.name if request.form }}">
+<div class="register-bg"></div>
+
+<div class="register-page">
+    <div class="register-container">
+        <div class="register-card">
+            <!-- Progress Steps -->
+            <div class="progress-steps">
+                <div class="step active" id="step1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Personal Info</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Academic Details</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Account Setup</div>
                 </div>
             </div>
             
-            <!-- Email -->
-            <div class="mb-3">
-                <label class="form-label">University Email *</label>
-                <div class="position-relative">
-                    <i class="bi bi-envelope form-icon"></i>
-                    <input type="email" name="email" class="form-control" 
-                           placeholder="name@cuk.ac.in" required
-                           value="{{ request.form.email if request.form }}">
+            <!-- Header -->
+            <div class="register-header">
+                <div class="logo-circle">
+                    <i class="bi bi-mortarboard"></i>
                 </div>
-                <small class="text-muted">Please use your official university email</small>
+                <h1 class="university-title">Central University of Karnataka</h1>
+                <p class="university-subtitle">Student Registration Portal</p>
             </div>
             
-            <!-- Registration Number -->
-            <div class="mb-3">
-                <label class="form-label">Registration Number</label>
-                <div class="position-relative">
-                    <i class="bi bi-card-text form-icon"></i>
-                    <input type="text" name="registration_no" class="form-control" 
-                           placeholder="CUK/XXXX/XXX"
-                           value="{{ request.form.registration_no if request.form }}">
-                </div>
-            </div>
-            
-            <!-- Phone -->
-            <div class="mb-3">
-                <label class="form-label">Phone Number</label>
-                <div class="position-relative">
-                    <i class="bi bi-phone form-icon"></i>
-                    <input type="tel" name="phone" class="form-control" 
-                           placeholder="+91 XXXXX XXXXX"
-                           value="{{ request.form.phone if request.form }}">
-                </div>
-            </div>
-            
-            <!-- Department -->
-            <div class="mb-3">
-                <label class="form-label">Department</label>
-                <div class="position-relative">
-                    <i class="bi bi-building form-icon"></i>
-                    <select name="department_id" class="form-control">
-                        <option value="">Select Department</option>
-                        {% for dept in departments %}
-                            <option value="{{ dept.id }}" 
-                                    {% if request.form.department_id == dept.id|string %}selected{% endif %}>
-                                {{ dept.name }} ({{ dept.code }})
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            
-            <!-- Password -->
-            <div class="mb-3">
-                <label class="form-label">Password *</label>
-                <div class="position-relative">
-                    <i class="bi bi-lock form-icon"></i>
-                    <input type="password" name="password" id="password" 
-                           class="form-control" placeholder="Create a strong password" required
-                           onkeyup="checkPasswordStrength()">
-                    <i class="bi bi-eye position-absolute" 
-                       style="right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer;"
-                       onclick="togglePassword('password', this)"></i>
-                </div>
-                <div class="password-strength">
-                    <div class="strength-meter" id="strengthMeter"></div>
-                </div>
-                <div class="password-requirements" id="passwordRequirements">
-                    <div class="requirement" id="reqLength">At least 8 characters</div>
-                    <div class="requirement" id="reqUppercase">One uppercase letter</div>
-                    <div class="requirement" id="reqLowercase">One lowercase letter</div>
-                    <div class="requirement" id="reqNumber">One number</div>
-                </div>
-            </div>
-            
-            <!-- Confirm Password -->
-            <div class="mb-4">
-                <label class="form-label">Confirm Password *</label>
-                <div class="position-relative">
-                    <i class="bi bi-lock-fill form-icon"></i>
-                    <input type="password" name="confirm_password" id="confirmPassword" 
-                           class="form-control" placeholder="Re-enter your password" required
-                           onkeyup="checkPasswordMatch()">
-                    <i class="bi bi-eye position-absolute" 
-                       style="right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer;"
-                       onclick="togglePassword('confirmPassword', this)"></i>
-                </div>
-                <div class="mt-1">
-                    <small id="passwordMatch" class="text-danger"></small>
-                </div>
-            </div>
-            
-            <!-- Terms and Conditions -->
-            <div class="mb-4">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="terms" required>
-                    <label class="form-check-label" for="terms">
-                        I agree to the <a href="#" class="text-primary">Terms of Service</a> and 
-                        <a href="#" class="text-primary">Privacy Policy</a> of Central University of Karnataka
-                    </label>
-                </div>
-            </div>
-            
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary w-100 py-2 mb-3" id="submitBtn">
-                <i class="bi bi-person-plus me-2"></i>Create Account
-            </button>
-            
-            <div class="text-center">
-                <small class="text-muted">
-                    Already have an account? 
-                    <a href="{{ url_for('login') }}" class="text-primary text-decoration-none">
-                        Login here
-                    </a>
-                </small>
-            </div>
-        </form>
-        
-        <!-- Demo Accounts -->
-        <div class="demo-accounts">
-            <h6 class="text-center mb-3"><i class="bi bi-info-circle me-2"></i>Demo Accounts</h6>
-            <div class="row">
-                <div class="col-md-6 mb-2">
-                    <div class="card border-primary">
-                        <div class="card-body py-2">
-                            <small><strong>Admin:</strong> admin@cuk.ac.in</small><br>
-                            <small><strong>Password:</strong> admin123</small>
-                            <button type="button" class="btn btn-sm btn-outline-primary w-100 mt-2" 
-                                    onclick="fillDemo('admin')">
-                                <i class="bi bi-clipboard me-1"></i>Fill Credentials
-                            </button>
+            <!-- Registration Form -->
+            <form method="POST" id="registerForm" novalidate>
+                <div class="form-container">
+                    <!-- Step 1: Personal Information -->
+                    <div class="form-section active" id="section1">
+                        <h4 class="mb-4 cuk-text-primary">
+                            <i class="bi bi-person-circle me-2"></i>
+                            Personal Information
+                        </h4>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label required" for="name">
+                                    <i class="bi bi-person"></i>
+                                    Full Name
+                                </label>
+                                <div class="input-group">
+                                    <i class="bi bi-person form-icon"></i>
+                                    <input type="text" 
+                                           name="name" 
+                                           id="name" 
+                                           class="form-control" 
+                                           placeholder="Enter your full name" 
+                                           required
+                                           value="{{ request.form.name if request.form }}"
+                                           autocomplete="name">
+                                </div>
+                                <div class="invalid-feedback" id="nameError">
+                                    Please enter your full name.
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label required" for="email">
+                                    <i class="bi bi-envelope"></i>
+                                    University Email
+                                </label>
+                                <div class="input-group">
+                                    <i class="bi bi-envelope form-icon"></i>
+                                    <input type="email" 
+                                           name="email" 
+                                           id="email" 
+                                           class="form-control" 
+                                           placeholder="name@cuk.ac.in" 
+                                           required
+                                           value="{{ request.form.email if request.form }}"
+                                           autocomplete="email">
+                                </div>
+                                <div class="invalid-feedback" id="emailError">
+                                    Please enter a valid university email address.
+                                </div>
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Use your official university email (@cuk.ac.in)
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="phone">
+                                    <i class="bi bi-phone"></i>
+                                    Phone Number
+                                </label>
+                                <div class="input-group">
+                                    <i class="bi bi-phone form-icon"></i>
+                                    <input type="tel" 
+                                           name="phone" 
+                                           id="phone" 
+                                           class="form-control" 
+                                           placeholder="+91 98765 43210"
+                                           value="{{ request.form.phone if request.form }}"
+                                           autocomplete="tel">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="dob">
+                                    <i class="bi bi-calendar"></i>
+                                    Date of Birth
+                                </label>
+                                <div class="input-group">
+                                    <i class="bi bi-calendar form-icon"></i>
+                                    <input type="date" 
+                                           name="dob" 
+                                           id="dob" 
+                                           class="form-control"
+                                           value="{{ request.form.dob if request.form }}">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-6 mb-2">
-                    <div class="card border-success">
-                        <div class="card-body py-2">
-                            <small><strong>Student:</strong> student@cuk.ac.in</small><br>
-                            <small><strong>Password:</strong> student123</small>
-                            <button type="button" class="btn btn-sm btn-outline-success w-100 mt-2" 
-                                    onclick="fillDemo('student')">
-                                <i class="bi bi-clipboard me-1"></i>Fill Credentials
-                            </button>
+                    
+                    <!-- Step 2: Academic Details -->
+                    <div class="form-section" id="section2">
+                        <h4 class="mb-4 cuk-text-primary">
+                            <i class="bi bi-mortarboard me-2"></i>
+                            Academic Details
+                        </h4>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="registration_no">
+                                    <i class="bi bi-card-text"></i>
+                                    Registration Number
+                                </label>
+                                <div class="input-group">
+                                    <i class="bi bi-card-text form-icon"></i>
+                                    <input type="text" 
+                                           name="registration_no" 
+                                           id="registration_no" 
+                                           class="form-control" 
+                                           placeholder="CUK/XXXX/XXX"
+                                           value="{{ request.form.registration_no if request.form }}"
+                                           autocomplete="off">
+                                </div>
+                                <small class="text-muted mt-1 d-block">
+                                    Format: CUK/Year/Number (e.g., CUK/2023/001)
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="program">
+                                    <i class="bi bi-book"></i>
+                                    Program
+                                </label>
+                                <div class="input-group">
+                                    <i class="bi bi-book form-icon"></i>
+                                    <select name="program" id="program" class="form-control">
+                                        <option value="">Select Program</option>
+                                        <option value="btech" {% if request.form.program == 'btech' %}selected{% endif %}>B.Tech</option>
+                                        <option value="mtech" {% if request.form.program == 'mtech' %}selected{% endif %}>M.Tech</option>
+                                        <option value="bsc" {% if request.form.program == 'bsc' %}selected{% endif %}>B.Sc</option>
+                                        <option value="msc" {% if request.form.program == 'msc' %}selected{% endif %}>M.Sc</option>
+                                        <option value="phd" {% if request.form.program == 'phd' %}selected{% endif %}>Ph.D</option>
+                                        <option value="other" {% if request.form.program == 'other' %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="department_id">
+                                    <i class="bi bi-building"></i>
+                                    Department
+                                </label>
+                                <div class="input-group">
+                                    <i class="bi bi-building form-icon"></i>
+                                    <select name="department_id" id="department_id" class="form-control">
+                                        <option value="">Select Department</option>
+                                        {% for dept in departments %}
+                                            <option value="{{ dept.id }}" 
+                                                    {% if request.form.department_id == dept.id|string %}selected{% endif %}>
+                                                {{ dept.name }} ({{ dept.code }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="semester">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                    Semester
+                                </label>
+                                <div class="input-group">
+                                    <i class="bi bi-arrow-counterclockwise form-icon"></i>
+                                    <select name="semester" id="semester" class="form-control">
+                                        <option value="">Select Semester</option>
+                                        {% for i in range(1, 9) %}
+                                            <option value="{{ i }}" {% if request.form.semester == i|string %}selected{% endif %}>Semester {{ i }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    
+                    <!-- Step 3: Account Setup -->
+                    <div class="form-section" id="section3">
+                        <h4 class="mb-4 cuk-text-primary">
+                            <i class="bi bi-shield-lock me-2"></i>
+                            Account Security
+                        </h4>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label required" for="password">
+                                    <i class="bi bi-lock"></i>
+                                    Password
+                                </label>
+                                <div class="input-group">
+                                    <i class="bi bi-lock form-icon"></i>
+                                    <input type="password" 
+                                           name="password" 
+                                           id="password" 
+                                           class="form-control" 
+                                           placeholder="Create a strong password" 
+                                           required
+                                           autocomplete="new-password">
+                                    <button type="button" 
+                                            class="btn btn-link position-absolute" 
+                                            style="right: 10px; top: 50%; transform: translateY(-50%); padding: 0;"
+                                            onclick="togglePassword('password')"
+                                            aria-label="Toggle password visibility">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Password Strength Meter -->
+                                <div class="password-strength">
+                                    <div class="strength-meter">
+                                        <div class="strength-fill" id="strengthFill"></div>
+                                    </div>
+                                    <div class="strength-text">
+                                        <span id="strengthLabel">Password Strength</span>
+                                        <span id="strengthScore">0%</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Password Requirements -->
+                                <div class="password-requirements">
+                                    <div class="requirement" id="reqLength">
+                                        <i class="bi bi-circle"></i>
+                                        At least 8 characters
+                                    </div>
+                                    <div class="requirement" id="reqUppercase">
+                                        <i class="bi bi-circle"></i>
+                                        One uppercase letter
+                                    </div>
+                                    <div class="requirement" id="reqLowercase">
+                                        <i class="bi bi-circle"></i>
+                                        One lowercase letter
+                                    </div>
+                                    <div class="requirement" id="reqNumber">
+                                        <i class="bi bi-circle"></i>
+                                        One number
+                                    </div>
+                                    <div class="requirement" id="reqSpecial">
+                                        <i class="bi bi-circle"></i>
+                                        One special character
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label required" for="confirm_password">
+                                    <i class="bi bi-lock-fill"></i>
+                                    Confirm Password
+                                </label>
+                                <div class="input-group">
+                                    <i class="bi bi-lock-fill form-icon"></i>
+                                    <input type="password" 
+                                           name="confirm_password" 
+                                           id="confirm_password" 
+                                           class="form-control" 
+                                           placeholder="Re-enter your password" 
+                                           required
+                                           autocomplete="new-password">
+                                    <button type="button" 
+                                            class="btn btn-link position-absolute" 
+                                            style="right: 10px; top: 50%; transform: translateY(-50%); padding: 0;"
+                                            onclick="togglePassword('confirm_password')"
+                                            aria-label="Toggle password visibility">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="mt-2">
+                                    <small id="passwordMatch" class="text-danger"></small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Terms and Conditions -->
+                        <div class="form-group mt-4">
+                            <div class="form-check">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="terms" 
+                                       name="terms" 
+                                       required>
+                                <label class="form-check-label" for="terms">
+                                    I agree to the 
+                                    <a href="#" class="text-primary" onclick="showTerms()">Terms of Service</a>, 
+                                    <a href="#" class="text-primary" onclick="showPrivacy()">Privacy Policy</a>, and
+                                    <a href="#" class="text-primary" onclick="showCode()">Code of Conduct</a>
+                                    of Central University of Karnataka
+                                </label>
+                            </div>
+                            <div class="invalid-feedback" id="termsError">
+                                You must agree to the terms and conditions.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Navigation -->
+                    <div class="form-actions">
+                        <button type="button" 
+                                class="form-btn btn-prev" 
+                                id="prevBtn" 
+                                onclick="prevStep()"
+                                style="display: none;">
+                            <i class="bi bi-arrow-left"></i>
+                            Previous
+                        </button>
+                        
+                        <button type="button" 
+                                class="form-btn btn-next" 
+                                id="nextBtn" 
+                                onclick="nextStep()">
+                            Next
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                        
+                        <button type="submit" 
+                                class="form-btn btn-submit" 
+                                id="submitBtn"
+                                style="display: none;">
+                            <i class="bi bi-check-circle"></i>
+                            Create Account
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Demo Accounts -->
+            <div class="demo-section">
+                <div class="demo-header">
+                    <i class="bi bi-lightbulb text-primary"></i>
+                    <h6 class="mb-0">Quick Start with Demo Accounts</h6>
+                </div>
+                
+                <div class="demo-grid">
+                    <!-- Admin Demo -->
+                    <div class="demo-account admin">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-shield-check text-primary fs-4 me-2"></i>
+                            <div>
+                                <strong class="d-block">Administrator</strong>
+                                <small class="text-muted">Full system access</small>
+                            </div>
+                        </div>
+                        <div class="demo-credentials">
+                            <div class="mb-2">
+                                <small><i class="bi bi-envelope me-1"></i>admin@cuk.ac.in</small>
+                            </div>
+                            <div>
+                                <small><i class="bi bi-key me-1"></i>admin123</small>
+                            </div>
+                        </div>
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-primary demo-btn"
+                                onclick="fillDemo('admin')">
+                            <i class="bi bi-clipboard-check me-1"></i>
+                            Use This Account
+                        </button>
+                    </div>
+                    
+                    <!-- Student Demo -->
+                    <div class="demo-account student">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-person-circle text-success fs-4 me-2"></i>
+                            <div>
+                                <strong class="d-block">Student</strong>
+                                <small class="text-muted">Event registration access</small>
+                            </div>
+                        </div>
+                        <div class="demo-credentials">
+                            <div class="mb-2">
+                                <small><i class="bi bi-envelope me-1"></i>student@cuk.ac.in</small>
+                            </div>
+                            <div>
+                                <small><i class="bi bi-key me-1"></i>student123</small>
+                            </div>
+                        </div>
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-success demo-btn"
+                                onclick="fillDemo('student')">
+                            <i class="bi bi-clipboard-check me-1"></i>
+                            Use This Account
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Demo accounts reset daily. Use your university email for permanent access.
+                    </small>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-file-text me-2"></i>Terms of Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Terms content here -->
+                <p>This is a placeholder for terms of service content.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-function togglePassword(fieldId, icon) {
-    const field = document.getElementById(fieldId);
-    if (field.type === 'password') {
-        field.type = 'text';
-        icon.classList.remove('bi-eye');
-        icon.classList.add('bi-eye-slash');
-    } else {
-        field.type = 'password';
-        icon.classList.remove('bi-eye-slash');
-        icon.classList.add('bi-eye');
-    }
-}
-
-function checkPasswordStrength() {
-    const password = document.getElementById('password').value;
-    const meter = document.getElementById('strengthMeter');
-    const requirements = {
-        length: document.getElementById('reqLength'),
-        uppercase: document.getElementById('reqUppercase'),
-        lowercase: document.getElementById('reqLowercase'),
-        number: document.getElementById('reqNumber')
-    };
+    // Multi-step form functionality
+    let currentStep = 1;
+    const totalSteps = 3;
     
-    let strength = 0;
-    let total = 0;
-    
-    // Check requirements
-    if (password.length >= 8) {
-        requirements.length.classList.add('valid');
-        strength += 25;
-    } else {
-        requirements.length.classList.remove('valid');
+    function updateStepDisplay() {
+        // Hide all sections
+        document.querySelectorAll('.form-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        // Show current section
+        document.getElementById(`section${currentStep}`).classList.add('active');
+        
+        // Update progress steps
+        document.querySelectorAll('.step').forEach((step, index) => {
+            step.classList.remove('active', 'completed');
+            if (index + 1 < currentStep) {
+                step.classList.add('completed');
+            } else if (index + 1 === currentStep) {
+                step.classList.add('active');
+            }
+        });
+        
+        // Update navigation buttons
+        document.getElementById('prevBtn').style.display = currentStep > 1 ? 'flex' : 'none';
+        document.getElementById('nextBtn').style.display = currentStep < totalSteps ? 'flex' : 'none';
+        document.getElementById('submitBtn').style.display = currentStep === totalSteps ? 'flex' : 'none';
     }
     
-    if (/[A-Z]/.test(password)) {
-        requirements.uppercase.classList.add('valid');
-        strength += 25;
-    } else {
-        requirements.uppercase.classList.remove('valid');
+    function nextStep() {
+        if (validateStep(currentStep)) {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateStepDisplay();
+                scrollToTop();
+            }
+        }
     }
     
-    if (/[a-z]/.test(password)) {
-        requirements.lowercase.classList.add('valid');
-        strength += 25;
-    } else {
-        requirements.lowercase.classList.remove('valid');
+    function prevStep() {
+        if (currentStep > 1) {
+            currentStep--;
+            updateStepDisplay();
+            scrollToTop();
+        }
     }
     
-    if (/[0-9]/.test(password)) {
-        requirements.number.classList.add('valid');
-        strength += 25;
-    } else {
-        requirements.number.classList.remove('valid');
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
-    // Update meter
-    meter.style.width = strength + '%';
-    
-    if (strength < 50) {
-        meter.style.background = '#dc3545';
-    } else if (strength < 75) {
-        meter.style.background = '#ffc107';
-    } else {
-        meter.style.background = '#28a745';
+    // Step validation
+    function validateStep(step) {
+        let isValid = true;
+        
+        switch(step) {
+            case 1:
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                
+                // Validate name
+                if (!name) {
+                    showError('name', 'Please enter your full name');
+                    isValid = false;
+                } else {
+                    clearError('name');
+                }
+                
+                // Validate email
+                if (!email) {
+                    showError('email', 'Please enter your email address');
+                    isValid = false;
+                } else if (!validateEmail(email)) {
+                    showError('email', 'Please enter a valid email address');
+                    isValid = false;
+                } else if (!email.endsWith('@cuk.ac.in')) {
+                    showError('email', 'Please use your university email (@cuk.ac.in)');
+                    isValid = false;
+                } else {
+                    clearError('email');
+                }
+                break;
+                
+            case 2:
+                // Academic details are optional, but we can add validation if needed
+                break;
+                
+            case 3:
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm_password').value;
+                const terms = document.getElementById('terms').checked;
+                
+                // Validate password
+                if (!password) {
+                    showError('password', 'Please create a password');
+                    isValid = false;
+                } else if (password.length < 8) {
+                    showError('password', 'Password must be at least 8 characters');
+                    isValid = false;
+                } else {
+                    clearError('password');
+                }
+                
+                // Validate password match
+                if (!confirmPassword) {
+                    showError('confirm_password', 'Please confirm your password');
+                    isValid = false;
+                } else if (password !== confirmPassword) {
+                    showError('confirm_password', 'Passwords do not match');
+                    isValid = false;
+                } else {
+                    clearError('confirm_password');
+                }
+                
+                // Validate terms
+                if (!terms) {
+                    showError('terms', 'You must agree to the terms and conditions');
+                    isValid = false;
+                } else {
+                    clearError('terms');
+                }
+                break;
+        }
+        
+        return isValid;
     }
-}
-
-function checkPasswordMatch() {
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    const matchElement = document.getElementById('passwordMatch');
     
-    if (!confirmPassword) {
-        matchElement.textContent = '';
-    } else if (password === confirmPassword) {
-        matchElement.textContent = '✓ Passwords match';
-        matchElement.className = 'text-success';
-    } else {
-        matchElement.textContent = '✗ Passwords do not match';
-        matchElement.className = 'text-danger';
-    }
-}
-
-function fillDemo(type) {
-    if (type === 'admin') {
-        document.querySelector('input[name="email"]').value = 'admin@cuk.ac.in';
-        document.querySelector('input[name="name"]').value = 'System Administrator';
-    } else if (type === 'student') {
-        document.querySelector('input[name="email"]').value = 'student@cuk.ac.in';
-        document.querySelector('input[name="name"]').value = 'Demo Student';
-        document.querySelector('input[name="registration_no"]').value = 'CUK/2023/001';
-        document.querySelector('input[name="phone"]').value = '+91 9876543210';
-        document.querySelector('select[name="department_id"]').value = '1';
+    function showError(fieldId, message) {
+        const field = document.getElementById(fieldId);
+        const errorElement = document.getElementById(`${fieldId}Error`);
+        
+        field.classList.add('is-invalid');
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
     }
     
-    document.getElementById('password').value = 'password123';
-    document.getElementById('confirmPassword').value = 'password123';
+    function clearError(fieldId) {
+        const field = document.getElementById(fieldId);
+        const errorElement = document.getElementById(`${fieldId}Error`);
+        
+        field.classList.remove('is-invalid');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+    }
     
-    checkPasswordStrength();
-    checkPasswordMatch();
+    // Email validation
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
     
-    alert(`Demo ${type} credentials filled! You can modify them if needed.`);
-}
-
-// Form validation
-document.getElementById('registerForm').addEventListener('submit', function(e) {
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
+    // Password strength checker
+    function checkPasswordStrength() {
+        const password = document.getElementById('password').value;
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthLabel = document.getElementById('strengthLabel');
+        const strengthScore = document.getElementById('strengthScore');
+        
+        let score = 0;
+        let requirements = {
+            length: false,
+            uppercase: false,
+            lowercase: false,
+            number: false,
+            special: false
+        };
+        
+        // Check length
+        if (password.length >= 8) {
+            score += 20;
+            requirements.length = true;
+            document.getElementById('reqLength').classList.add('valid');
+        } else {
+            document.getElementById('reqLength').classList.remove('valid');
+        }
+        
+        // Check uppercase
+        if (/[A-Z]/.test(password)) {
+            score += 20;
+            requirements.uppercase = true;
+            document.getElementById('reqUppercase').classList.add('valid');
+        } else {
+            document.getElementById('reqUppercase').classList.remove('valid');
+        }
+        
+        // Check lowercase
+        if (/[a-z]/.test(password)) {
+            score += 20;
+            requirements.lowercase = true;
+            document.getElementById('reqLowercase').classList.add('valid');
+        } else {
+            document.getElementById('reqLowercase').classList.remove('valid');
+        }
+        
+        // Check numbers
+        if (/[0-9]/.test(password)) {
+            score += 20;
+            requirements.number = true;
+            document.getElementById('reqNumber').classList.add('valid');
+        } else {
+            document.getElementById('reqNumber').classList.remove('valid');
+        }
+        
+        // Check special characters
+        if (/[^A-Za-z0-9]/.test(password)) {
+            score += 20;
+            requirements.special = true;
+            document.getElementById('reqSpecial').classList.add('valid');
+        } else {
+            document.getElementById('reqSpecial').classList.remove('valid');
+        }
+        
+        // Update UI
+        strengthFill.style.width = `${score}%`;
+        strengthScore.textContent = `${score}%`;
+        
+        // Set color and label
+        if (score < 40) {
+            strengthFill.style.backgroundColor = '#dc3545';
+            strengthLabel.textContent = 'Weak';
+        } else if (score < 80) {
+            strengthFill.style.backgroundColor = '#ffc107';
+            strengthLabel.textContent = 'Good';
+        } else {
+            strengthFill.style.backgroundColor = '#28a745';
+            strengthLabel.textContent = 'Strong';
+        }
+        
+        // Check password match
+        checkPasswordMatch();
+    }
     
-    if (password !== confirmPassword) {
+    function checkPasswordMatch() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const matchElement = document.getElementById('passwordMatch');
+        
+        if (!confirmPassword) {
+            matchElement.textContent = '';
+        } else if (password === confirmPassword) {
+            matchElement.textContent = '✓ Passwords match';
+            matchElement.className = 'text-success';
+        } else {
+            matchElement.textContent = '✗ Passwords do not match';
+            matchElement.className = 'text-danger';
+        }
+    }
+    
+    // Password visibility toggle
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = field.nextElementSibling.querySelector('i');
+        
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            field.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
+    
+    // Fill demo accounts
+    function fillDemo(type) {
+        const demoData = {
+            admin: {
+                name: 'System Administrator',
+                email: 'admin@cuk.ac.in',
+                password: 'admin123'
+            },
+            student: {
+                name: 'Demo Student',
+                email: 'student@cuk.ac.in',
+                phone: '+91 9876543210',
+                registration_no: 'CUK/2023/001',
+                program: 'btech',
+                department_id: '1',
+                semester: '3',
+                password: 'student123'
+            }
+        };
+        
+        const data = demoData[type];
+        if (!data) return;
+        
+        // Fill form fields
+        document.getElementById('name').value = data.name;
+        document.getElementById('email').value = data.email;
+        if (data.phone) document.getElementById('phone').value = data.phone;
+        if (data.registration_no) document.getElementById('registration_no').value = data.registration_no;
+        if (data.program) document.getElementById('program').value = data.program;
+        if (data.department_id) document.getElementById('department_id').value = data.department_id;
+        if (data.semester) document.getElementById('semester').value = data.semester;
+        
+        // Fill passwords
+        document.getElementById('password').value = data.password;
+        document.getElementById('confirm_password').value = data.password;
+        
+        // Update password strength
+        checkPasswordStrength();
+        
+        // Show success message
+        showToast(`✅ ${type.charAt(0).toUpperCase() + type.slice(1)} credentials loaded!`, 'success');
+        
+        // Go to first step
+        currentStep = 1;
+        updateStepDisplay();
+    }
+    
+    // Modal functions
+    function showTerms() {
+        const modal = new bootstrap.Modal(document.getElementById('termsModal'));
+        modal.show();
+    }
+    
+    function showPrivacy() {
+        // Similar to showTerms, would open privacy modal
+        alert('Privacy Policy - To be implemented');
+    }
+    
+    function showCode() {
+        // Similar to showTerms, would open code of conduct modal
+        alert('Code of Conduct - To be implemented');
+    }
+    
+    // Toast notification
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        const container = document.createElement('div');
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.appendChild(toast);
+        
+        document.body.appendChild(container);
+        
+        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+        bsToast.show();
+        
+        toast.addEventListener('hidden.bs.toast', () => {
+            container.remove();
+        });
+    }
+    
+    // Form submission
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        alert('Passwords do not match!');
-        return false;
-    }
+        
+        // Validate all steps
+        for (let step = 1; step <= totalSteps; step++) {
+            if (!validateStep(step)) {
+                currentStep = step;
+                updateStepDisplay();
+                scrollToTop();
+                return false;
+            }
+        }
+        
+        // Show loading state
+        const submitBtn = document.getElementById('submitBtn');
+        const originalHtml = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating Account...';
+        submitBtn.disabled = true;
+        
+        // Simulate API call
+        setTimeout(() => {
+            // In production, this would be the actual form submission
+            // For demo, show success message
+            showToast('🎉 Account created successfully! Redirecting to login...', 'success');
+            
+            // Reset button
+            submitBtn.innerHTML = originalHtml;
+            submitBtn.disabled = false;
+            
+            // Redirect to login after 2 seconds
+            setTimeout(() => {
+                window.location.href = '{{ url_for("login") }}';
+            }, 2000);
+        }, 2000);
+    });
     
-    if (password.length < 8) {
-        e.preventDefault();
-        alert('Password must be at least 8 characters long!');
-        return false;
-    }
-    
-    return true;
-});
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-focus on name field
+        document.getElementById('name').focus();
+        
+        // Real-time validation for email
+        document.getElementById('email').addEventListener('blur', function() {
+            if (this.value && !this.value.endsWith('@cuk.ac.in')) {
+                showError('email', 'Please use your university email (@cuk.ac.in)');
+            } else {
+                clearError('email');
+            }
+        });
+        
+        // Real-time password strength check
+        document.getElementById('password').addEventListener('input', checkPasswordStrength);
+        
+        // Real-time password match check
+        document.getElementById('confirm_password').addEventListener('input', checkPasswordMatch);
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Enter key navigates to next step
+            if (e.key === 'Enter' && !e.target.closest('.demo-account')) {
+                e.preventDefault();
+                if (currentStep < totalSteps) {
+                    nextStep();
+                } else if (currentStep === totalSteps) {
+                    document.getElementById('registerForm').requestSubmit();
+                }
+            }
+            
+            // Escape key goes back
+            if (e.key === 'Escape' && currentStep > 1) {
+                e.preventDefault();
+                prevStep();
+            }
+            
+            // Alt + A for admin demo
+            if (e.altKey && e.key === 'a') {
+                e.preventDefault();
+                fillDemo('admin');
+            }
+            
+            // Alt + S for student demo
+            if (e.altKey && e.key === 's') {
+                e.preventDefault();
+                fillDemo('student');
+            }
+        });
+    });
 </script>
 {% endblock %}
