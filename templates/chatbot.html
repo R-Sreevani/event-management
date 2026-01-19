@@ -10,21 +10,63 @@
         <div id="quick-actions" style="padding: 8px; background: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; flex-wrap: wrap; gap: 4px; font-size: 12px;">
             <button onclick="sendQuickQuestion('How do I create an event?')" style="flex: 1; padding: 4px; background: white; border: 1px solid #4CAF50; border-radius: 3px; color: #4CAF50; cursor: pointer; font-size: 11px;">Create Event</button>
             <button onclick="sendQuickQuestion('View my tickets')" style="flex: 1; padding: 4px; background: white; border: 1px solid #4CAF50; border-radius: 3px; color: #4CAF50; cursor: pointer; font-size: 11px;">My Tickets</button>
-            <button onclick="sendQuickQuestion('Help with payment')" style="flex: 1; padding: 4px; background: white; border: 1px solid #4CAF50; border-radius: 3px; color: #4CAF50; cursor: pointer; font-size: 11px;">Payment Help</button>
+            <button onclick="startForgotPasswordFlow()" style="flex: 1; padding: 4px; background: white; border: 1px solid #ff9800; border-radius: 3px; color: #ff9800; cursor: pointer; font-size: 11px;">Forgot Password</button>
             <button onclick="sendQuickQuestion('Event cancellation')" style="flex: 1; padding: 4px; background: white; border: 1px solid #4CAF50; border-radius: 3px; color: #4CAF50; cursor: pointer; font-size: 11px;">Cancellation</button>
         </div>
         
+        <!-- Chat Messages Area -->
         <div id="chat-messages" style="flex: 1; padding: 10px; overflow-y: auto; font-size: 14px;">
             <div class="message bot">Hello! I'm your event assistant. I can help you with:<br>
                 • Creating and managing events<br>
                 • Ticket purchases and refunds<br>
-                • Event discovery and recommendations<br>
+                • Password reset assistance<br>
                 • Payment issues<br>
                 • Account support<br>
                 How can I help you today? 😊</div>
         </div>
         
-        <div style="padding: 10px; border-top: 1px solid #ddd; background: white;">
+        <!-- Password Reset Form (Hidden by default) -->
+        <div id="password-reset-form" style="display: none; padding: 15px; flex-direction: column; gap: 10px;">
+            <h4 style="margin: 0; color: #333;">Reset Your Password</h4>
+            
+            <!-- Step 1: Email Input -->
+            <div id="reset-step-1">
+                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Enter your email to receive OTP:</p>
+                <input type="email" id="reset-email" placeholder="Enter your email" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 13px;">
+                <button onclick="sendOTP()" style="width: 100%; padding: 8px; margin-top: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Send OTP</button>
+                <button onclick="cancelReset()" style="width: 100%; padding: 8px; margin-top: 5px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+            </div>
+            
+            <!-- Step 2: OTP Verification -->
+            <div id="reset-step-2" style="display: none;">
+                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Enter 6-digit OTP sent to <span id="user-email-display" style="font-weight: bold;"></span>:</p>
+                <div style="display: flex; gap: 5px; justify-content: center; margin-bottom: 10px;">
+                    <input type="text" id="otp-1" maxlength="1" style="width: 30px; height: 30px; text-align: center; font-size: 16px; border: 1px solid #ddd; border-radius: 5px;">
+                    <input type="text" id="otp-2" maxlength="1" style="width: 30px; height: 30px; text-align: center; font-size: 16px; border: 1px solid #ddd; border-radius: 5px;">
+                    <input type="text" id="otp-3" maxlength="1" style="width: 30px; height: 30px; text-align: center; font-size: 16px; border: 1px solid #ddd; border-radius: 5px;">
+                    <input type="text" id="otp-4" maxlength="1" style="width: 30px; height: 30px; text-align: center; font-size: 16px; border: 1px solid #ddd; border-radius: 5px;">
+                    <input type="text" id="otp-5" maxlength="1" style="width: 30px; height: 30px; text-align: center; font-size: 16px; border: 1px solid #ddd; border-radius: 5px;">
+                    <input type="text" id="otp-6" maxlength="1" style="width: 30px; height: 30px; text-align: center; font-size: 16px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <p id="otp-timer" style="font-size: 12px; color: #ff9800; margin: 5px 0;">OTP expires in: <span id="timer">05:00</span></p>
+                <button onclick="verifyOTP()" style="width: 100%; padding: 8px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Verify OTP</button>
+                <button onclick="resendOTP()" id="resend-btn" disabled style="width: 100%; padding: 8px; margin-top: 5px; background: #ff9800; color: white; border: none; border-radius: 5px; cursor: not-allowed; opacity: 0.6;">Resend OTP (60s)</button>
+                <button onclick="cancelReset()" style="width: 100%; padding: 8px; margin-top: 5px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+            </div>
+            
+            <!-- Step 3: New Password -->
+            <div id="reset-step-3" style="display: none;">
+                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Create your new password:</p>
+                <input type="password" id="new-password" placeholder="New password" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 13px; margin-bottom: 8px;">
+                <input type="password" id="confirm-password" placeholder="Confirm password" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 13px;">
+                <div id="password-strength" style="font-size: 12px; margin: 5px 0; height: 15px;"></div>
+                <button onclick="updatePassword()" style="width: 100%; padding: 8px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Update Password</button>
+                <button onclick="cancelReset()" style="width: 100%; padding: 8px; margin-top: 5px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+            </div>
+        </div>
+        
+        <!-- Chat Input Area -->
+        <div id="chat-input-area" style="padding: 10px; border-top: 1px solid #ddd; background: white;">
             <div style="display: flex; gap: 5px;">
                 <input type="text" id="chat-input" placeholder="Type your message..." 
                        style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 13px;"
@@ -32,7 +74,7 @@
                 <button onclick="sendMessage()" style="padding: 8px 12px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 13px;">Send</button>
             </div>
             <div style="font-size: 11px; color: #666; margin-top: 5px; text-align: center;">
-                Ask about events, tickets, payments, or account issues
+                Try: "forgot password", "reset password", or click Forgot Password button
             </div>
         </div>
     </div>
@@ -45,6 +87,11 @@
 <script>
 let chatOpen = false;
 let messageHistory = [];
+let otpGenerated = "";
+let otpExpiryTime = null;
+let resendTimer = 60;
+let otpTimerInterval = null;
+let resendTimerInterval = null;
 
 function toggleChat() {
     const chatWindow = document.getElementById('chat-window');
@@ -52,46 +99,351 @@ function toggleChat() {
     chatOpen = !chatOpen;
     chatWindow.style.display = chatOpen ? 'flex' : 'none';
     
-    // Add animation to toggle button
     if (chatOpen) {
         toggleButton.style.transform = 'scale(1.1)';
         setTimeout(() => { toggleButton.style.transform = 'scale(1)'; }, 300);
     }
 }
 
-function sendQuickQuestion(question) {
-    document.getElementById('chat-input').value = question;
-    sendMessage();
+function startForgotPasswordFlow() {
+    // Hide chat messages and input area
+    document.getElementById('chat-messages').style.display = 'none';
+    document.getElementById('chat-input-area').style.display = 'none';
+    
+    // Show password reset form
+    document.getElementById('password-reset-form').style.display = 'flex';
+    document.getElementById('reset-step-1').style.display = 'block';
+    document.getElementById('reset-step-2').style.display = 'none';
+    document.getElementById('reset-step-3').style.display = 'none';
+    
+    // Focus on email input
+    setTimeout(() => {
+        document.getElementById('reset-email').focus();
+    }, 100);
 }
 
+function cancelReset() {
+    // Show chat messages and input area
+    document.getElementById('chat-messages').style.display = 'block';
+    document.getElementById('chat-input-area').style.display = 'block';
+    
+    // Hide password reset form
+    document.getElementById('password-reset-form').style.display = 'none';
+    
+    // Clear all intervals
+    clearInterval(otpTimerInterval);
+    clearInterval(resendTimerInterval);
+    
+    // Reset timers
+    resendTimer = 60;
+    
+    addMessage("Password reset cancelled. How else can I help you?", 'bot');
+}
+
+function sendOTP() {
+    const email = document.getElementById('reset-email').value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (!email) {
+        alert("Please enter your email address");
+        return;
+    }
+    
+    if (!emailRegex.test(email)) {
+        alert("Please enter a valid email address");
+        return;
+    }
+    
+    // Display user email
+    document.getElementById('user-email-display').textContent = email;
+    
+    // Generate 6-digit OTP (frontend simulation)
+    otpGenerated = Math.floor(100000 + Math.random() * 900000).toString();
+    otpExpiryTime = Date.now() + 5 * 60 * 1000; // 5 minutes from now
+    
+    // Show OTP step
+    document.getElementById('reset-step-1').style.display = 'none';
+    document.getElementById('reset-step-2').style.display = 'block';
+    
+    // Clear OTP inputs
+    for (let i = 1; i <= 6; i++) {
+        document.getElementById(`otp-${i}`).value = '';
+    }
+    
+    // Focus first OTP input
+    setTimeout(() => {
+        document.getElementById('otp-1').focus();
+    }, 100);
+    
+    // Start OTP timer
+    startOTPTimer();
+    
+    // Start resend timer
+    startResendTimer();
+    
+    // In a real application, you would make an API call here:
+    // fetch('/send-otp', {
+    //     method: 'POST',
+    //     headers: {'Content-Type': 'application/json'},
+    //     body: JSON.stringify({ email: email })
+    // })
+    
+    // For demo purposes, show the OTP in console (remove in production)
+    console.log(`OTP for ${email}: ${otpGenerated}`);
+    
+    // Add message to chat (simulation)
+    addMessage(`OTP sent to ${email}. Check your email for the 6-digit code.`, 'bot');
+}
+
+function startOTPTimer() {
+    clearInterval(otpTimerInterval);
+    
+    otpTimerInterval = setInterval(() => {
+        const now = Date.now();
+        const timeLeft = otpExpiryTime - now;
+        
+        if (timeLeft <= 0) {
+            clearInterval(otpTimerInterval);
+            document.getElementById('timer').textContent = "00:00";
+            alert("OTP has expired. Please request a new one.");
+            return;
+        }
+        
+        const minutes = Math.floor(timeLeft / 60000);
+        const seconds = Math.floor((timeLeft % 60000) / 1000);
+        document.getElementById('timer').textContent = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+
+function startResendTimer() {
+    clearInterval(resendTimerInterval);
+    const resendBtn = document.getElementById('resend-btn');
+    resendBtn.disabled = true;
+    resendBtn.style.opacity = '0.6';
+    resendBtn.style.cursor = 'not-allowed';
+    resendBtn.textContent = `Resend OTP (${resendTimer}s)`;
+    
+    resendTimerInterval = setInterval(() => {
+        resendTimer--;
+        resendBtn.textContent = `Resend OTP (${resendTimer}s)`;
+        
+        if (resendTimer <= 0) {
+            clearInterval(resendTimerInterval);
+            resendBtn.disabled = false;
+            resendBtn.style.opacity = '1';
+            resendBtn.style.cursor = 'pointer';
+            resendBtn.textContent = 'Resend OTP';
+        }
+    }, 1000);
+}
+
+function resendOTP() {
+    const email = document.getElementById('reset-email').value.trim();
+    
+    if (!email) {
+        alert("Email not found. Please start over.");
+        return;
+    }
+    
+    // Generate new OTP
+    otpGenerated = Math.floor(100000 + Math.random() * 900000).toString();
+    otpExpiryTime = Date.now() + 5 * 60 * 1000;
+    
+    // Reset timers
+    clearInterval(otpTimerInterval);
+    clearInterval(resendTimerInterval);
+    resendTimer = 60;
+    
+    // Restart timers
+    startOTPTimer();
+    startResendTimer();
+    
+    // Clear OTP inputs
+    for (let i = 1; i <= 6; i++) {
+        document.getElementById(`otp-${i}`).value = '';
+    }
+    
+    // Focus first OTP input
+    document.getElementById('otp-1').focus();
+    
+    // For demo purposes
+    console.log(`New OTP for ${email}: ${otpGenerated}`);
+    addMessage("New OTP sent to your email.", 'bot');
+}
+
+// Auto-focus next OTP input
+for (let i = 1; i <= 6; i++) {
+    document.getElementById(`otp-${i}`).addEventListener('input', function(e) {
+        if (this.value.length === 1 && i < 6) {
+            document.getElementById(`otp-${i + 1}`).focus();
+        }
+        
+        // If all OTP digits entered, auto verify
+        if (i === 6 && this.value.length === 1) {
+            let allFilled = true;
+            for (let j = 1; j <= 6; j++) {
+                if (!document.getElementById(`otp-${j}`).value) {
+                    allFilled = false;
+                    break;
+                }
+            }
+            if (allFilled) {
+                setTimeout(verifyOTP, 100);
+            }
+        }
+    });
+    
+    // Allow backspace to go to previous input
+    document.getElementById(`otp-${i}`).addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && !this.value && i > 1) {
+            document.getElementById(`otp-${i - 1}`).focus();
+        }
+    });
+}
+
+function verifyOTP() {
+    let enteredOTP = '';
+    for (let i = 1; i <= 6; i++) {
+        enteredOTP += document.getElementById(`otp-${i}`).value;
+    }
+    
+    if (enteredOTP.length !== 6) {
+        alert("Please enter the complete 6-digit OTP");
+        return;
+    }
+    
+    // Check if OTP matches (in real app, verify with backend)
+    if (enteredOTP === otpGenerated) {
+        // Check if OTP is expired
+        if (Date.now() > otpExpiryTime) {
+            alert("OTP has expired. Please request a new one.");
+            return;
+        }
+        
+        // Show password reset step
+        document.getElementById('reset-step-2').style.display = 'none';
+        document.getElementById('reset-step-3').style.display = 'block';
+        
+        // Clear timers
+        clearInterval(otpTimerInterval);
+        clearInterval(resendTimerInterval);
+        
+        // Focus on new password input
+        setTimeout(() => {
+            document.getElementById('new-password').focus();
+        }, 100);
+        
+        addMessage("OTP verified successfully! Please create your new password.", 'bot');
+    } else {
+        alert("Invalid OTP. Please try again.");
+        // Clear OTP inputs
+        for (let i = 1; i <= 6; i++) {
+            document.getElementById(`otp-${i}`).value = '';
+        }
+        document.getElementById('otp-1').focus();
+    }
+}
+
+function updatePassword() {
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    
+    if (!newPassword || !confirmPassword) {
+        alert("Please fill in both password fields");
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        alert("Passwords do not match. Please try again.");
+        return;
+    }
+    
+    if (newPassword.length < 8) {
+        alert("Password must be at least 8 characters long");
+        return;
+    }
+    
+    // In real application, make API call to update password:
+    // fetch('/update-password', {
+    //     method: 'POST',
+    //     headers: {'Content-Type': 'application/json'},
+    //     body: JSON.stringify({ 
+    //         email: document.getElementById('reset-email').value,
+    //         newPassword: newPassword 
+    //     })
+    // })
+    
+    // Show success message
+    addMessage("✅ Password updated successfully! You can now login with your new password.", 'bot');
+    
+    // Return to chat
+    cancelReset();
+}
+
+// Password strength indicator
+document.getElementById('new-password').addEventListener('input', function(e) {
+    const password = e.target.value;
+    const strengthDiv = document.getElementById('password-strength');
+    
+    if (!password) {
+        strengthDiv.textContent = '';
+        strengthDiv.style.color = '';
+        return;
+    }
+    
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    
+    if (strength < 2) {
+        strengthDiv.textContent = 'Weak';
+        strengthDiv.style.color = '#f44336';
+    } else if (strength < 4) {
+        strengthDiv.textContent = 'Moderate';
+        strengthDiv.style.color = '#ff9800';
+    } else {
+        strengthDiv.textContent = 'Strong';
+        strengthDiv.style.color = '#4CAF50';
+    }
+});
+
+// Enhanced sendMessage function to handle password reset requests
 function sendMessage() {
     const input = document.getElementById('chat-input');
-    const message = input.value.trim();
+    let message = input.value.trim().toLowerCase();
     
     if (!message) return;
     
-    // Add user message
+    // Check for password reset keywords
+    if (message.includes('forgot password') || 
+        message.includes('reset password') || 
+        message.includes('password reset') ||
+        message.includes('lost password')) {
+        startForgotPasswordFlow();
+        input.value = '';
+        return;
+    }
+    
+    // Normal message handling
     addMessage(message, 'user');
     input.value = '';
     
-    // Store in history
     messageHistory.push({ role: 'user', content: message });
     
-    // Send to backend - EXACTLY THE SAME AS BEFORE
     fetch('/chatbot', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ 
             message: message,
-            history: messageHistory.slice(-5) // Send last 5 messages for context
+            history: messageHistory.slice(-5)
         })
     })
     .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
+        if (!response.ok) throw new Error('Network response was not ok');
         return response.json();
     })
     .then(data => {
@@ -104,8 +456,17 @@ function sendMessage() {
     })
     .catch(error => {
         console.error('Error:', error);
-        addMessage('Sorry, I\'m having trouble connecting. Please try again or contact support if the problem persists.', 'bot');
+        addMessage('Sorry, I\'m having trouble connecting. Please try again.', 'bot');
     });
+}
+
+function sendQuickQuestion(question) {
+    if (question === 'Forgot Password') {
+        startForgotPasswordFlow();
+    } else {
+        document.getElementById('chat-input').value = question;
+        sendMessage();
+    }
 }
 
 function addMessage(text, sender) {
@@ -113,7 +474,6 @@ function addMessage(text, sender) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}`;
     
-    // Format text with basic markdown
     const formattedText = text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\n/g, '<br>')
@@ -145,25 +505,6 @@ function addMessage(text, sender) {
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-// Add typing indicator function (optional, requires backend support)
-function showTypingIndicator() {
-    const messagesDiv = document.getElementById('chat-messages');
-    const typingDiv = document.createElement('div');
-    typingDiv.id = 'typing-indicator';
-    typingDiv.className = 'message bot';
-    typingDiv.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-    typingDiv.style.background = '#f1f1f1';
-    typingDiv.style.padding = '10px';
-    typingDiv.style.margin = '8px 0';
-    messagesDiv.appendChild(typingDiv);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-function hideTypingIndicator() {
-    const typingDiv = document.getElementById('typing-indicator');
-    if (typingDiv) typingDiv.remove();
-}
-
 // Auto-focus input when chat opens
 const observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
@@ -182,74 +523,13 @@ observer.observe(document.getElementById('chat-window'), { attributes: true });
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
-    // Close chat with Escape key
     if (e.key === 'Escape' && chatOpen) {
         toggleChat();
     }
     
-    // Focus input with / key when chat is open
     if (e.key === '/' && chatOpen) {
         e.preventDefault();
         document.getElementById('chat-input').focus();
     }
 });
-
-// Welcome message with common issues
-window.addEventListener('DOMContentLoaded', function() {
-    // You can add initial setup here if needed
-});
 </script>
-
-<style>
-/* Additional styling for better appearance */
-.message {
-    animation: fadeIn 0.3s ease-in;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.typing {
-    display: flex;
-    align-items: center;
-    height: 20px;
-}
-
-.typing span {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    background: #999;
-    border-radius: 50%;
-    margin: 0 2px;
-    animation: typing 1.4s infinite ease-in-out both;
-}
-
-.typing span:nth-child(1) { animation-delay: -0.32s; }
-.typing span:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes typing {
-    0%, 80%, 100% { transform: scale(0.6); opacity: 0.6; }
-    40% { transform: scale(1); opacity: 1; }
-}
-
-#chat-messages::-webkit-scrollbar {
-    width: 6px;
-}
-
-#chat-messages::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-#chat-messages::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-#chat-messages::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-</style>
