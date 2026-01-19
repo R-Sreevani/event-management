@@ -1,32 +1,67 @@
 <!-- templates/chatbot.html -->
 <div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-    <div id="chat-window" style="display: none; width: 300px; height: 400px; background: white; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); flex-direction: column;">
-        <div style="background: #4CAF50; color: white; padding: 10px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between;">
+    <div id="chat-window" style="display: none; width: 320px; height: 450px; background: white; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); flex-direction: column;">
+        <div style="background: #4CAF50; color: white; padding: 10px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center;">
             <strong>Event Assistant 🤖</strong>
-            <button onclick="toggleChat()" style="background: none; border: none; color: white; cursor: pointer;">×</button>
+            <button onclick="toggleChat()" style="background: none; border: none; color: white; cursor: pointer; font-size: 20px; line-height: 1;">×</button>
         </div>
+        
+        <!-- Quick Actions Buttons -->
+        <div id="quick-actions" style="padding: 8px; background: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; flex-wrap: wrap; gap: 4px; font-size: 12px;">
+            <button onclick="sendQuickQuestion('How do I create an event?')" style="flex: 1; padding: 4px; background: white; border: 1px solid #4CAF50; border-radius: 3px; color: #4CAF50; cursor: pointer; font-size: 11px;">Create Event</button>
+            <button onclick="sendQuickQuestion('View my tickets')" style="flex: 1; padding: 4px; background: white; border: 1px solid #4CAF50; border-radius: 3px; color: #4CAF50; cursor: pointer; font-size: 11px;">My Tickets</button>
+            <button onclick="sendQuickQuestion('Help with payment')" style="flex: 1; padding: 4px; background: white; border: 1px solid #4CAF50; border-radius: 3px; color: #4CAF50; cursor: pointer; font-size: 11px;">Payment Help</button>
+            <button onclick="sendQuickQuestion('Event cancellation')" style="flex: 1; padding: 4px; background: white; border: 1px solid #4CAF50; border-radius: 3px; color: #4CAF50; cursor: pointer; font-size: 11px;">Cancellation</button>
+        </div>
+        
         <div id="chat-messages" style="flex: 1; padding: 10px; overflow-y: auto; font-size: 14px;">
-            <div class="message bot">Hello! I'm your event assistant. How can I help you today? 😊</div>
+            <div class="message bot">Hello! I'm your event assistant. I can help you with:<br>
+                • Creating and managing events<br>
+                • Ticket purchases and refunds<br>
+                • Event discovery and recommendations<br>
+                • Payment issues<br>
+                • Account support<br>
+                How can I help you today? 😊</div>
         </div>
-        <div style="padding: 10px; border-top: 1px solid #ddd;">
-            <input type="text" id="chat-input" placeholder="Type your message..." 
-                   style="width: 70%; padding: 5px; border: 1px solid #ddd; border-radius: 5px;"
-                   onkeypress="if(event.keyCode==13) sendMessage()">
-            <button onclick="sendMessage()" style="width: 25%; padding: 6px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Send</button>
+        
+        <div style="padding: 10px; border-top: 1px solid #ddd; background: white;">
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="chat-input" placeholder="Type your message..." 
+                       style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 13px;"
+                       onkeypress="if(event.keyCode===13) sendMessage()">
+                <button onclick="sendMessage()" style="padding: 8px 12px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 13px;">Send</button>
+            </div>
+            <div style="font-size: 11px; color: #666; margin-top: 5px; text-align: center;">
+                Ask about events, tickets, payments, or account issues
+            </div>
         </div>
     </div>
-    <button onclick="toggleChat()" style="background: #4CAF50; color: white; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
+    
+    <button onclick="toggleChat()" id="chatbot-toggle" style="background: #4CAF50; color: white; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.2); transition: transform 0.3s;">
         🤖
     </button>
 </div>
 
 <script>
 let chatOpen = false;
+let messageHistory = [];
 
 function toggleChat() {
     const chatWindow = document.getElementById('chat-window');
+    const toggleButton = document.getElementById('chatbot-toggle');
     chatOpen = !chatOpen;
     chatWindow.style.display = chatOpen ? 'flex' : 'none';
+    
+    // Add animation to toggle button
+    if (chatOpen) {
+        toggleButton.style.transform = 'scale(1.1)';
+        setTimeout(() => { toggleButton.style.transform = 'scale(1)'; }, 300);
+    }
+}
+
+function sendQuickQuestion(question) {
+    document.getElementById('chat-input').value = question;
+    sendMessage();
 }
 
 function sendMessage() {
@@ -39,20 +74,37 @@ function sendMessage() {
     addMessage(message, 'user');
     input.value = '';
     
-    // Send to backend
+    // Store in history
+    messageHistory.push({ role: 'user', content: message });
+    
+    // Send to backend - EXACTLY THE SAME AS BEFORE
     fetch('/chatbot', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: message })
+        body: JSON.stringify({ 
+            message: message,
+            history: messageHistory.slice(-5) // Send last 5 messages for context
+        })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
-        addMessage(data.response, 'bot');
+        if (data.response) {
+            addMessage(data.response, 'bot');
+            messageHistory.push({ role: 'bot', content: data.response });
+        } else {
+            throw new Error('No response from server');
+        }
     })
     .catch(error => {
-        addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+        console.error('Error:', error);
+        addMessage('Sorry, I\'m having trouble connecting. Please try again or contact support if the problem persists.', 'bot');
     });
 }
 
@@ -60,30 +112,144 @@ function addMessage(text, sender) {
     const messagesDiv = document.getElementById('chat-messages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}`;
-    messageDiv.innerHTML = text.replace(/\n/g, '<br>');
-    messageDiv.style.margin = '5px 0';
-    messageDiv.style.padding = '8px';
-    messageDiv.style.borderRadius = '5px';
-    messageDiv.style.maxWidth = '80%';
+    
+    // Format text with basic markdown
+    const formattedText = text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>')
+        .replace(/•/g, '•');
+    
+    messageDiv.innerHTML = formattedText;
+    messageDiv.style.margin = '8px 0';
+    messageDiv.style.padding = '10px 12px';
+    messageDiv.style.borderRadius = '8px';
+    messageDiv.style.maxWidth = '85%';
     messageDiv.style.wordWrap = 'break-word';
+    messageDiv.style.fontSize = '13px';
+    messageDiv.style.lineHeight = '1.4';
     
     if (sender === 'user') {
-        messageDiv.style.background = '#4CAF50';
+        messageDiv.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
         messageDiv.style.color = 'white';
         messageDiv.style.marginLeft = 'auto';
+        messageDiv.style.borderBottomRightRadius = '2px';
     } else {
         messageDiv.style.background = '#f1f1f1';
         messageDiv.style.color = '#333';
         messageDiv.style.marginRight = 'auto';
+        messageDiv.style.borderBottomLeftRadius = '2px';
+        messageDiv.style.border = '1px solid #e0e0e0';
     }
     
     messagesDiv.appendChild(messageDiv);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-// Optional: Add sample questions buttons
-function addQuickQuestion(question) {
-    document.getElementById('chat-input').value = question;
-    sendMessage();
+// Add typing indicator function (optional, requires backend support)
+function showTypingIndicator() {
+    const messagesDiv = document.getElementById('chat-messages');
+    const typingDiv = document.createElement('div');
+    typingDiv.id = 'typing-indicator';
+    typingDiv.className = 'message bot';
+    typingDiv.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+    typingDiv.style.background = '#f1f1f1';
+    typingDiv.style.padding = '10px';
+    typingDiv.style.margin = '8px 0';
+    messagesDiv.appendChild(typingDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+
+function hideTypingIndicator() {
+    const typingDiv = document.getElementById('typing-indicator');
+    if (typingDiv) typingDiv.remove();
+}
+
+// Auto-focus input when chat opens
+const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+            const chatWindow = document.getElementById('chat-window');
+            if (chatWindow.style.display === 'flex') {
+                setTimeout(() => {
+                    document.getElementById('chat-input').focus();
+                }, 100);
+            }
+        }
+    });
+});
+
+observer.observe(document.getElementById('chat-window'), { attributes: true });
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Close chat with Escape key
+    if (e.key === 'Escape' && chatOpen) {
+        toggleChat();
+    }
+    
+    // Focus input with / key when chat is open
+    if (e.key === '/' && chatOpen) {
+        e.preventDefault();
+        document.getElementById('chat-input').focus();
+    }
+});
+
+// Welcome message with common issues
+window.addEventListener('DOMContentLoaded', function() {
+    // You can add initial setup here if needed
+});
 </script>
+
+<style>
+/* Additional styling for better appearance */
+.message {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.typing {
+    display: flex;
+    align-items: center;
+    height: 20px;
+}
+
+.typing span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #999;
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: typing 1.4s infinite ease-in-out both;
+}
+
+.typing span:nth-child(1) { animation-delay: -0.32s; }
+.typing span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.6; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+#chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chat-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#chat-messages::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+#chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+</style>
