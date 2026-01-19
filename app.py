@@ -1,4 +1,4 @@
-so now i will give main.py code just uppdate this featuer and dont change other thing as it is connected to all files                                                                                           from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
