@@ -348,7 +348,7 @@
 <body>
     <header>
         <div class="container">
-            <h1>🎓 Central University Event Hub</h1>
+            <h1>🎓 Central University of Karnataka Event Hub</h1>
             
             {% if session.get('user_id') %}
             <div class="user-status">
@@ -402,9 +402,9 @@
         <div class="container">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
                 <div>
-                    <strong>&copy; {{ now.year }} Central University Hub</strong>
+                    <strong>&copy; {{ now.year }} Central University of Karnataka Event Management Hub</strong>
                     <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.9;">
-                        Developed with ❤️ for better event management
+                        Developed by R Sreevani for better event management
                     </p>
                 </div>
                 <div style="display: flex; gap: 15px;">
@@ -428,7 +428,7 @@
                     {% if session.get('user_id') %}
                         Hello {{ session.get('role')|title }}! 👋 I'm your event assistant.
                     {% else %}
-                        Welcome to Central University Event Hub! 👋 I'm your event assistant.
+                        Welcome to Central University of Karnataka Event Management Hub! 👋 I'm your event assistant.
                     {% endif %}
                 </div>
                 <div class="message bot">I can help you with:
