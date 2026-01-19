@@ -3,6 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import json
+import random
+import smtplib
+import hashlib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
@@ -13,6 +19,20 @@ db = SQLAlchemy(app)
 @app.context_processor
 def inject_now():
     return {'now': datetime.now()}
+
+# ----------------- OTP Configuration -----------------
+# Email configuration (update with your SMTP details)
+SMTP_SERVER = "smtp.gmail.com"  # Change as needed
+SMTP_PORT = 587
+SMTP_USERNAME = "your-email@gmail.com"  # Change this
+SMTP_PASSWORD = "your-app-password"  # Change this
+
+# OTP storage dictionary (in production, use database)
+# Format: {email: {'otp': '123456', 'expiry': datetime, 'verified': False}}
+otp_storage = {}
+
+# Password reset token expiry (in minutes)
+OTP_EXPIRY_MINUTES = 5
 
 # ----------------- Models -----------------
 class User(db.Model):
@@ -47,6 +67,86 @@ class Registration(db.Model):
     user = db.relationship('User', backref='registrations')
     event = db.relationship('Event', backref='registrations')
 
+# ----------------- Helper Functions for OTP -----------------
+def generate_otp():
+    """Generate a 6-digit OTP"""
+    return str(random.randint(100000, 999999))
+
+def send_otp_email(email, otp):
+    """Send OTP to user's email (dummy function - update with real SMTP)"""
+    try:
+        # For now, just print to console
+        print(f"📧 OTP for {email}: {otp}")
+        print("In production, configure SMTP settings above to send real emails")
+        
+        # Uncomment and configure this for real email sending:
+        """
+        msg = MIMEMultipart()
+        msg['From'] = SMTP_USERNAME
+        msg['To'] = email
+        msg['Subject'] = "Password Reset OTP - Event Management System"
+        
+        body = f"""
+        <html>
+        <body>
+            <h2>Password Reset Request</h2>
+            <p>You have requested to reset your password for Event Management System.</p>
+            <p>Your OTP is: <strong>{otp}</strong></p>
+            <p>This OTP will expire in {OTP_EXPIRY_MINUTES} minutes.</p>
+            <p>If you didn't request this, please ignore this email.</p>
+        </body>
+        </html>
+        """
+        
+        msg.attach(MIMEText(body, 'html'))
+        
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(SMTP_USERNAME, SMTP_PASSWORD)
+        server.send_message(msg)
+        server.quit()
+        """
+        
+        return True
+    except Exception as e:
+        print(f"Email sending error: {e}")
+        return False
+
+def store_otp(email, otp):
+    """Store OTP with expiry time"""
+    expiry_time = datetime.now() + timedelta(minutes=OTP_EXPIRY_MINUTES)
+    otp_storage[email] = {
+        'otp': otp,
+        'expiry': expiry_time,
+        'verified': False
+    }
+    return True
+
+def verify_otp(email, otp):
+    """Verify if OTP is valid"""
+    if email not in otp_storage:
+        return False, "No OTP request found for this email"
+    
+    otp_data = otp_storage[email]
+    
+    # Check if OTP has expired
+    if datetime.now() > otp_data['expiry']:
+        del otp_storage[email]
+        return False, "OTP has expired. Please request a new one."
+    
+    # Check if OTP matches
+    if otp_data['otp'] != otp:
+        return False, "Invalid OTP"
+    
+    # Mark OTP as verified
+    otp_data['verified'] = True
+    return True, "OTP verified successfully"
+
+def clear_otp(email):
+    """Clear OTP data after use"""
+    if email in otp_storage:
+        del otp_storage[email]
+
 # ----------------- Chatbot Logic -----------------
 class EventChatbot:
     def __init__(self, db_session):
@@ -58,7 +158,8 @@ class EventChatbot:
             'admin': ['admin', 'contact admin', 'help', 'support'],
             'time': ['time', 'current time', 'what time', 'clock'],
             'date': ['date', 'today', 'what day', 'calendar'],
-            'logout': ['logout', 'sign out', 'exit', 'quit']
+            'logout': ['logout', 'sign out', 'exit', 'quit'],
+            'password': ['forgot password', 'reset password', 'password reset', 'lost password', 'change password']
         }
     
     def get_response(self, user_input, user_role=None, user_id=None):
@@ -67,6 +168,10 @@ class EventChatbot:
         # Check for greeting
         if any(word in user_input for word in self.responses['greeting']):
             return "Hello! 👋 I'm your event assistant. How can I help you today?"
+        
+        # Check for password reset
+        elif any(word in user_input for word in self.responses['password']):
+            return "To reset your password:\n1. Click the 'Forgot Password' button in the chatbot\n2. Enter your email to receive OTP\n3. Enter the OTP sent to your email\n4. Create a new password"
         
         # Check for events query
         elif any(word in user_input for word in self.responses['events']):
@@ -125,7 +230,7 @@ class EventChatbot:
         
         # Default response
         else:
-            return "I'm not sure I understand. Try asking about:\n• Upcoming events\n• How to register\n• Event details\n• Contacting admin"
+            return "I'm not sure I understand. Try asking about:\n• Upcoming events\n• How to register\n• Event details\n• Forgot password\n• Contacting admin"
 
 # ----------------- Routes -----------------
 @app.route('/')
@@ -151,6 +256,92 @@ def chatbot():
     
     return jsonify({'response': response})
 
+# ----------------- Password Reset Routes -----------------
+@app.route('/send-otp', methods=['POST'])
+def send_otp():
+    """Send OTP to user's email for password reset"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    
+    if not email:
+        return jsonify({'success': False, 'message': 'Email is required'})
+    
+    # Check if user exists
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        # Don't reveal that user doesn't exist (security)
+        return jsonify({'success': True, 'message': 'If an account exists with this email, OTP will be sent.'})
+    
+    # Generate and store OTP
+    otp = generate_otp()
+    store_otp(email, otp)
+    
+    # Send OTP via email
+    if send_otp_email(email, otp):
+        return jsonify({
+            'success': True, 
+            'message': 'OTP sent to your email address.',
+            'email': email
+        })
+    else:
+        return jsonify({'success': False, 'message': 'Failed to send OTP. Please try again.'})
+
+@app.route('/verify-otp', methods=['POST'])
+def verify_otp_route():
+    """Verify OTP entered by user"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    otp = data.get('otp', '')
+    
+    if not email or not otp:
+        return jsonify({'success': False, 'message': 'Email and OTP are required'})
+    
+    # Verify OTP
+    is_valid, message = verify_otp(email, otp)
+    
+    if is_valid:
+        return jsonify({'success': True, 'message': message})
+    else:
+        return jsonify({'success': False, 'message': message})
+
+@app.route('/reset-password', methods=['POST'])
+def reset_password():
+    """Reset user's password after OTP verification"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    new_password = data.get('new_password', '')
+    confirm_password = data.get('confirm_password', '')
+    
+    if not email or not new_password or not confirm_password:
+        return jsonify({'success': False, 'message': 'All fields are required'})
+    
+    if new_password != confirm_password:
+        return jsonify({'success': False, 'message': 'Passwords do not match'})
+    
+    if len(new_password) < 6:
+        return jsonify({'success': False, 'message': 'Password must be at least 6 characters long'})
+    
+    # Check if OTP was verified
+    if email not in otp_storage or not otp_storage[email].get('verified'):
+        return jsonify({'success': False, 'message': 'OTP not verified. Please complete OTP verification first.'})
+    
+    # Find user and update password
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({'success': False, 'message': 'User not found'})
+    
+    try:
+        user.password = generate_password_hash(new_password)
+        db.session.commit()
+        
+        # Clear OTP after successful password reset
+        clear_otp(email)
+        
+        return jsonify({'success': True, 'message': 'Password updated successfully! You can now login with your new password.'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error updating password: {str(e)}'})
+
+# ----------------- Existing Routes (Unchanged) -----------------
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
